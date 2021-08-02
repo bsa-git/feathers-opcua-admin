@@ -1,0 +1,201 @@
+{
+  "options": {
+    "ver": "1.0.0",
+    "inspectConflicts": false,
+    "semicolons": true,
+    "freeze": [],
+    "ts": false
+  },
+  "app": {
+    "environmentsAllowingSeedData": "test",
+    "seedData": true,
+    "name": "feathers-plus-app",
+    "description": "Project feathers-plus-app",
+    "src": "src",
+    "packager": "npm@>= 3.0.0",
+    "providers": [
+      "rest",
+      "socketio"
+    ]
+  },
+  "services": {
+    "users": {
+      "name": "users",
+      "nameSingular": "user",
+      "subFolder": "",
+      "fileName": "users",
+      "adapter": "mongoose",
+      "path": "/users",
+      "isAuthEntity": true,
+      "requiresAuth": true,
+      "graphql": true
+    },
+    "roles": {
+      "name": "roles",
+      "nameSingular": "role",
+      "subFolder": "",
+      "fileName": "roles",
+      "adapter": "mongoose",
+      "path": "/roles",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": true
+    },
+    "teams": {
+      "name": "teams",
+      "nameSingular": "team",
+      "subFolder": "",
+      "fileName": "teams",
+      "adapter": "mongoose",
+      "path": "/teams",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": true
+    },
+    "userTeams": {
+      "name": "userTeams",
+      "nameSingular": "userTeam",
+      "subFolder": "",
+      "fileName": "user-teams",
+      "adapter": "mongoose",
+      "path": "/user-teams",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": true
+    },
+    "userProfiles": {
+      "name": "userProfiles",
+      "nameSingular": "userProfile",
+      "subFolder": "",
+      "fileName": "user-profiles",
+      "adapter": "mongoose",
+      "path": "/user-profiles",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": true
+    },
+    "mailer": {
+      "name": "mailer",
+      "nameSingular": "mailer",
+      "subFolder": "",
+      "fileName": "mailer",
+      "adapter": "generic",
+      "path": "/mailer",
+      "isAuthEntity": false,
+      "requiresAuth": false,
+      "graphql": false
+    },
+    "authManagement": {
+      "name": "authManagement",
+      "nameSingular": "authManagement",
+      "subFolder": "",
+      "fileName": "auth-management",
+      "adapter": "generic",
+      "path": "/auth-management",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": false
+    },
+    "dataManagement": {
+      "name": "dataManagement",
+      "nameSingular": "dataManagement",
+      "subFolder": "",
+      "fileName": "data-management",
+      "adapter": "generic",
+      "path": "/data-management",
+      "isAuthEntity": false,
+      "requiresAuth": false,
+      "graphql": false
+    },
+    "logMessages": {
+      "name": "logMessages",
+      "nameSingular": "logMessage",
+      "subFolder": "",
+      "fileName": "log-messages",
+      "adapter": "mongoose",
+      "path": "/log-messages",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": true
+    },
+    "chatMessages": {
+      "name": "chatMessages",
+      "nameSingular": "chatMessage",
+      "subFolder": "",
+      "fileName": "chat-messages",
+      "adapter": "mongoose",
+      "path": "/chat-messages",
+      "isAuthEntity": false,
+      "requiresAuth": true,
+      "graphql": true
+    }
+  },
+  "hooks": {
+    "normalize": {
+      "fileName": "normalize",
+      "camelName": "normalize",
+      "ifMulti": "y",
+      "multiServices": [
+        "*app"
+      ],
+      "singleService": ""
+    },
+    "accounts-profile-data": {
+      "fileName": "accounts-profile-data",
+      "camelName": "accountsProfileData",
+      "ifMulti": "n",
+      "multiServices": [],
+      "singleService": "users"
+    },
+    "auth": {
+      "fileName": "auth",
+      "camelName": "auth",
+      "ifMulti": "y",
+      "multiServices": [
+        "*app"
+      ],
+      "singleService": ""
+    },
+    "my-log": {
+      "fileName": "my-log",
+      "camelName": "myLog",
+      "ifMulti": "y",
+      "multiServices": [
+        "*app"
+      ],
+      "singleService": ""
+    },
+    "constraints": {
+      "fileName": "constraints",
+      "camelName": "constraints",
+      "ifMulti": "y",
+      "multiServices": [
+        "*app"
+      ],
+      "singleService": ""
+    }
+  },
+  "authentication": {
+    "strategies": [
+      "local",
+      "google",
+      "github"
+    ],
+    "entity": "users"
+  },
+  "connections": {
+    "mongoose": {
+      "database": "mongodb",
+      "adapter": "mongoose",
+      "connectionString": "mongodb://localhost:27017/feathers_plus_app"
+    }
+  },
+  "graphql": {
+    "path": "/graphql",
+    "strategy": "services",
+    "sqlInterface": null,
+    "requiresAuth": true,
+    "name": "graphql",
+    "doNotConfigure": false
+  }
+}

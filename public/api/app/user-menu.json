@@ -1,0 +1,47 @@
+[
+  {
+    "header": "Language",
+    "name": "language"
+  },
+  {
+    "title": "English",
+    "name": "language_en",
+    "click": "en"
+  },
+  {
+    "title": "Русский",
+    "name": "language_ru",
+    "click": "ru"
+  },
+  {
+    "divider": true
+  },
+  {
+    "header": "User",
+    "name": "user"
+  },
+  {
+    "icon": "mdi-account-circle",
+    "to": "/user/profile",
+    "title": "Profile",
+    "name": "profile"
+  },
+  {
+    "icon": "mdi-account-plus",
+    "to": "/user/signup",
+    "title": "Signup",
+    "name": "signup"
+  },
+  {
+    "icon": "mdi-login",
+    "to": "/user/login",
+    "title": "Login",
+    "name": "login"
+  },
+  {
+    "icon": "mdi-logout",
+    "title": "Logout",
+    "name": "logout",
+    "click": "logout"
+  }
+]
