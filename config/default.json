@@ -134,5 +134,5 @@
       "secure": false
     }
   },
-  "mongodb": "mongodb://localhost:27017/feathers_plus_app"
+  "mongodb": "mongodb://localhost:27017/feathers_opcua_admin"
 }
