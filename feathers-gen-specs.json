@@ -128,6 +128,28 @@
       "isAuthEntity": false,
       "requiresAuth": true,
       "graphql": true
+    },
+    "opcuaTags": {
+      "name": "opcuaTags",
+      "nameSingular": "opcuaTag",
+      "subFolder": "",
+      "fileName": "opcua-tags",
+      "adapter": "mongoose",
+      "path": "/opcua-tags",
+      "isAuthEntity": false,
+      "requiresAuth": false,
+      "graphql": true
+    },
+    "opcuaValues": {
+      "name": "opcuaValues",
+      "nameSingular": "opcuaValue",
+      "subFolder": "",
+      "fileName": "opcua-values",
+      "adapter": "mongoose",
+      "path": "/opcua-values",
+      "isAuthEntity": false,
+      "requiresAuth": false,
+      "graphql": true
     }
   },
   "hooks": {

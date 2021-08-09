@@ -5,6 +5,8 @@ let chatMessages = require('./chat-messages/chat-messages.service');
 let dataManagement = require('./data-management/data-management.service');
 let logMessages = require('./log-messages/log-messages.service');
 let mailer = require('./mailer/mailer.service');
+let opcuaTags = require('./opcua-tags/opcua-tags.service');
+let opcuaValues = require('./opcua-values/opcua-values.service');
 let roles = require('./roles/roles.service');
 let teams = require('./teams/teams.service');
 let userProfiles = require('./user-profiles/user-profiles.service');
@@ -22,6 +24,8 @@ let moduleExports = function (app) {
   app.configure(dataManagement);
   app.configure(logMessages);
   app.configure(mailer);
+  app.configure(opcuaTags);
+  app.configure(opcuaValues);
   app.configure(roles);
   app.configure(teams);
   app.configure(userProfiles);
