@@ -5,7 +5,8 @@
   "homepage": "",
   "main": "src",
   "keywords": [
-    "feathers"
+    "feathers",
+    "opc ua"
   ],
   "author": {
     "name": "bsa-git",
