@@ -269,14 +269,14 @@ let findChatMessage = () => {
 };
 
 module.exports = {
-  getUser: getUser(),
-  findUser: findUser(),
-  getRole: getRole(),
-  findRole: findRole(),
-  getTeam: getTeam(),
-  findTeam: findTeam(),
-  getLogMessage: getLogMessage(),
-  findLogMessage: findLogMessage(),
-  getChatMessage: getChatMessage(),
-  findChatMessage: findChatMessage()
+  getUser,
+  findUser,
+  getRole,
+  findRole,
+  getTeam,
+  findTeam,
+  getLogMessage,
+  findLogMessage,
+  getChatMessage,
+  findChatMessage
 };

@@ -56,7 +56,7 @@ async function opcuaValuesPopulate (context) {
     runTime,
     schema,
     resolvers,
-    recordType: 'OpcuaValues',
+    recordType: 'OpcuaValue',
     query,
     options,
   })(context);
@@ -83,6 +83,11 @@ module.exports = moduleExports;
 /* For your information: all record and resolver fields 2 levels deep.
 const twoLevelsFields = {
   query: {
+    id: 1,
+    _id: 1,
+    tagId: 1,
+    tagName: 1,
+    values: 1,
   }
 };
 */

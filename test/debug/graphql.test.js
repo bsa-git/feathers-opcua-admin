@@ -1,6 +1,15 @@
 const assert = require('assert');
-const {inspector, appRoot} = require('../../src/plugins/lib');
-const {serviceHelper, graphqlQuery, graphqlExpected} = require('../../src/plugins/test-helpers');
+const {
+  inspector, 
+  appRoot
+} = require('../../src/plugins/lib');
+const {
+  checkServicesRegistered,
+  saveFakesToServices, 
+  graphqlQuery, 
+  graphqlExpected
+} = require('../../src/plugins/test-helpers');
+
 const app = require(`${appRoot}/src/app`);
 const debug = require('debug')('app:graphql.test');
 
@@ -36,12 +45,12 @@ describe('<<< Test services/graphql.test.js >>>', () => {
   describe('--- Save fake data to services ---', function () {
     if (isSeed) {
       it('registered the all services', () => {
-        const errPath = serviceHelper.checkServicesRegistered(app);
+        const errPath = checkServicesRegistered(app);
         assert.ok(errPath === '', `Service '${errPath}' not registered`);
       });
 
       it('Save fakes to services', async () => {
-        const errPath = await serviceHelper.saveFakesToServices(app);
+        const errPath = await saveFakesToServices(app);
         assert.ok(errPath === '', `Not save fakes to services - '${errPath}'`);
       });
     }

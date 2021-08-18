@@ -17,7 +17,7 @@ let base = merge({},
   {
     title: "ChatMessages",
     description: "ChatMessages database.",
-    fakeRecords: 3,
+    fakeRecords: 4,
     required: [],
     uniqueItemProperties: [],
     properties: {

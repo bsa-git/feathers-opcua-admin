@@ -19,7 +19,39 @@ let base = merge({},
     description: "OpcuaValues database.",
     required: [],
     uniqueItemProperties: [],
-    properties: {}
+    properties: {
+      id: {
+        type: ID
+      },
+      _id: {
+        type: ID
+      },
+      tagId: {
+        type: ID
+      },
+      tagName: {
+        type: "string"
+      },
+      values: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            key: {
+              type: "string"
+            },
+            value: {
+              type: [
+                "string",
+                "number",
+                "integer",
+                "boolean"
+              ]
+            }
+          }
+        }
+      }
+    }
   },
   // !end
   // !code: base_more // !end

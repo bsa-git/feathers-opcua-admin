@@ -10,7 +10,22 @@ const DataTypes = Sequelize.DataTypes;
 
 let moduleExports = merge({},
   // !<DEFAULT> code: sequelize_model
-  {},
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
+    tagId: {
+      type: DataTypes.INTEGER
+    },
+    tagName: {
+      type: DataTypes.TEXT
+    },
+    values: {
+      type: DataTypes.JSONB
+    }
+  },
   // !end
   // !code: moduleExports // !end
 );

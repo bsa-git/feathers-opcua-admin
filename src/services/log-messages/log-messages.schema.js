@@ -1,3 +1,4 @@
+
 // Define the Feathers schema for service `logMessages`. (Can be re-generated.)
 // !code: imports // !end
 // !code: init // !end

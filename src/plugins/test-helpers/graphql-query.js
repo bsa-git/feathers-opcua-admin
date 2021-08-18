@@ -1,4 +1,3 @@
-
 const {readJsonFileSync, appRoot} = require('../lib');
 
 // Get generated fake data

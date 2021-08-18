@@ -46,6 +46,10 @@ let fakeDataLogMessages = fakeData['logMessages'];
 
 let fakeDataChatMessages = fakeData['chatMessages'];
 
+let fakeDataOpcuaTags = fakeData['opcuaTags'];
+
+let fakeDataOpcuaValues = fakeData['opcuaValues'];
+
 const rolesUpdate = () => {
   const roles = Auth.getBaseRoles();
   const roleKeys = Object.keys(Auth.getBaseRoles());
@@ -131,6 +135,16 @@ const chatMessagesUpdate = () => {
   if(isDebug) console.log(chalk.yellow('ChatMessages Update: Ok'));
 };
 
+const opcuaValuesUpdate = () => {
+  fakeDataOpcuaTags.forEach((tag, index) => {
+    if(index > 0){
+      fakeDataOpcuaValues[index - 1]['tagId'] = tag[idFieldUser];
+    }
+  });
+  if (isLog) inspector('fake-service.opcuaValuesUpdate.fakeDataOpcuaValues:', fakeDataOpcuaValues);
+  if (isDebug) console.log(chalk.yellow('OpcuaValues Update: Ok'));
+};
+
 const fakeDataUpdate = () => {
   Object.assign(fakeData, {
     users: fakeDataUsers,
@@ -139,7 +153,9 @@ const fakeDataUpdate = () => {
     userTeams: fakeDataUserTeams,
     userProfiles: fakeDataUserProfiles,
     logMessages: fakeDataLogMessages,
-    chatMessages: fakeDataChatMessages
+    chatMessages: fakeDataChatMessages,
+    opcuaTags: fakeDataOpcuaTags,
+    opcuaValues: fakeDataOpcuaValues,
   });
   writeJsonFileSync(`${appRoot}/seeds/fake-data.json`, fakeData);
 };
@@ -162,6 +178,7 @@ usersUpdate();
 userTeamsUpdate();
 logMessagesUpdate();
 chatMessagesUpdate();
+opcuaValuesUpdate();
 // All fake data update
 fakeDataUpdate();
 if(isDebug) console.log(chalk.yellow('Finish: Fake-Service!'));

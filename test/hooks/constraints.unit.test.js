@@ -1,5 +1,19 @@
 const assert = require('assert');
-const {AuthServer, serviceHelper, readJsonFileSync, /*seedService,*/ inspector, appRoot, dbNullIdValue} = require('../../src/plugins/index');
+const {
+  inspector, 
+  appRoot, 
+  AuthServer, 
+  checkServicesRegistered,
+  saveFakesToServices,
+  readJsonFileSync 
+} = require('../../src/plugins');
+
+const {
+  dbNullIdValue,
+  getCountItems,
+  createItem
+} = require('../../src/plugins/db-helpers');
+
 const constraints = require(`${appRoot}/src/hooks/constraints`);
 const app = require(`${appRoot}/src/app`);
 const debug = require('debug')('app:constraints.unit.test');
@@ -8,6 +22,10 @@ const isDebug = false;
 const isLog = false;
 const isTest = true;
 const isSeed = true;
+
+// Get max rows for opcua-values service
+let maxOpcuaValuesRows = process.env.OPCUA_VALUES_MAXROWS;
+maxOpcuaValuesRows = Number.isInteger(maxOpcuaValuesRows) ? maxOpcuaValuesRows : Number.parseInt(maxOpcuaValuesRows);
 
 // Get generated fake data
 const fakes = readJsonFileSync(`${appRoot}/seeds/fake-data.json`) || {};
@@ -62,24 +80,24 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
 
   describe('--- Save fake data to services ---', function () {
     if (isSeed) {
-      it('registered the all services', () => {
-        const errPath = serviceHelper.checkServicesRegistered(app);
+      it('#1: registered the all services', () => {
+        const errPath = checkServicesRegistered(app);
         assert.ok(errPath === '', `Service '${errPath}' not registered`);
       });
 
-      it('Save fakes to services', async () => {
-        const errPath = await serviceHelper.saveFakesToServices(app);
+      it('#2: Save fakes to services', async () => {
+        const errPath = await saveFakesToServices(app);
         assert.ok(errPath === '', `Not save fakes to services - '${errPath}'`);
       });
     }
   });
 
   describe('--- Run constraints.unit.test ---', function () {
-    it('Constraints hook exists', () => {
+    it('#3: Constraints hook exists', () => {
       assert(typeof constraints === 'function', 'Hook is not a function.');
     });
 
-    it('Relationship error while deleting record from \'user-profiles\' service', async () => {
+    it('#4: Relationship error while deleting record from \'user-profiles\' service', async () => {
       try {
 
         const rec = fakes['users'][0];
@@ -105,7 +123,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Error creating unique values for \'userTeams\' service', async () => {
+    it('#5: Error creating unique values for \'userTeams\' service', async () => {
       try {
         const rec = fakes['userTeams'][0];
         const service = app.service('user-teams');
@@ -127,7 +145,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Relationship error while creating record for \'userTeams\' service', async () => {
+    it('#6: Relationship error while creating record for \'userTeams\' service', async () => {
       try {
 
         const rec = fakes['teams'][0];
@@ -154,7 +172,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Relationship error while creating record for \'userTeams\' service', async () => {
+    it('#7: Relationship error while creating record for \'userTeams\' service', async () => {
       try {
 
         const rec = fakes['users'][0];
@@ -181,7 +199,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Relationship error while patching record for \'users\' service', async () => {
+    it('#8: Relationship error while patching record for \'users\' service', async () => {
       try {
 
         const rec = fakes['users'][0];
@@ -208,7 +226,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Error when removing a base record from \'roles\' service', async () => {
+    it('#9: Error when removing a base record from \'roles\' service', async () => {
 
       const recAdmin = fakes['roles'].find(function (role) {
         return (role.name === AuthServer.getRoles('isAdministrator'));
@@ -255,7 +273,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Set contextBefore.alias while creating record for \'roles\' service', async () => {
+    it('#10: Set contextBefore.alias while creating record for \'roles\' service', async () => {
       const service = app.service('roles');
       contextBefore.path = 'roles';
       contextBefore.method = 'create';
@@ -269,7 +287,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.alias, 'Protection did not work to write the data to service');
     });
 
-    it('Set contextBefore.alias while creating record for \'teams\' service', async () => {
+    it('#11: Set contextBefore.alias while creating record for \'teams\' service', async () => {
       const service = app.service('roles');
       contextBefore.path = 'teams';
       contextBefore.method = 'create';
@@ -283,7 +301,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.alias, 'Protection did not work to write the data to service');
     });
 
-    it('Set contextBefore.roleId while creating record for \'users\' service', async () => {
+    it('#12: Set contextBefore.roleId while creating record for \'users\' service', async () => {
       const service = app.service('users');
       contextBefore.path = 'users';
       contextBefore.method = 'create';
@@ -299,7 +317,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.roleId, 'Protection did not work to write the data to service');
     });
 
-    it('Set contextBefore.profileId while creating record for \'users\' service', async () => {
+    it('#13: Set contextBefore.profileId while creating record for \'users\' service', async () => {
       const service = app.service('users');
       contextBefore.path = 'users';
       contextBefore.method = 'create';
@@ -315,7 +333,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.profileId, 'Protection did not work to write the data to service');
     });
 
-    it('Set contextAfter.roleAlias while creating record for \'users\' service', async () => {
+    it('#14: Set contextAfter.roleAlias while creating record for \'users\' service', async () => {
       const idField = 'id' in roleGuest ? 'id' : '_id';
       const service = app.service('users');
       contextAfter.path = 'users';
@@ -333,7 +351,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextAfter.result.roleAlias, 'Protection did not work to write the data to service');
     });
 
-    it('Data integrity when removing a record from \'roles\' service', async () => {
+    it('#15: Data integrity when removing a record from \'roles\' service', async () => {
       const rec = fakes['roles'].find(function (role) {
         return (role.name !== AuthServer.getRoles('isAdministrator')) && (role.name !== AuthServer.getRoles('isGuest'));
       });
@@ -372,7 +390,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(findChatMessagesBefore.length > findChatMessagesAfter.length, 'Protection did not work to removing the data from service');
     });
 
-    it('Data integrity when removing a record from \'teams\' service', async () => {
+    it('#16: Data integrity when removing a record from \'teams\' service', async () => {
       let teamId = null;
       let findUserTeamsBefore = null;
       let findChatMessagesBefore = null;
@@ -423,7 +441,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    it('Data integrity when removing a record from \'users\' service', async () => {
+    it('#17: Data integrity when removing a record from \'users\' service', async () => {
       const rec = fakes['users'][0];
       const idFieldUser = 'id' in rec ? 'id' : '_id';
       const userId = rec[idFieldUser];
@@ -462,6 +480,115 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       const findChatMessagesAfter = await chatMessages.find({query: {ownerId: userId}});
       if (isLog) inspector('Data integrity for \'chat-messages\' service, when removing a record from \'users\' service.findChatMessagesAfter:', findChatMessagesAfter.data);
       assert.ok(findChatMessagesBefore.data.length > findChatMessagesAfter.data.length, 'Protection did not work to removing the data from service');
+    });
+
+    it('#18: Set contextBefore.tagName while creating record for \'opcua-values\' service', async () => {
+      // Get opcuaTag
+      const index = fakes['opcuaTags'].length - 1;
+      const opcuaTag = fakes['opcuaTags'][index];
+      const idField = 'id' in opcuaTag ? 'id' : '_id';
+      const tagId = opcuaTag[idField];
+
+      const service = app.service('opcua-values');
+      contextBefore.path = 'opcua-values';
+      contextBefore.method = 'create';
+      contextBefore.service = service;
+      contextBefore.data = {
+        tagId,
+        values: [
+          {
+            key: opcuaTag.browseName,
+            value: 'opcuaTagValue'
+          }
+        ]
+      };
+      await constraints(true)(contextBefore);
+      if (isDebug) debug('Set contextBefore.tagName while creating record for \'opcua-values\' service.contextBefore:', contextBefore.data);
+      assert.ok(contextBefore.data.tagName === opcuaTag.browseName, 'Protection did not work to write the data to service');
+      // Once again
+      contextBefore.data = {
+        tagId,
+        tagName: 'NotOpcuaTagBrowseName',
+        values: [
+          {
+            key: opcuaTag.browseName,
+            value: 'opcuaTagValue'
+          }
+        ]
+      };
+      await constraints(true)(contextBefore);
+      if (isDebug) debug('Set contextBefore.tagName while creating record for \'opcua-values\' service.contextBefore:', contextBefore.data);
+      assert.ok(contextBefore.data.tagName === opcuaTag.browseName, 'Protection did not work to write the data to service');
+    });
+
+    it('#19: Restrict max rows when add a record to \'opcua-values\' service', async () => {
+      let opcuaValuesCount = 0, serviceName = '';
+      const index = fakes['opcuaTags'].length - 1;
+      const opcuaTag = fakes['opcuaTags'][index];
+      const idField = 'id' in opcuaTag ? 'id' : '_id';
+      const tagId = opcuaTag[idField];
+      const tagName = opcuaTag['browseName'];
+      const unitRange = opcuaTag.valueParams.engineeringUnitsRange;
+      const tagvalue = (unitRange.high - unitRange.low) / 2;
+
+      const valueData = { tagId, tagName, values: [
+        {
+          key: tagName,
+          value: tagvalue
+        }
+      ] };
+      // Get count items
+      serviceName = 'opcua-values';
+      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+      if(isDebug) debug('opcuaValuesCount:', opcuaValuesCount);
+      // Create items
+      for (let index = 0; index < maxOpcuaValuesRows + 20; index++) {
+        await createItem(app, serviceName, valueData);
+      }
+      // Get count items
+      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+      if(isDebug) debug('opcuaValuesCount:', opcuaValuesCount);
+
+      // Run constraints hook
+      contextAfter.path = serviceName;
+      contextAfter.method = 'create';
+      contextAfter.service = app.service(serviceName);
+      contextAfter.result = valueData;
+      await constraints(true)(contextAfter);
+
+      // Get count items
+      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+      if(isDebug) debug('opcuaValuesCount:', opcuaValuesCount);
+      
+      assert.ok(opcuaValuesCount === maxOpcuaValuesRows, 'Restrict max rows when add a record to \'opcua-values\' service');
+    });
+
+    
+    it('#20: Data integrity when removing a record from \'opcua-tags\' service', async () => {
+      const index = fakes['opcuaTags'].length - 1;
+      const rec = fakes['opcuaTags'][index];
+      const idField = 'id' in rec ? 'id' : '_id';
+      const tagId = rec[idField];
+      // Get service
+      const opcuaValues = app.service('opcua-values');
+
+      // Get before services
+      const findOpcuaValuesBefore = await opcuaValues.find({ query: { tagId: tagId } });
+      if (isLog) inspector('Data integrity for \'opcua-values\' service, when removing a record from \'opcua-tags\' service.findOpcuaValuesBefore:', findOpcuaValuesBefore.data);
+
+      // Run constraints hook
+      contextAfter.path = 'opcua-tags';
+      contextAfter.method = 'remove';
+      contextAfter.service = app.service('opcua-tags');
+      contextAfter.result = {
+        ...rec
+      };
+      await constraints(true)(contextAfter);
+
+      // Check constraints
+      const findOpcuaValuesAfter = await opcuaValues.find({ query: { tagId: tagId } });
+      if (isLog) inspector('Data integrity for \'opcua-values\' service, when removing a record from \'opcua-tags\' service.findOpcuaValuesAfter:', findOpcuaValuesAfter.data);
+      assert.ok(findOpcuaValuesBefore.data.length > findOpcuaValuesAfter.data.length, 'Protection did not work to removing the data from service');
     });
   });
 });

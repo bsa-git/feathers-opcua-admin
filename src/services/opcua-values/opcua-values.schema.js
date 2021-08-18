@@ -22,7 +22,32 @@ let schema = {
 
   // Fields in the model.
   properties: {
-    // !code: schema_properties // !end
+    // !code: schema_properties
+    //-------------------
+    id: {
+      type: 'ID'
+    },
+    _id: {
+      type: 'ID'
+    },
+    tagId: {
+      type: 'ID'
+    },
+    tagName: {
+      type: 'string'
+    },
+    values: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          key: { type: 'string' },
+          value: { type: ['string', 'number', 'integer', 'boolean'] }
+        }
+      }
+    }
+    //-------------------
+    // !end
   },
   // !code: schema_more // !end
 };

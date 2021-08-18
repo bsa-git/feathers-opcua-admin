@@ -11,10 +11,10 @@ module.exports = Object.assign({},
   {
     adapterInfo,
     seedService,
+    isTestEnv,
     graphqlQuery,
     graphqlExpected,
-    isTestEnv,
-    serviceHelper
   },
+  serviceHelper,
   cli
 );

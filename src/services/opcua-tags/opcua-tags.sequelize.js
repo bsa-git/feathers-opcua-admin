@@ -10,7 +10,59 @@ const DataTypes = Sequelize.DataTypes;
 
 let moduleExports = merge({},
   // !<DEFAULT> code: sequelize_model
-  {},
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true
+    },
+    isDisable: {
+      type: DataTypes.BOOLEAN
+    },
+    browseName: {
+      type: DataTypes.TEXT,
+      unique: true
+    },
+    displayName: {
+      type: DataTypes.TEXT
+    },
+    aliasName: {
+      type: DataTypes.TEXT
+    },
+    description: {
+      type: DataTypes.TEXT
+    },
+    type: {
+      type: DataTypes.TEXT
+    },
+    ownerName: {
+      type: DataTypes.TEXT
+    },
+    dataType: {
+      type: DataTypes.TEXT
+    },
+    hist: {
+      type: DataTypes.BOOLEAN
+    },
+    group: {
+      type: DataTypes.BOOLEAN
+    },
+    ownerGroup: {
+      type: DataTypes.TEXT
+    },
+    variableGetType: {
+      type: DataTypes.TEXT
+    },
+    getter: {
+      type: DataTypes.TEXT
+    },
+    getterParams: {
+      type: DataTypes.JSONB
+    },
+    valueParams: {
+      type: DataTypes.JSONB
+    }
+  },
   // !end
   // !code: moduleExports // !end
 );

@@ -19,6 +19,8 @@ let moduleExports = function serviceResolvers(app, options) {
   // !<DEFAULT> code: services
   let chatMessages = app.service('/chat-messages');
   let logMessages = app.service('/log-messages');
+  let opcuaTags = app.service('/opcua-tags');
+  let opcuaValues = app.service('/opcua-values');
   let roles = app.service('/roles');
   let teams = app.service('/teams');
   let userProfiles = app.service('/user-profiles');
@@ -98,6 +100,12 @@ let moduleExports = function serviceResolvers(app, options) {
           return users.find(feathersParams).then(extractFirstItem);
         },
         // !end
+    },
+
+    OpcuaTag: {
+    },
+
+    OpcuaValue: {
     },
 
     Role: {
@@ -283,6 +291,34 @@ let moduleExports = function serviceResolvers(app, options) {
       findLogMessage(parent, args, content, ast) {
         const feathersParams = convertArgs(args, content, ast, { query: { $sort: {   _id: 1 } } });
         return logMessages.find(feathersParams).then(paginate(content)).then(extractAllItems);
+      },
+      // !end
+
+      // !<DEFAULT> code: query-OpcuaTag
+      // getOpcuaTag(query: JSON, params: JSON, key: JSON): OpcuaTag
+      getOpcuaTag(parent, args, content, ast) {
+        const feathersParams = convertArgs(args, content, ast);
+        return opcuaTags.get(args.key, feathersParams).then(extractFirstItem);
+      },
+
+      // findOpcuaTag(query: JSON, params: JSON): [OpcuaTag!]
+      findOpcuaTag(parent, args, content, ast) {
+        const feathersParams = convertArgs(args, content, ast, { query: { $sort: {   _id: 1 } } });
+        return opcuaTags.find(feathersParams).then(paginate(content)).then(extractAllItems);
+      },
+      // !end
+
+      // !<DEFAULT> code: query-OpcuaValue
+      // getOpcuaValue(query: JSON, params: JSON, key: JSON): OpcuaValue
+      getOpcuaValue(parent, args, content, ast) {
+        const feathersParams = convertArgs(args, content, ast);
+        return opcuaValues.get(args.key, feathersParams).then(extractFirstItem);
+      },
+
+      // findOpcuaValue(query: JSON, params: JSON): [OpcuaValue!]
+      findOpcuaValue(parent, args, content, ast) {
+        const feathersParams = convertArgs(args, content, ast, { query: { $sort: {   _id: 1 } } });
+        return opcuaValues.find(feathersParams).then(paginate(content)).then(extractAllItems);
       },
       // !end
 

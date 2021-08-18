@@ -31,6 +31,34 @@ type LogMessage {
   user(query: JSON, params: JSON, key: JSON): User
 }
  
+type OpcuaTag {
+  id: ID
+  _id: ID
+  isDisable: Boolean
+  browseName: String
+  displayName: String
+  aliasName: String
+  description: String
+  type: String
+  ownerName: String
+  dataType: String
+  hist: Boolean
+  group: Boolean
+  ownerGroup: String
+  variableGetType: String
+  getter: String
+  getterParams: JSON
+  valueParams: JSON
+}
+ 
+type OpcuaValue {
+  id: ID
+  _id: ID
+  tagId: ID
+  tagName: String
+  values: [JSON]
+}
+ 
 type Role {
   id: ID
   _id: ID
@@ -118,6 +146,10 @@ type Query {
   findChatMessage(query: JSON, params: JSON): [ChatMessage]!
   getLogMessage(key: JSON, query: JSON, params: JSON): LogMessage
   findLogMessage(query: JSON, params: JSON): [LogMessage]!
+  getOpcuaTag(key: JSON, query: JSON, params: JSON): OpcuaTag
+  findOpcuaTag(query: JSON, params: JSON): [OpcuaTag]!
+  getOpcuaValue(key: JSON, query: JSON, params: JSON): OpcuaValue
+  findOpcuaValue(query: JSON, params: JSON): [OpcuaValue]!
   getRole(key: JSON, query: JSON, params: JSON): Role
   findRole(query: JSON, params: JSON): [Role]!
   getTeam(key: JSON, query: JSON, params: JSON): Team

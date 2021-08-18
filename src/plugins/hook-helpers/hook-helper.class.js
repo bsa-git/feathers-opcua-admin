@@ -1,8 +1,21 @@
-const loMerge = require('lodash/merge');
+// const loMerge = require('lodash/merge');
 const {checkContext, getItems, replaceItems} = require('feathers-hooks-common');
 const errors = require('@feathersjs/errors');
 // const {inspector, isObject} = require('../lib');
 const {inspector, isObject} = require('../lib');
+const {
+  getCountItems,
+  getItem,
+  findItems,
+  findAllItems,
+  removeItem,
+  removeItems,
+  patchItem,
+  patchItems,
+  createItem,
+  createItems
+} = require('../db-helpers');
+
 const chalk = require('chalk');
 const debug = require('debug')('app:hook-helper.class');
 
@@ -309,148 +322,272 @@ class HookHelper {
     return this;
   }
 
+  // /**
+  //  * Get item
+  //  * @param path
+  //  * @param id
+  //  * @return {Promise.<*>}
+  //  */
+  // async getItem(path = '', id = null) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     const getResult = await service.get(id);
+  //     if (isLog) inspector(`getItem(path='${path}', id='${id}').getResult:`, getResult);
+  //     return getResult;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Find items
+  //  * @param path
+  //  * @param query
+  //  * @return {Promise.<*>}
+  //  */
+  // async findItems(path = '', query = {}) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     let findResults = await service.find({query: query});
+  //     findResults = (query['$limit'] === 0) ? findResults.total : findResults.data;
+  //     if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
+  //     return findResults;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Find all items
+  //  * @param path
+  //  * @param query
+  //  * @return {Promise.<*>}
+  //  */
+  // async findAllItems(path = '', query = {}) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     // const newQuery = Object.assign(query, {$limit: null});
+  //     const newQuery = loMerge(query, {$limit: null});
+  //     let findResults = await service.find({query: newQuery});
+  //     findResults = findResults.data;
+  //     if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(newQuery)}).findResults:`, findResults);
+  //     return findResults;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Get count items
+  //  * @param path
+  //  * @param query
+  //  * @return {Promise.<*>}
+  //  */
+  // async getCountItems(path = '', query = {}) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     // const newQuery = Object.assign(query, {$limit: 0});
+  //     const newQuery = loMerge(query, {$limit: 0});
+  //     let findResults = await service.find({query: newQuery});
+  //     findResults = findResults.total;
+  //     if (isDebug) inspector(`getCountItems(path='${path}', query=${JSON.stringify(newQuery)}).findResults:`, findResults);
+  //     return findResults;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Remove items
+  //  * @param path
+  //  * @param query
+  //  * @return {Promise.<*>}
+  //  */
+  // async removeItems(path = '', query = {}) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     const removeResults = await service.remove(null, {query: query});
+  //     if (isLog) inspector(`removeItems(path='${path}', query=${JSON.stringify(query)}).removeResults:`, removeResults);
+  //     return removeResults;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Remove item
+  //  * @param path
+  //  * @param id
+  //  * @return {Promise.<*>}
+  //  */
+  // async removeItem(path = '', id = null) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     const removeResult = await service.remove(id);
+  //     if (isLog) inspector(`removeItem(path='${path}', id=${id}).removeResult:`, removeResult);
+  //     return removeResult;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Patch items
+  //  * @param path
+  //  * @param data
+  //  * @param query
+  //  * @return {Promise.<*>}
+  //  */
+  // async patchItems(path = '', data = {}, query = {}) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     const patchResults = await service.patch(null, data, {query: query});
+  //     if (isLog) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, query=${JSON.stringify(query)}).patchResults:`, patchResults);
+  //     return patchResults;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  // /**
+  //  * Create item
+  //  * @param path
+  //  * @param data
+  //  * @return {Promise.<*>}
+  //  */
+  // async createItem(path = '', data = {}) {
+  //   const service = this.app.service(path);
+  //   if (service) {
+  //     const createResults = await service.create(data);
+  //     if (isLog) inspector(`createItem(path='${path}', data=${JSON.stringify(data)}).createResults:`, createResults);
+  //     return createResults;
+  //   } else {
+  //     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  //   }
+  // }
+
+  /**
+   * Get count items
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} query
+   * @return {Number}
+   */
+  async getCountItems(path = '', query = {}) {
+    return await getCountItems(this.app, path, query);
+  }
+
   /**
    * Get item
-   * @param path
-   * @param id
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {String} id
+   * @return {Object}
    */
   async getItem(path = '', id = null) {
-    const service = this.app.service(path);
-    if (service) {
-      const getResult = await service.get(id);
-      if (isLog) inspector(`getItem(path='${path}', id='${id}').getResult:`, getResult);
-      return getResult;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
+    return await getItem(this.app, path, id);
   }
 
   /**
    * Find items
-   * @param path
-   * @param query
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} query
+   * @return {Object[]}
    */
   async findItems(path = '', query = {}) {
-    const service = this.app.service(path);
-    if (service) {
-      let findResults = await service.find({query: query});
-      findResults = (query['$limit'] === 0) ? findResults.total : findResults.data;
-      if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
-      return findResults;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
+    return await findItems(this.app, path, query);
   }
 
   /**
    * Find all items
-   * @param path
-   * @param query
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} query
+   * @return {Object[]}
    */
   async findAllItems(path = '', query = {}) {
-    const service = this.app.service(path);
-    if (service) {
-      // const newQuery = Object.assign(query, {$limit: null});
-      const newQuery = loMerge(query, {$limit: null});
-      let findResults = await service.find({query: newQuery});
-      findResults = findResults.data;
-      if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(newQuery)}).findResults:`, findResults);
-      return findResults;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
-  }
-
-  /**
-   * Get count items
-   * @param path
-   * @param query
-   * @return {Promise.<*>}
-   */
-  async getCountItems(path = '', query = {}) {
-    const service = this.app.service(path);
-    if (service) {
-      // const newQuery = Object.assign(query, {$limit: 0});
-      const newQuery = loMerge(query, {$limit: 0});
-      let findResults = await service.find({query: newQuery});
-      findResults = findResults.total;
-      if (isDebug) inspector(`getCountItems(path='${path}', query=${JSON.stringify(newQuery)}).findResults:`, findResults);
-      return findResults;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
-  }
-
-  /**
-   * Remove items
-   * @param path
-   * @param query
-   * @return {Promise.<*>}
-   */
-  async removeItems(path = '', query = {}) {
-    const service = this.app.service(path);
-    if (service) {
-      const removeResults = await service.remove(null, {query: query});
-      if (isLog) inspector(`removeItems(path='${path}', query=${JSON.stringify(query)}).removeResults:`, removeResults);
-      return removeResults;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
+    return await findAllItems(this.app, path, query);
   }
 
   /**
    * Remove item
-   * @param path
-   * @param id
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {String} id
+   * @return {Object}
    */
   async removeItem(path = '', id = null) {
-    const service = this.app.service(path);
-    if (service) {
-      const removeResult = await service.remove(id);
-      if (isLog) inspector(`removeItem(path='${path}', id=${id}).removeResult:`, removeResult);
-      return removeResult;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
+    return await removeItem(this.app, path, id);
+  }
+
+  /**
+   * Remove items
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} query
+   * @return {Object[]}
+   */
+  async removeItems(path = '', query = {}) {
+    return await removeItems(this.app, path, query);
+  }
+
+
+  /**
+   * Patch item
+   * @async
+   * 
+   * @param {String} path
+   * @param {String} id
+   * @param {Object} data
+   * @return {Object}
+   */
+  async patchItem(path = '', id = '', data = {}) {
+    return await patchItem(this.app, path, id, data);
   }
 
   /**
    * Patch items
-   * @param path
-   * @param data
-   * @param query
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} data
+   * @param {Object} query
+   * @return {Object[]}
    */
   async patchItems(path = '', data = {}, query = {}) {
-    const service = this.app.service(path);
-    if (service) {
-      const patchResults = await service.patch(null, data, {query: query});
-      if (isLog) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, query=${JSON.stringify(query)}).patchResults:`, patchResults);
-      return patchResults;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
+    return await patchItems(this.app, path, data, query);
   }
+
 
   /**
    * Create item
-   * @param path
-   * @param data
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} data
+   * @return {Object}
    */
   async createItem(path = '', data = {}) {
-    const service = this.app.service(path);
-    if (service) {
-      const createResults = await service.create(data);
-      if (isLog) inspector(`createItem(path='${path}', data=${JSON.stringify(data)}).createResults:`, createResults);
-      return createResults;
-    } else {
-      throw new errors.BadRequest(`There is no service for the path - '${path}'`);
-    }
+    return await createItem(this.app, path, data);
+  }
+
+  /**
+   * Create items
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object[]} data
+   * @return {Object[]}
+   */
+  async createItems(path = '', data = []) {
+    return await createItems(this.app, path, data);
   }
 
   /**

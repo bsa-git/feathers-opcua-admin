@@ -1,7 +1,13 @@
 
 const assert = require('assert');
 const myLog = require('../../src/hooks/my-log');
-const {appRoot, inspector, readJsonFileSync, HookHelper, serviceHelper} = require('../../src/plugins');
+const {
+  appRoot, 
+  inspector, 
+  readJsonFileSync, 
+  HookHelper, 
+  saveFakesToServices
+} = require('../../src/plugins');
 const app = require(`${appRoot}/src/app`);
 const chalk = require('chalk');
 const debug = require('debug')('app:my-log.unit.test');
@@ -68,7 +74,7 @@ describe('<<< Test /hooks/my-log.unit.test.js >>>', () => {
   });
 
   it('Save fake data to \'users\' service', async () => {
-    const errPath = await serviceHelper.saveFakesToServices(app, 'users');
+    const errPath = await saveFakesToServices(app, 'users');
     assert.ok(errPath === '', `Not save fakes to services - '${errPath}'`);
   });
 

@@ -56,7 +56,7 @@ async function opcuaTagsPopulate (context) {
     runTime,
     schema,
     resolvers,
-    recordType: 'OpcuaTags',
+    recordType: 'OpcuaTag',
     query,
     options,
   })(context);
@@ -83,6 +83,23 @@ module.exports = moduleExports;
 /* For your information: all record and resolver fields 2 levels deep.
 const twoLevelsFields = {
   query: {
+    id: 1,
+    _id: 1,
+    isDisable: 1,
+    browseName: 1,
+    displayName: 1,
+    aliasName: 1,
+    description: 1,
+    type: 1,
+    ownerName: 1,
+    dataType: 1,
+    hist: 1,
+    group: 1,
+    ownerGroup: 1,
+    variableGetType: 1,
+    getter: 1,
+    getterParams: 1,
+    valueParams: 1,
   }
 };
 */

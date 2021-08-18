@@ -17,12 +17,87 @@ let schema = {
   ],
   // Fields with unique values.
   uniqueItemProperties: [
-    // !code: schema_unique // !end
+    // !code: schema_unique
+    //----------------------
+    'browseName'
+    //----------------------
+    // !end
   ],
 
   // Fields in the model.
   properties: {
-    // !code: schema_properties // !end
+    // !code: schema_properties
+    //-------------------------
+    id: {type: 'ID'},
+    _id: {type: 'ID'},
+    isDisable: {
+      type: 'boolean'
+    },
+    browseName: {
+      type: 'string'
+    },
+    displayName: {
+      type: 'string',
+    },
+    aliasName: {
+      type: 'string',
+    },
+    description: {
+      type: 'string'
+    },
+    type: {
+      type: 'string'
+    },
+    ownerName: {
+      type: 'string'
+    },
+    dataType: {
+      type: 'string'
+    },
+    hist: {
+      type: 'boolean'
+    },
+    group: {
+      type: 'boolean'
+    },
+    ownerGroup: {
+      type: 'string'
+    },
+    variableGetType: {
+      type: 'string'
+    },
+    getter: {
+      type: 'string'
+    },
+    getterParams: {
+      type: 'object',
+      properties: {
+        path: {type: 'string'},
+        fromFile: {type: 'string'},
+        interval: {type: 'number'},
+        dbEnv: {type: 'string'},
+        queryFunc: {type: 'string'},
+        queryParams: {
+          properties: {
+            scanerName: {type: 'string'}
+          }
+        }
+      }
+    },
+    valueParams: {
+      type: 'object',
+      properties: {
+        engineeringUnits: {type: 'string'},
+        engineeringUnitsRange: {
+          properties: {
+            low: {type: 'number'},
+            high: {type: 'number'}
+          }
+        }
+      }
+    }
+    //-------------------------
+    // !end
   },
   // !code: schema_more // !end
 };
