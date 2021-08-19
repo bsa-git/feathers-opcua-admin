@@ -24,6 +24,9 @@ let moduleExports = merge({},
         items: {
           type: "object",
           properties: {
+            tagId: {
+              type: "ID"
+            },
             key: {
               type: "string"
             },

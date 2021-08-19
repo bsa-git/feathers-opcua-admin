@@ -16,11 +16,14 @@ const queries = {
   // All resolver fields 1 level deep.
   oneLevel: {
     query: {
+      tag: {},
     }
   },
   // All resolver fields 2 levels deep.
   twoLevels: {
     query: {
+      tag: {
+      },
     }
   },
   // !code: queries // !end
@@ -88,6 +91,26 @@ const twoLevelsFields = {
     tagId: 1,
     tagName: 1,
     values: 1,
+    tag: {
+      _args: {},
+      id: 1,
+      _id: 1,
+      isDisable: 1,
+      browseName: 1,
+      displayName: 1,
+      aliasName: 1,
+      description: 1,
+      type: 1,
+      ownerName: 1,
+      dataType: 1,
+      hist: 1,
+      group: 1,
+      ownerGroup: 1,
+      variableGetType: 1,
+      getter: 1,
+      getterParams: 1,
+      valueParams: 1,
+    },
   }
 };
 */

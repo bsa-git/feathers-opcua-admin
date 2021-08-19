@@ -106,6 +106,17 @@ let moduleExports = function serviceResolvers(app, options) {
     },
 
     OpcuaValue: {
+
+      // tag(query: JSON, params: JSON, key: JSON): OpcuaTag
+      tag:
+        // !<DEFAULT> code: resolver-OpcuaValue-tag
+        (parent, args, content, ast) => {
+          const feathersParams = convertArgs(args, content, ast, {
+            query: { _id: parent.tagId }, paginate: false
+          });
+          return opcuaTags.find(feathersParams).then(extractFirstItem);
+        },
+        // !end
     },
 
     Role: {

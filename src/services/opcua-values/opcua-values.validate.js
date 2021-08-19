@@ -37,6 +37,9 @@ let base = merge({},
         items: {
           type: "object",
           properties: {
+            tagId: {
+              type: ID
+            },
             key: {
               type: "string"
             },

@@ -164,6 +164,21 @@ let moduleExports = function batchLoaderResolvers(app, options) {
       );
       // !end
 
+    // OpcuaValue.tag(query: JSON, params: JSON, key: JSON): OpcuaTag
+    // !<DEFAULT> code: bl-OpcuaValue-tag
+    case 'OpcuaValue.tag':
+      return feathersBatchLoader(dataLoaderName, '', '_id',
+        keys => {
+          feathersParams = convertArgs(args, content, null, {
+            query: { _id: { $in: keys }, $sort: undefined },
+            _populate: 'skip', paginate: false
+          });
+          return opcuaTags.find(feathersParams);
+        },
+        maxBatchSize // Max #keys in a BatchLoader func call.
+      );
+      // !end
+
     // Role.users: [User!]
     // !<DEFAULT> code: bl-Role-users
     case 'Role.users':
@@ -304,6 +319,11 @@ let moduleExports = function batchLoaderResolvers(app, options) {
     },
 
     OpcuaValue: {
+
+      // tag(query: JSON, params: JSON, key: JSON): OpcuaTag
+      // !<DEFAULT> code: resolver-OpcuaValue-tag
+      tag: getResult('OpcuaValue.tag', 'tagId'),
+      // !end
     },
 
     Role: {

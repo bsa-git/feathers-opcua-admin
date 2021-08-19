@@ -57,6 +57,7 @@ type OpcuaValue {
   tagId: ID
   tagName: String
   values: [JSON]
+  tag(query: JSON, params: JSON, key: JSON): OpcuaTag
 }
  
 type Role {

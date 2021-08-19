@@ -24,23 +24,16 @@ let schema = {
   properties: {
     // !code: schema_properties
     //-------------------
-    id: {
-      type: 'ID'
-    },
-    _id: {
-      type: 'ID'
-    },
-    tagId: {
-      type: 'ID'
-    },
-    tagName: {
-      type: 'string'
-    },
+    id: { type: 'ID' },
+    _id: { type: 'ID' },
+    tagId: { type: 'ID' },
+    tagName: { type: 'string' },
     values: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
+          tagId: { type: 'ID' },
           key: { type: 'string' },
           value: { type: ['string', 'number', 'integer', 'boolean'] }
         }
@@ -73,8 +66,8 @@ let extensions = {
       // !code: graphql_discard // !end
     ],
     add: {
-      // !<DEFAULT> code: graphql_add
-      // __author__: { type: '__User__!', args: false, relation: { ourTable: '__authorId__', otherTable: '_id' } },
+      // !code: graphql_add
+      tag: {type: 'OpcuaTag', args: true, relation: {ourTable: 'tagId', otherTable: '_id'}},
       // !end
     },
     // !code: graphql_more // !end

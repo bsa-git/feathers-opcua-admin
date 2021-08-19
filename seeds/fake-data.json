@@ -319,10 +319,12 @@
       "tagName": "CH_M51::ValueFromFile",
       "values": [
         {
+          "tagId": "60af3870270f24162c049c1f",
           "key": "CH_M51::01AMIAK:01T4",
           "value": 166.128945
         },
         {
+          "tagId": "60af3870270f24162c049c20",
           "key": "CH_M51::01AMIAK:01P4_1",
           "value": 6.123245
         }
@@ -334,7 +336,6 @@
       "tagName": "CH_M51::01AMIAK:01T4",
       "values": [
         {
-          "key": "CH_M51::01AMIAK:01T4",
           "value": 166.128945
         }
       ]
@@ -345,7 +346,6 @@
       "tagName": "CH_M51::01AMIAK:01P4_1",
       "values": [
         {
-          "key": "CH_M51::01AMIAK:01P4_1",
           "value": 6.123245
         }
       ]
