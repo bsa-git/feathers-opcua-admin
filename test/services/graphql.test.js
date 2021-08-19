@@ -67,74 +67,84 @@ describe('<<< Test services/graphql.test.js >>>', () => {
       const response = await graphql.find({query: {query: graphqlQuery['getUser']}});
       if (isLog) inspector('Response for \'getUser\' query:', response);
       // inspector('Response for \'getUser\' query:', response);
-      if (isLog) inspector('Expected for \'getUser\' query:', graphqlExpected['getUser']);
-      // inspector('Expected for \'getUser\' query:', graphqlExpected['getUser']);
-      assert.deepStrictEqual(response, graphqlExpected['getUser']);
+      const getUser = graphqlExpected['getUser']();
+      if (isLog) inspector('Expected for \'getUser\' query:', getUser);
+      // inspector('Expected for \'getUser\' query:', getUser);
+      assert.deepStrictEqual(response, getUser);
     });
 
     it('Run \'findUser\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['findUser']}});
       if (isLog) inspector('Response for \'findUser\' query:', response.data);
-      if (isLog) inspector('Expected for \'findUser\' query:', graphqlExpected['findUser']);
-      assert.deepStrictEqual(response.data, graphqlExpected['findUser']);
+      const findUser = graphqlExpected['findUser']();
+      if (isLog) inspector('Expected for \'findUser\' query:', findUser);
+      assert.deepStrictEqual(response.data, findUser);
     });
 
     it('Run \'getRole\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['getRole']}});
       if (isLog) inspector('Response for \'getRole\' query:', response);
-      if (isLog) inspector('Expected for \'getRole\' query:', graphqlExpected['getRole']);
-      assert.deepStrictEqual(response, graphqlExpected['getRole']);
+      const getRole = graphqlExpected['getRole']();
+      if (isLog) inspector('Expected for \'getRole\' query:', getRole);
+      assert.deepStrictEqual(response, getRole);
     });
 
     it('Run \'findRole\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['findRole']}});
       if (isLog) inspector('Response for \'findRole\' query:', response);
-      if (isLog) inspector('Expected for \'findRole\' query:', graphqlExpected['findRole']);
-      assert.deepStrictEqual(response.data, graphqlExpected['findRole']);
+      const findRole = graphqlExpected['findRole']();
+      if (isLog) inspector('Expected for \'findRole\' query:', findRole);
+      assert.deepStrictEqual(response.data, findRole);
     });
 
     it('Run \'getTeam\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['getTeam']}});
       if (isLog) inspector('Response for \'getTeam\' query:', response);
-      if (isLog) inspector('Expected for \'getTeam\' query:', graphqlExpected['getTeam']);
-      assert.deepStrictEqual(response, graphqlExpected['getTeam']);
+      const getTeam = graphqlExpected['getTeam']();
+      if (isLog) inspector('Expected for \'getTeam\' query:', getTeam);
+      assert.deepStrictEqual(response, getTeam);
     });
 
     it('Run \'findTeam\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['findTeam']}});
       if (isLog) inspector('Response for \'findTeam\' query:', response);
-      if (isLog) inspector('Expected for \'findTeam\' query:', graphqlExpected['findTeam']);
-      assert.deepStrictEqual(response.data, graphqlExpected['findTeam']);
+      const findTeam = graphqlExpected['findTeam']();
+      if (isLog) inspector('Expected for \'findTeam\' query:', findTeam);
+      assert.deepStrictEqual(response.data, findTeam);
     });
 
     it('Run \'getLogMessage\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['getLogMessage']}});
       if (isLog) inspector('Response for \'getLogMessage\' query:', response);
-      if (isLog) inspector('Expected for \'getLogMessage\' query:', graphqlExpected['getLogMessage']);
-      assert.deepStrictEqual(response, graphqlExpected['getLogMessage']);
+      const getLogMessage = graphqlExpected['getLogMessage']();
+      if (isLog) inspector('Expected for \'getLogMessage\' query:', getLogMessage);
+      assert.deepStrictEqual(response, getLogMessage);
     });
 
     it('Run \'findLogMessage\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['findLogMessage']}});
       if (isLog) inspector('Response for \'findLogMessage\' query:', response);
-      if (isLog) inspector('Expected for \'findLogMessage\' query:', graphqlExpected['findLogMessage']);
-      assert.deepStrictEqual(response.data, graphqlExpected['findLogMessage']);
+      const findLogMessage = graphqlExpected['findLogMessage']();
+      if (isLog) inspector('Expected for \'findLogMessage\' query:', findLogMessage);
+      assert.deepStrictEqual(response.data, findLogMessage);
     });
 
     it('Run \'getChatMessage\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['getChatMessage']}});
       if (isLog) inspector('Response for \'getChatMessage\' query:', response);
-      inspector('Response for \'getChatMessage\' query:', response);
-      if (isLog) inspector('Expected for \'getChatMessage\' query:', graphqlExpected['getChatMessage']);
-      inspector('Expected for \'getChatMessage\' query:', graphqlExpected['getChatMessage']);
-      assert.deepStrictEqual(response, graphqlExpected['getChatMessage']);
+      // inspector('Response for \'getChatMessage\' query:', response);
+      const getChatMessage = graphqlExpected['getChatMessage']();
+      if (isLog) inspector('Expected for \'getChatMessage\' query:', getChatMessage);
+      // inspector('Expected for \'getChatMessage\' query:', getChatMessage);
+      assert.deepStrictEqual(response, getChatMessage);
     });
 
     it('Run \'findChatMessage\' request for GraphQl', async () => {
       const response = await graphql.find({query: {query: graphqlQuery['findChatMessage']}});
       if (isLog) inspector('Response for \'findChatMessage\' query:', response);
-      if (isLog) inspector('Expected for \'findChatMessage\' query:', graphqlExpected['findChatMessage']);
-      assert.deepStrictEqual(response.data, graphqlExpected['findChatMessage']);
+      const findChatMessage = graphqlExpected['findChatMessage']();
+      if (isLog) inspector('Expected for \'findChatMessage\' query:', findChatMessage);
+      assert.deepStrictEqual(response.data, findChatMessage);
     });
   });
 });

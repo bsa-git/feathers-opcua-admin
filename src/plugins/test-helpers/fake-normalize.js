@@ -1,4 +1,5 @@
-const {readJsonFileSync, writeJsonFileSync, inspector, appRoot, dbNullIdValue} = require('../lib');
+const { readJsonFileSync, writeJsonFileSync, inspector, appRoot } = require('../lib');
+const { dbNullIdValue } = require('../db-helpers');
 const Auth = require(`${appRoot}/src/plugins/auth/auth-server.class`);
 const chalk = require('chalk');
 
@@ -53,13 +54,13 @@ let fakeDataOpcuaValues = fakeData['opcuaValues'];
 const rolesUpdate = () => {
   const roles = Auth.getBaseRoles();
   const roleKeys = Object.keys(Auth.getBaseRoles());
-  if(isLog) inspector('fake-service.rolesUpdate.roles:', roles);
+  if (isLog) inspector('fake-service.rolesUpdate.roles:', roles);
   roleKeys.forEach((key, index) => {
     fakeDataRoles[index]['alias'] = key;
     fakeDataRoles[index]['name'] = roles[key];
   });
-  if(isLog) inspector('fake-service.rolesUpdate.fakeDataRoles:', fakeDataRoles);
-  if(isDebug) console.log(chalk.yellow('Roles Update: Ok'));
+  if (isLog) inspector('fake-service.rolesUpdate.fakeDataRoles:', fakeDataRoles);
+  if (isDebug) console.log(chalk.yellow('Roles Update: Ok'));
 };
 
 const usersUpdate = () => {
@@ -89,8 +90,8 @@ const usersUpdate = () => {
     return user;
   }));
 
-  if(isLog) inspector('fake-service.usersUpdate.fakeDataUsers:', fakeDataUsers);
-  if(isDebug) console.log(chalk.yellow('Users Update: Ok'));
+  if (isLog) inspector('fake-service.usersUpdate.fakeDataUsers:', fakeDataUsers);
+  if (isDebug) console.log(chalk.yellow('Users Update: Ok'));
 };
 
 const userTeamsUpdate = () => {
@@ -98,19 +99,19 @@ const userTeamsUpdate = () => {
     fakeDataUserTeams[index]['teamId'] = team[idFieldTeam];
   });
   fakeDataUserTeams[0]['userId'] = fakeDataUsers[1][idFieldUser];
-  if(isLog) inspector('fake-service.userTeamsUpdate.fakeDataUserTeams:', fakeDataUserTeams);
-  if(isDebug) console.log(chalk.yellow('UserTeams Update: Ok'));
+  if (isLog) inspector('fake-service.userTeamsUpdate.fakeDataUserTeams:', fakeDataUserTeams);
+  if (isDebug) console.log(chalk.yellow('UserTeams Update: Ok'));
 };
 
 const logMessagesUpdate = () => {
   fakeDataLogMessages[0]['gr'] = logData.gr;
   fakeDataLogMessages[0]['pr'] = logData.pr;
   fakeDataLogMessages[0]['name'] = logData.name;
-  fakeDataLogMessages[0]['msg'] = JSON.stringify({message: 'Ullam eum enim incidunt unde omnis laborum voluptatum explicabo.'});
+  fakeDataLogMessages[0]['msg'] = JSON.stringify({ message: 'Ullam eum enim incidunt unde omnis laborum voluptatum explicabo.' });
   fakeDataLogMessages[0]['ownerId'] = fakeDataUser[idFieldUser];
   fakeDataLogMessages[0]['userId'] = fakeDataUser[idFieldUser];
-  if(isLog) inspector('fake-service.logMessagesUpdate.fakeDataLogMessages:', fakeDataLogMessages);
-  if(isDebug) console.log(chalk.yellow('LogMessages Update: Ok'));
+  if (isLog) inspector('fake-service.logMessagesUpdate.fakeDataLogMessages:', fakeDataLogMessages);
+  if (isDebug) console.log(chalk.yellow('LogMessages Update: Ok'));
 };
 
 const chatMessagesUpdate = () => {
@@ -131,13 +132,13 @@ const chatMessagesUpdate = () => {
   fakeDataChatMessages[3]['teamId'] = dbNullIdValue();
   fakeDataChatMessages[3]['roleId'] = dbNullIdValue();
 
-  if(isLog) inspector('fake-service.chatMessagesUpdate.fakeDataChatMessages:', fakeDataChatMessages);
-  if(isDebug) console.log(chalk.yellow('ChatMessages Update: Ok'));
+  if (isLog) inspector('fake-service.chatMessagesUpdate.fakeDataChatMessages:', fakeDataChatMessages);
+  if (isDebug) console.log(chalk.yellow('ChatMessages Update: Ok'));
 };
 
 const opcuaValuesUpdate = () => {
   fakeDataOpcuaTags.forEach((tag, index) => {
-    if(index > 0){
+    if (index > 0) {
       fakeDataOpcuaValues[index - 1]['tagId'] = tag[idFieldUser];
     }
   });
@@ -160,7 +161,7 @@ const fakeDataUpdate = () => {
   writeJsonFileSync(`${appRoot}/seeds/fake-data.json`, fakeData);
 };
 
-if(isDebug) console.log(chalk.yellow('Start: Fake-Service!'));
+if (isDebug) console.log(chalk.yellow('Start: Fake-Service!'));
 // Services fake data update
 rolesUpdate();
 
@@ -181,4 +182,4 @@ chatMessagesUpdate();
 opcuaValuesUpdate();
 // All fake data update
 fakeDataUpdate();
-if(isDebug) console.log(chalk.yellow('Finish: Fake-Service!'));
+if (isDebug) console.log(chalk.yellow('Finish: Fake-Service!'));

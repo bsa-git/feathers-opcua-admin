@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars, indent */
 // Define GraphQL resolvers using only Feathers services. (Can be re-generated.)
 // !code: imports
-const {inspector, dbNullIdValue} = require('../../plugins/lib');
+const {inspector, dbNullIdValue} = require('../../plugins');
 const debug = require('debug')('app:service.graphql.resolvers');
 
 const isDebug = false;
