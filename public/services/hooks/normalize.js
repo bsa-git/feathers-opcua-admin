@@ -1,7 +1,6 @@
-
 const loPick = require('lodash/pick');
 const loCamelCase = require('lodash/camelCase');
-const {replaceItems} = require('feathers-hooks-common');
+const { replaceItems } = require('feathers-hooks-common');
 import Service from '~/plugins/service-helpers/service-client.class';
 import HookHelper from '~/plugins/service-helpers/hook-helper.class';
 import fakeData from '~~/seeds/fake-data.json';
@@ -23,7 +22,7 @@ export default function (options = {}) {
     // let records = hh.contextRecords;
     let _records;
     const fakeDataKey = loCamelCase(hh.contextPath);
-    if(isDebug) debug('fakeDataKey:', fakeDataKey);
+    if (isDebug) debug('fakeDataKey:', fakeDataKey);
 
     /**
      * Pick item
@@ -37,9 +36,9 @@ export default function (options = {}) {
 
     if (isLog) debug('Before normalize-query records:', hh.contextRecords);
 
-    if(fakeData[fakeDataKey]){
+    if (fakeData[fakeDataKey]) {
       _records = hh.getPickRecords(pickItem);
-    }else {
+    } else {
       Object.assign(_records, hh.contextRecords);
     }
 

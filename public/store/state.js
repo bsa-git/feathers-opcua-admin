@@ -112,6 +112,8 @@ export default () => ({
     //--- LOG-MESSAGES ---//
     logMsgEnable: util.isTrue(process.env.LOGMSG_ENABLE),
     logMsgMaxRows: util.getNumber(process.env.LOGMSG_MAXROWS),
+    //--- OPCUA-MESSAGES ---//
+    opcuaValuesMaxRows: util.getNumber(process.env.OPCUA_VALUES_MAXROWS),
     //--- SECRETS ---//
     /*
     gmail: (process.env.GMAIL || 'my@gmail.com').trim(),

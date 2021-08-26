@@ -136,6 +136,7 @@ class Service {
     // Find chat messages for user
     const user = this.getAuthUser();
     if (user) {
+      // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
       const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams');
       paths.forEach(path => this.findAll(path, {query: {}}));
       // Find all chat messages for admin
@@ -201,6 +202,11 @@ class Service {
       }
       // Find chat messages for user
       await this.findChatMessagesForUser(user);
+      // Find all opcua tags
+      await this.findAll('opcua-tags', {query: {}});
+      // Find all opcua values
+      await this.findAll('opcua-values', {query: {}});
+      // Init state chat checkAt
       this.initStateChatCheckAt();
     }
   }

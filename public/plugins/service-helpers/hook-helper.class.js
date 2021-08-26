@@ -1,5 +1,5 @@
 import typeOf from '~/plugins/lib/type-of';
-const {checkContext, getItems, replaceItems} = require('feathers-hooks-common');
+const { checkContext, getItems, replaceItems } = require('feathers-hooks-common');
 const errors = require('@feathersjs/errors');
 const chalk = require('chalk');
 const debug = require('debug')('app:hook-helper.class');
@@ -31,13 +31,13 @@ class HookHelper {
     // context.type is a read only property with the hook type (one of before, after or error)
     this.contextType = this.context.type;
     // context.params is a writeable property that contains the service method parameters
-    this.contextParams = this.context.params? this.context.params : null;
+    this.contextParams = this.context.params ? this.context.params : null;
     // Get the authenticated user.
-    this.contextUser = (this.contextParams && this.contextParams.user)? this.contextParams.user : null;
+    this.contextUser = (this.contextParams && this.contextParams.user) ? this.contextParams.user : null;
     // Get context.params.authenticated
-    this.contextAuthenticated = this.contextParams && this.contextParams.authenticated? this.contextParams.authenticated : null;
+    this.contextAuthenticated = this.contextParams && this.contextParams.authenticated ? this.contextParams.authenticated : null;
     // Get contextParams.payload
-    this.contextPayload = this.contextParams && this.contextParams.payload? this.contextParams.payload : null;
+    this.contextPayload = this.contextParams && this.contextParams.payload ? this.contextParams.payload : null;
     // Get the record(s) from context.data (before), context.result.data or context.result (after).
     // getItems always returns an array to simplify your processing.
     this.contextRecords = getItems(this.context);
@@ -47,7 +47,7 @@ class HookHelper {
     // It is only available in after hooks.
     this.contextResult = this.context.result ? this.context.result : null;
     // Get contextResult.accessToken
-    this.contextAccessToken = this.contextResult && this.contextResult.accessToken? this.contextResult.accessToken : '';
+    this.contextAccessToken = this.contextResult && this.contextResult.accessToken ? this.contextResult.accessToken : '';
     // context.dispatch is a writeable, optional property and contains a "safe" version of the data that should be sent to any client.
     // If context.dispatch has not been set context.result will be sent to the client instead
     this.contextDispatch = this.context.dispatch ? this.context.dispatch : null;
@@ -163,7 +163,7 @@ class HookHelper {
    */
   static getHookContext(context) {
     let target = {};
-    let {path, method, type, params, id, data, result, /*dispatch,*/ statusCode, grapql} = context;
+    let { path, method, type, params, id, data, result, /*dispatch,*/ statusCode, grapql } = context;
 
     if (path) target.path = path;
     if (method) target.method = method;
@@ -192,9 +192,9 @@ class HookHelper {
    */
   static mergeItems(records, source = {}) {
     let _records;
-    if(Array.isArray(records)){
+    if (Array.isArray(records)) {
       _records = records.map(record => Object.assign({}, record, source));
-    }else {
+    } else {
       _records = Object.assign({}, records, source);
     }
     return _records;
@@ -205,9 +205,9 @@ class HookHelper {
    * @param source {Object}
    */
   mergeRecords(source = {}) {
-    if(Array.isArray(this.contextRecords)){
+    if (Array.isArray(this.contextRecords)) {
       this.contextRecords.forEach(record => Object.assign(record, source));
-    }else {
+    } else {
       Object.assign(this.contextRecords, source);
     }
   }
@@ -219,10 +219,10 @@ class HookHelper {
    */
   getPickRecords(fn) {
     let _records;
-    if(Array.isArray(this.contextRecords)){
+    if (Array.isArray(this.contextRecords)) {
       this.contextRecords.forEach(record => fn(record));
       _records = records.map(record => fn(record));
-    }else {
+    } else {
       _records = fn(this.contextRecords);
     }
     return _records;
@@ -235,12 +235,12 @@ class HookHelper {
    */
   async forEachRecords(fn) {
     const _recordHandle = async record => await fn(record);
-    if(Array.isArray(this.contextRecords)){
+    if (Array.isArray(this.contextRecords)) {
       for (let i = 0; i < this.contextRecords.length; i++) {
         const record = this.contextRecords[i];
         await _recordHandle(record);
       }
-    }else {
+    } else {
       await fn(this.contextRecords);
     }
   }
@@ -249,7 +249,7 @@ class HookHelper {
    * Replace records for context
    * @return {HookHelper}
    */
-  replaceRecordsForContext(){
+  replaceRecordsForContext() {
     // Place the modified records back in the context.
     replaceItems(this.context, this.contextRecords);
     return this;
