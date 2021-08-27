@@ -22,7 +22,7 @@ class Service {
     this.dispatch = store.dispatch;
     this.commit = store.commit;
     this.config = store.getters.getConfig;
-    const {auth} = store.state;
+    const { auth } = store.state;
     this.user = auth.user;
     if (isDebug) debug('Created.OK');
   }
@@ -34,7 +34,13 @@ class Service {
    * @return {Array.<*>}
    */
   static serviceFields(serviceName = '', isId = false) {
-    const serviceFakeData = fakeData[serviceName][0];
+    let serviceFakeData = {};
+    //-------------------------------------- 
+    if (serviceName === 'opcuaTags') {
+      fakeData[serviceName].forEach(item => Object.assign(serviceFakeData, item));
+    } else {
+      serviceFakeData = fakeData[serviceName][0];
+    }
     const idField = 'id' in serviceFakeData ? 'id' : '_id';
     const fields = Object.keys(serviceFakeData).filter(key => isId ? true : key !== idField);
     if (isLog) debug('serviceFields.fields:', fields);
@@ -99,8 +105,8 @@ class Service {
    */
   getAuthUserId() {
     const user = this.getAuthUser();
-    const idField = user? this.getServiceIdField('users') : '';
-    return idField? user[idField] : '';
+    const idField = user ? this.getServiceIdField('users') : '';
+    return idField ? user[idField] : '';
   }
 
   /**
@@ -118,10 +124,10 @@ class Service {
    * @return {Promise.<void>}
    */
   async getUserForUserId(userId) {
-    if(!this.getFromStore('users', userId)){
+    if (!this.getFromStore('users', userId)) {
       const user = await this.get('users', userId);
       await this.get('user-profiles', user.profileId);
-      if(!this.getFromStore('roles', user.roleId)){
+      if (!this.getFromStore('roles', user.roleId)) {
         await this.get('roles', user.roleId);
       }
     }
@@ -138,7 +144,7 @@ class Service {
     if (user) {
       // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
       const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams');
-      paths.forEach(path => this.findAll(path, {query: {}}));
+      paths.forEach(path => this.findAll(path, { query: {} }));
       // Find all chat messages for admin
       await this.findChatMessagesForAdmin(user);
       this.initStateChatCheckAt();
@@ -154,15 +160,19 @@ class Service {
     const idField = this.getServiceIdField('users');
     const userId = user[idField];
     // Find chat messages
-    await this.findAll('user-teams', {query: {}});
+    await this.findAll('user-teams', { query: {} });
     const teamIdsForUser = this.getters.getTeamIdsForUser(userId);
     // getTeamIdsForUser
-    await this.findAll('chat-messages', {query: {$or: [
-      {ownerId: userId},
-      {userId: userId},
-      {roleId: user.roleId},
-      { teamId: { $in: teamIdsForUser}}
-    ]}});
+    await this.findAll('chat-messages', {
+      query: {
+        $or: [
+          { ownerId: userId },
+          { userId: userId },
+          { roleId: user.roleId },
+          { teamId: { $in: teamIdsForUser } }
+        ]
+      }
+    });
   }
 
   /**
@@ -175,7 +185,7 @@ class Service {
     if (user) {
       // getRole
       await this.get('roles', user.roleId);
-      await this.find('roles', {query: {alias: 'isAdministrator'}});
+      await this.find('roles', { query: { alias: 'isAdministrator' } });
       // getUserProfiles
       await this.get('user-profiles', user.profileId);
       // getTeams
@@ -184,15 +194,15 @@ class Service {
       const userId = user[idFieldUser];
 
       // Find teams for user
-      let teamIdsForUser = await this.findAll('user-teams', {query: {userId: userId, $sort: {teamId: 1}}});
+      let teamIdsForUser = await this.findAll('user-teams', { query: { userId: userId, $sort: { teamId: 1 } } });
       teamIdsForUser = teamIdsForUser.map(row => row.teamId.toString());
-      if(teamIdsForUser.length){
-        await this.findAll('teams', {query: {[idFieldTeam]: {$in: teamIdsForUser}, $sort: {name: 1}}});
+      if (teamIdsForUser.length) {
+        await this.findAll('teams', { query: { [idFieldTeam]: { $in: teamIdsForUser }, $sort: { name: 1 } } });
       }
       // Find log messages
-      let logMessages = await this.findAll('log-messages', {query: {userId: userId}});
+      let logMessages = await this.findAll('log-messages', { query: { userId: userId } });
       logMessages = logMessages.filter(msg => msg.ownerId !== msg.userId);
-      if(logMessages.length){
+      if (logMessages.length) {
         let ownerIds = logMessages.map(msg => msg.ownerId);
         // Get users for log-messages ownerIds
         for (let i = 0; i < ownerIds.length; i++) {
@@ -203,9 +213,9 @@ class Service {
       // Find chat messages for user
       await this.findChatMessagesForUser(user);
       // Find all opcua tags
-      await this.findAll('opcua-tags', {query: {}});
+      await this.findAll('opcua-tags', { query: {} });
       // Find all opcua values
-      await this.findAll('opcua-values', {query: {}});
+      await this.findAll('opcua-values', { query: {} });
       // Init state chat checkAt
       this.initStateChatCheckAt();
     }
@@ -221,21 +231,25 @@ class Service {
     const authUserId = user[idField];
     // Find chat messages
     const teamIdsForUser = this.getters.getTeamIdsForUser(authUserId);
-    const chatMessages = await this.findAll('chat-messages', {query: {$or: [
-      {ownerId: authUserId},
-      {userId: authUserId},
-      {roleId: user.roleId},
-      { teamId: { $in: teamIdsForUser}}
-    ]}});
+    const chatMessages = await this.findAll('chat-messages', {
+      query: {
+        $or: [
+          { ownerId: authUserId },
+          { userId: authUserId },
+          { roleId: user.roleId },
+          { teamId: { $in: teamIdsForUser } }
+        ]
+      }
+    });
     // Get users for chatMessages
     for (let i = 0; i < chatMessages.length; i++) {
       const msg = chatMessages[i];
       const msgOwnerId = msg['ownerId'];
-      const msgUserId = msg['user']?  msg['userId'] : null;
-      if(msgOwnerId !== authUserId && !this.getFromStore('users', msgOwnerId)){
+      const msgUserId = msg['user'] ? msg['userId'] : null;
+      if (msgOwnerId !== authUserId && !this.getFromStore('users', msgOwnerId)) {
         await this.getUserForUserId(msgOwnerId);
       }
-      if(msgUserId && msgUserId !== authUserId && !this.getFromStore('users', msgUserId)){
+      if (msgUserId && msgUserId !== authUserId && !this.getFromStore('users', msgUserId)) {
         await this.getUserForUserId(msgUserId);
       }
     }
@@ -251,21 +265,21 @@ class Service {
     const authUser = this.getAuthUser();
     const authUserId = authUser[idUserField];
     // Find chat messages
-    if(!this.getFromStore('roles', roleId)){
+    if (!this.getFromStore('roles', roleId)) {
       await this.get('roles', roleId);
 
-      let chatMessages = this.findInStore('chat-messages', {query: {roleId: roleId}});
-      if(!chatMessages.length){
-        chatMessages = await this.find('chat-messages', {query: {roleId: roleId}});
+      let chatMessages = this.findInStore('chat-messages', { query: { roleId: roleId } });
+      if (!chatMessages.length) {
+        chatMessages = await this.find('chat-messages', { query: { roleId: roleId } });
         // Get users for chatMessages
         for (let i = 0; i < chatMessages.length; i++) {
           const msg = chatMessages[i];
           const msgOwnerId = msg['ownerId'];
-          const msgUserId = msg['user']?  msg['userId'] : null;
-          if(msgOwnerId !== authUserId && !this.getFromStore('users', msgOwnerId)){
+          const msgUserId = msg['user'] ? msg['userId'] : null;
+          if (msgOwnerId !== authUserId && !this.getFromStore('users', msgOwnerId)) {
             await this.getUserForUserId(msgOwnerId);
           }
-          if(msgUserId && msgUserId !== authUserId && !this.getFromStore('users', msgUserId)){
+          if (msgUserId && msgUserId !== authUserId && !this.getFromStore('users', msgUserId)) {
             await this.getUserForUserId(msgUserId);
           }
         }
@@ -283,21 +297,21 @@ class Service {
     const authUser = this.getAuthUser();
     const authUserId = authUser[idUserField];
     // Find chat messages
-    if(!this.getFromStore('teams', teamId)){
+    if (!this.getFromStore('teams', teamId)) {
       await this.get('teams', teamId);
 
-      let chatMessages = this.findInStore('chat-messages', {query: {teamId: teamId}});
-      if(!chatMessages.length){
-        chatMessages = await this.find('chat-messages', {query: {teamId: teamId}});
+      let chatMessages = this.findInStore('chat-messages', { query: { teamId: teamId } });
+      if (!chatMessages.length) {
+        chatMessages = await this.find('chat-messages', { query: { teamId: teamId } });
         // Get users for chatMessages
         for (let i = 0; i < chatMessages.length; i++) {
           const msg = chatMessages[i];
           const msgOwnerId = msg['ownerId'];
-          const msgUserId = msg['user']?  msg['userId'] : null;
-          if(msgOwnerId !== authUserId && !this.getFromStore('users', msgOwnerId)){
+          const msgUserId = msg['user'] ? msg['userId'] : null;
+          if (msgOwnerId !== authUserId && !this.getFromStore('users', msgOwnerId)) {
             await this.getUserForUserId(msgOwnerId);
           }
-          if(msgUserId && msgUserId !== authUserId && !this.getFromStore('users', msgUserId)){
+          if (msgUserId && msgUserId !== authUserId && !this.getFromStore('users', msgUserId)) {
             await this.getUserForUserId(msgUserId);
           }
         }
@@ -308,11 +322,11 @@ class Service {
   /**
    * Init state chat checkAt
    */
-  initStateChatCheckAt(){
+  initStateChatCheckAt() {
     let idField = '_id';
 
     const authUser = this.getAuthUser();
-    if(!authUser) return;
+    if (!authUser) return;
 
     // Get chat users
     const users = this.getChatUsers();
@@ -340,12 +354,12 @@ class Service {
   /**
    * Get new chat messages
    */
-  getNewChatMessages(){
+  getNewChatMessages() {
     let idField = '_id', count = 0, dtCheckAt = '', messages = [];
     let msgInfo = {};
 
     const authUser = this.getAuthUser();
-    if(!authUser) return count;
+    if (!authUser) return count;
 
     // Get chat users
     const users = this.getChatUsers();
@@ -353,10 +367,10 @@ class Service {
       idField = this.state.users.idField;
       const userId = user[idField];
       messages = this.getChatMessages().filter(msg => this.isUserChatMsg(userId, msg));
-      if(messages.length){
+      if (messages.length) {
         dtCheckAt = this.getChatDTCheckAt('user', userId);
         msgInfo = this.getChatMsgInfo(messages, dtCheckAt);
-        if(msgInfo.countMsg){
+        if (msgInfo.countMsg) {
           count += msgInfo.countMsg;
         }
       }
@@ -367,10 +381,10 @@ class Service {
       idField = this.state.roles.idField;
       const roleId = role[idField];
       messages = this.getChatMessages().filter(msg => this.isRoleChatMsg(roleId, msg));
-      if(messages.length){
+      if (messages.length) {
         dtCheckAt = this.getChatDTCheckAt('role', roleId);
         msgInfo = this.getChatMsgInfo(messages, dtCheckAt);
-        if(msgInfo.countMsg){
+        if (msgInfo.countMsg) {
           count += msgInfo.countMsg;
         }
       }
@@ -381,10 +395,10 @@ class Service {
       const idField = this.state.teams.idField;
       const teamId = team[idField];
       messages = this.getChatMessages().filter(msg => this.isTeamChatMsg(teamId, msg));
-      if(messages.length){
+      if (messages.length) {
         dtCheckAt = this.getChatDTCheckAt('team', teamId);
         msgInfo = this.getChatMsgInfo(messages, dtCheckAt);
-        if(msgInfo.countMsg){
+        if (msgInfo.countMsg) {
           count += msgInfo.countMsg;
         }
       }
@@ -396,8 +410,8 @@ class Service {
    * Get chat users
    * @return {Array}
    */
-  getChatUsers(){
-    let users = this.findInStore('users', {query: {$sort: {fullName: 1}}});
+  getChatUsers() {
+    let users = this.findInStore('users', { query: { $sort: { fullName: 1 } } });
     users = users.filter(user => this.isChatFilterUser(user));
     return users;
   }
@@ -406,8 +420,8 @@ class Service {
    * Get chat roles
    * @return {Array}
    */
-  getChatRoles(){
-    let roles = this.findInStore('roles', {query: {$sort: {name: 1}}});
+  getChatRoles() {
+    let roles = this.findInStore('roles', { query: { $sort: { name: 1 } } });
     roles = roles.filter(role => this.isChatFilterRole(role));
     return roles;
   }
@@ -416,8 +430,8 @@ class Service {
    * Get chat teams
    * @return {Array}
    */
-  getChatTeams(){
-    let teams = this.findInStore('teams', {query: {$sort: {name: 1}}});
+  getChatTeams() {
+    let teams = this.findInStore('teams', { query: { $sort: { name: 1 } } });
     teams = teams.filter(team => this.isChatFilterTeam(team));
     return teams;
   }
@@ -426,8 +440,8 @@ class Service {
    * Get chat messages
    * @return {Array}
    */
-  getChatMessages(){
-    let messages = this.findInStore('chat-messages', {query: {$sort: {createdAt: 1}}});
+  getChatMessages() {
+    let messages = this.findInStore('chat-messages', { query: { $sort: { createdAt: 1 } } });
     messages = messages.filter(msg => this.isChatFilterMsg(msg));
     return messages;
   }
@@ -443,9 +457,9 @@ class Service {
     const idField = this.state.users.idField;
     const authUser = this.getAuthUser();
     const authUserId = authUser[idField];
-    const msgUserId = msg.user? msg.userId : null;
+    const msgUserId = msg.user ? msg.userId : null;
     // I wrote to the selected user || The selected user wrote to me
-    if(msgUserId){
+    if (msgUserId) {
       result = ((userId === msgUserId) && (authUserId === msg.ownerId)) ||
         ((userId === msg.ownerId) && (authUserId === msgUserId));
     }
@@ -463,9 +477,9 @@ class Service {
     const idField = this.state.users.idField;
     const authUser = this.getAuthUser();
     const authUserId = authUser[idField];
-    const msgTeamId = msg.team? msg.teamId : null;
+    const msgTeamId = msg.team ? msg.teamId : null;
     // I wrote to the selected team || I am a member of the selected team
-    if(teamId === msgTeamId){
+    if (teamId === msgTeamId) {
       result = this.getters.isMyTeam(authUserId, teamId) || (authUserId === msg.ownerId);
     }
     return result;
@@ -482,9 +496,9 @@ class Service {
     const idField = this.state.users.idField;
     const authUser = this.getAuthUser();
     const authUserId = authUser[idField];
-    const msgRoleId = msg.role? msg.roleId : null;
+    const msgRoleId = msg.role ? msg.roleId : null;
     // I wrote to the selected role || This is my role
-    if(roleId === msgRoleId){
+    if (roleId === msgRoleId) {
       result = (authUser.roleId === roleId) || (authUserId === msg.ownerId);
     }
     return result;
@@ -498,7 +512,7 @@ class Service {
   isChatFilterRole(role) {
     const idField = this.state.roles.idField;
     const authUser = this.getAuthUser();
-    const isRole = (authUser.roleAlias === 'isAdministrator')? true : ( role[idField] === authUser.roleId);
+    const isRole = (authUser.roleAlias === 'isAdministrator') ? true : (role[idField] === authUser.roleId);
     return (role.alias === 'isAdministrator') || isRole;
   }
 
@@ -511,7 +525,7 @@ class Service {
     const idTeamField = this.state.teams.idField;
     const idUserField = this.state.users.idField;
     const authUser = this.getAuthUser();
-    const isTeam = (authUser.roleAlias === 'isAdministrator')? true : this.getters.isMyTeam(authUser[idUserField], team[idTeamField]);
+    const isTeam = (authUser.roleAlias === 'isAdministrator') ? true : this.getters.isMyTeam(authUser[idUserField], team[idTeamField]);
     return isTeam;
   }
 
@@ -556,7 +570,7 @@ class Service {
    * @param commitCheckAt {Boolean}
    * @return {String}
    */
-  getChatDTCheckAt(name, id, commitCheckAt = false){
+  getChatDTCheckAt(name, id, commitCheckAt = false) {
     let _item, items = [], isStateChatCheckAt = false;
     let dtCheckAt = moment.utc(0).format();
 
@@ -567,19 +581,19 @@ class Service {
     }
 
     // Get dtCheckAt from stateChatCheckAt
-    if(items.length){
+    if (items.length) {
       isStateChatCheckAt = items.filter(item => (item.name === name) && (item.id === id)).length > 0;
     }
-    if(isStateChatCheckAt){
+    if (isStateChatCheckAt) {
       _item = items.filter(item => (item.name === name) && (item.id === id))[0];
-      if(commitCheckAt){
+      if (commitCheckAt) {
         _item.checkAt = moment.utc().format();
         // Set state chat checkat
         this.commit('SET_CHAT_CHECKAT', items);
       }
       dtCheckAt = _item.checkAt;
     } else {
-      _item = {name, id, checkAt: dtCheckAt};
+      _item = { name, id, checkAt: dtCheckAt };
       items.push(_item);
       // Set state chat checkat
       this.commit('SET_CHAT_CHECKAT', items);
@@ -605,7 +619,7 @@ class Service {
     msgInfo.countMsg = _messages.length ? _messages.length : 0;
     msgInfo.lastMsg = _messages.length ? _messages[0].msg : '';
 
-    return  msgInfo;
+    return msgInfo;
   }
 
   //==============================================================================================//
@@ -630,7 +644,7 @@ class Service {
    * @return {Promise.<*>}
    */
   async findCount(path, params = {}) {
-    const newParams = loMerge(params, {query: {$limit: 0}});
+    const newParams = loMerge(params, { query: { $limit: 0 } });
     let results = await this.dispatch(`${path}/find`, newParams);
     results = results.total;
     if (isLog) debug(`findCount.path: ${path}`, `findCount.params: ${JSON.stringify(newParams)}`, 'findCount.results:', results);
@@ -644,7 +658,7 @@ class Service {
    * @return {Promise.<*>}
    */
   async findAll(path, params = {}) {
-    const newParams = loMerge(params, {query: {$limit: null}});
+    const newParams = loMerge(params, { query: { $limit: null } });
     let results = await this.dispatch(`${path}/find`, newParams);
     if (isLog) debug(`findAll.path: ${path}`, `findAll.params: ${JSON.stringify(newParams)}`, 'findAll.results:', results);
     results = results.data || results;
@@ -671,7 +685,7 @@ class Service {
    * @return {Array}
    */
   findCountInStore(path, params = {}) {
-    const newParams = loMerge(params, {query: {$limit: 0}});
+    const newParams = loMerge(params, { query: { $limit: 0 } });
     let results = this.getters[`${path}/find`](newParams);
     results = results.total;
     if (isLog) debug(`findCountInStore.path: ${path}`, `findCountInStore.params: ${JSON.stringify(newParams)}`, 'findCountInStore.results:', results);
@@ -685,7 +699,7 @@ class Service {
    * @return {Array}
    */
   findAllInStore(path, params = {}) {
-    const newParams = loMerge(params, {query: {$limit: null}});
+    const newParams = loMerge(params, { query: { $limit: null } });
     let results = this.getters[`${path}/find`](newParams);
     results = results.data || results;
     if (isLog) debug(`findAllInStore.path: ${path}`, `findAllInStore.params: ${JSON.stringify(newParams)}`, 'findAllInStore.results:', results);

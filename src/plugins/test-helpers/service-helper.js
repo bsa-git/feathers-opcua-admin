@@ -27,7 +27,13 @@ const getFakeData = function(){
  * @return {Array.<*>}
  */
 const serviceFields = function(serviceName = '', isId = false) {
-  const serviceFakeData = fakeData[serviceName][0];
+  let serviceFakeData = {};
+  //-------------------------------------- 
+  if(serviceName === 'opcuaTags'){
+    fakeData[serviceName].forEach(item => Object.assign(serviceFakeData, item));
+  } else {
+    serviceFakeData = fakeData[serviceName][0];
+  }
   const idField = 'id' in serviceFakeData ? 'id' : '_id';
   const fields = Object.keys(serviceFakeData).filter(key => isId ? true : key !== idField);
   if (isLog) debug('serviceFields.fields:', fields);

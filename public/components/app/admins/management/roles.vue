@@ -176,7 +176,7 @@
 
   const debug = require('debug')('app:comp.admins-management-roles');
   const isLog = false;
-  const isDebug = true;
+  const isDebug = false;
 
   export default {
     $_veeValidate: {

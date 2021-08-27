@@ -1,6 +1,7 @@
 const errors = require('@feathersjs/errors');
 const {inspector } = require('../lib');
 const AuthServer = require('./auth-server.class');
+const { serviceFields } = require('../test-helpers');
 
 const debug = require('debug')('app:plugins.auth-server.class');
 const isLog = false;
@@ -168,16 +169,7 @@ class Channel {
     return AuthServer.getIdField(items);
   }
 
-  /**
-   * Get service fields
-   * @param serviceName
-   * @param isId
-   * @return {Array.<*>}
-   */
-  static serviceFields(serviceName = '', isId = false) {
-    return AuthServer.serviceFields(serviceName, isId);
-  }
-
+  
   /**
    * Get service paths
    * @return {Array}
@@ -205,7 +197,7 @@ class Channel {
         teamsForUser = teamsForUser.data;
         teamsForUser = teamsForUser.map(team => {
           const id = team[idField].toString();
-          team = loPick(team, AuthServer.serviceFields('teams'));
+          team = loPick(team, serviceFields('teams'));
           team.id = id;
           return team;
         });
@@ -214,10 +206,6 @@ class Channel {
     if(isLog)debug('getTeamsForUser:', teamsForUser? teamsForUser : 'Not teamsForUser');
     return  teamsForUser;
   }
-
-  // async publishEvents(){
-  //   const userTeams = this.app.service('user-teams');
-  // }
 }
 
 module.exports = Channel;

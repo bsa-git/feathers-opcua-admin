@@ -4,7 +4,7 @@ import feathersClient from '~/plugins/auth/feathers-client';
 import normalize from '~/services/hooks/normalize';
 import log from '~/services/hooks/log';
 
-const debug = require('debug')('app:service.opcua-tags');
+const debug = require('debug')('app:service.opcua-values');
 
 // const isDebug = true;
 const isLog = false;

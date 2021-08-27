@@ -1,5 +1,6 @@
 const loPick = require('lodash/pick');
 const loCamelCase = require('lodash/camelCase');
+// const loForEach = require('lodash/forEach');
 const { replaceItems } = require('feathers-hooks-common');
 import Service from '~/plugins/service-helpers/service-client.class';
 import HookHelper from '~/plugins/service-helpers/hook-helper.class';
@@ -18,6 +19,7 @@ export default function (options = {}) {
     const hh = new HookHelper(context);
     // Show debug info
     hh.showDebugInfo('', isLog);
+    hh.showDebugRecords('', true);
 
     // let records = hh.contextRecords;
     let _records;
@@ -31,21 +33,19 @@ export default function (options = {}) {
      */
     const pickItem = (record) => {
       if (!record) return {};
-      return Object.assign({}, loPick(record, Service.serviceFields(fakeDataKey)));
+      // return Object.assign({}, loPick(record, Service.serviceFields(fakeDataKey)));
+      record = Object.assign({}, loPick(record, Service.serviceFields(fakeDataKey)));
     };
 
-    if (isLog) debug('Before normalize-query records:', hh.contextRecords);
-
     if (fakeData[fakeDataKey]) {
-      _records = hh.getPickRecords(pickItem);
-    } else {
-      Object.assign(_records, hh.contextRecords);
+      // hh.pickRecords(pickItem);
     }
 
-    if (isLog) debug('After normalize-query records:', _records);
+
+    hh.showDebugRecords('', true);
 
     // Place the modified records back in the context.
-    replaceItems(context, _records);
+    replaceItems(context, hh.contextRecords);
     // Best practice: hooks should always return the context.
     return context;
   };

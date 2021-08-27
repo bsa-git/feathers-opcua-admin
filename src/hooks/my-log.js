@@ -16,6 +16,7 @@ module.exports = function (isTest = false) {
     const hookHelper = new HookHelper(context);
     // Show debug info
     hookHelper.showDebugInfo('', isLog);
+    // hookHelper.showDebugInfo('opcua-values', true);
     hookHelper.showDebugError();
 
     // hookHelper.showDebugInfo('authentication.remove.after', true);

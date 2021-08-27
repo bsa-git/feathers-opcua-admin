@@ -1,6 +1,6 @@
-// const errors = require('@feathersjs/errors');
-const {inspector, isString, isObject, isNumber, isNull, /*getCapitalizeStr*/} = require('../lib');
+const { inspector, isString, isObject, isNumber, isNull } = require('../lib');
 const HookHelper = require('./hook-helper.class');
+const loToNumber = require('lodash/toNumber');
 
 const isLog = false;
 
@@ -17,9 +17,25 @@ const baseNormalize = async (record) => {
 };
 
 /**
+ * Normalize OpcuaValues
+ * @async
+ * @param {Object} record 
+ */
+const normalizeOpcuaValues = async (record) => {
+  if (!record) return;
+  if (record.values) {
+    record.values.forEach(item => {
+      if (!isNumber(item.value)) {
+        item.value = loToNumber(item.value)
+      }
+    })
+  }
+};
+
+/**
  * Before normalize user auth
- * @param record
- * @return {Promise.<void>}
+ * @async
+ * @param {Object} record
  */
 const beforeNormalizeUserAuth = async (record) => {
   let date, _record = {};
@@ -80,8 +96,8 @@ const beforeNormalizeUserAuth = async (record) => {
 
 /**
  * After normalize user auth
- * @param record
- * @return {Promise.<void>}
+ * @async
+ * @param {Object} record
  */
 const afterNormalizeUserAuth = async (record) => {
   let _record = {};
@@ -114,8 +130,9 @@ const afterNormalizeUserAuth = async (record) => {
 
 /**
  * Context normalize
- * @param context
- * @return {Promise<HookHelper>}
+ * @async
+ * @param {Object} context
+ * @return {Array|Object}
  */
 module.exports = async function contextNormalize(context) {
   // let normalize = null;
@@ -125,17 +142,22 @@ module.exports = async function contextNormalize(context) {
   if (hh.contextType === 'before' || hh.contextType === 'after') {
     await hh.forEachRecords(baseNormalize);
   }
-  // Run normalize user auth
+  // Run normalize
   switch (`${hh.contextPath}.${hh.contextType}`) {
-  case 'users.before':
-    await hh.forEachRecords(beforeNormalizeUserAuth);
-    break;
-  case 'users.after':
-    await hh.forEachRecords(afterNormalizeUserAuth);
-    break;
-  default:
-    break;
+    case 'users.before':
+      await hh.forEachRecords(beforeNormalizeUserAuth);
+      break;
+    case 'opcua-values.before':
+      await hh.forEachRecords(normalizeOpcuaValues);
+      break;
+    case 'users.after':
+      await hh.forEachRecords(afterNormalizeUserAuth);
+      break;
+    case 'opcua-values.after':
+      await hh.forEachRecords(normalizeOpcuaValues);
+      break;
+    default:
+      break;
   }
-  // return Promise.resolve(hh);
   return hh.contextRecords;
 };

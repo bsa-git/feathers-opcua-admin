@@ -1,5 +1,5 @@
-const {getItems, replaceItems} = require('feathers-hooks-common');
-const {inspector, HookHelper, contextNormalize} = require('../plugins');
+const { replaceItems } = require('feathers-hooks-common');
+const { inspector, HookHelper, contextNormalize } = require('../plugins');
 
 const isLog = false;
 
@@ -9,15 +9,15 @@ module.exports = function (options = {}) {
   return async (context) => {
     // Get the record(s) from context.data (before), context.result.data or context.result (after).
     // getItems always returns an array to simplify your processing.
-    let records = getItems(context);
+    // let records = getItems(context);
 
     // Create HookHelper object
     const hh = new HookHelper(context);
     // Show debug info
     hh.showDebugInfo('', isLog);
 
-    records = await contextNormalize(context);
-    if(isLog) inspector('hooks.normalize::records:', records);
+    const records = await contextNormalize(context);
+    if (isLog) inspector('hooks.normalize::records:', records);
 
     // Place the modified records back in the context.
     replaceItems(context, records);
@@ -26,9 +26,3 @@ module.exports = function (options = {}) {
     return context;
   };
 };
-
-// Throw to reject the service call, or on an unrecoverable error.
-// eslint-disable-next-line no-unused-vars
-function error(msg) {
-  throw new Error(msg);
-}

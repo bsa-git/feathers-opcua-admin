@@ -82,8 +82,20 @@ class HookHelper {
     if (this.contextError) return;
     if (mask) {
       const maskItems = mask.split('.');
-      if (show && (maskItems[0] === this.contextPath) && (maskItems[1] === this.contextMethod) && (maskItems[2] === this.contextType)) {
-        debug(`showDebugInfo::${mask}:`, this.hookContext);
+      if (maskItems.length === 1) {
+        if (show && (maskItems[0] === this.contextPath)) {
+          debug(`showDebugInfo::${mask}:`, this.hookContext);
+        }
+      }
+      if (maskItems.length === 2) {
+        if (show && (maskItems[0] === this.contextPath) && (maskItems[1] === this.contextMethod)) {
+          debug(`showDebugInfo::${mask}:`, this.hookContext);
+        }
+      }
+      if (maskItems.length === 3) {
+        if (show && (maskItems[0] === this.contextPath) && (maskItems[1] === this.contextMethod) && (maskItems[2] === this.contextType)) {
+          debug(`showDebugInfo::${mask}:`, this.hookContext);
+        }
       }
     } else {
       if (show) {
@@ -102,8 +114,20 @@ class HookHelper {
     if (this.contextError) return;
     if (mask) {
       const maskItems = mask.split('.');
-      if (show && (maskItems[0] === this.contextPath) && (maskItems[1] === this.contextMethod) && (maskItems[2] === this.contextType)) {
-        debug(`showDebugRecords::${mask}:`, this.contextRecords);
+      if (maskItems.length === 1) {
+        if (show && (maskItems[0] === this.contextPath)) {
+          debug(`showDebugRecords::${mask}:`, this.contextRecords);
+        }
+      }
+      if (maskItems.length === 2) {
+        if (show && (maskItems[0] === this.contextPath) && (maskItems[1] === this.contextMethod)) {
+          debug(`showDebugRecords::${mask}:`, this.contextRecords);
+        }
+      }
+      if (maskItems.length === 3) {
+        if (show && (maskItems[0] === this.contextPath) && (maskItems[1] === this.contextMethod) && (maskItems[2] === this.contextType)) {
+          debug(`showDebugRecords::${mask}:`, this.contextRecords);
+        }
       }
     } else {
       if (show) debug('showDebugRecords:', this.contextRecords);
@@ -217,21 +241,36 @@ class HookHelper {
    * @param fn
    * @return {Array||Object}
    */
-  getPickRecords(fn) {
+   getPickRecords(fn) {
     let _records;
     if (Array.isArray(this.contextRecords)) {
-      this.contextRecords.forEach(record => fn(record));
-      _records = records.map(record => fn(record));
+      _records = this.contextRecords.map(record => fn(Object.assign({}, record)));
     } else {
-      _records = fn(this.contextRecords);
+      _records = fn(Object.assign({}, this.contextRecords));
     }
     return _records;
+  }
+  
+  /**
+   * Pick records
+   * @param fn
+   */
+  pickRecords(fn) {
+    const _recordHandle = record => fn(record);
+    if (Array.isArray(this.contextRecords)) {
+      for (let i = 0; i < this.contextRecords.length; i++) {
+        const record = this.contextRecords[i];
+        _recordHandle(record);
+      }
+    } else {
+      fn(this.contextRecords);
+    }
   }
 
   /**
    * For each records
    * @param fn {Function}
-   * @return {Promise.<void>}
+   * @return {Promise}
    */
   async forEachRecords(fn) {
     const _recordHandle = async record => await fn(record);

@@ -5,7 +5,7 @@ const {
   inspector, 
   appRoot,
   checkServicesRegistered, 
-  saveFakesToServices 
+  saveFakesToServices
 } = require('../../src/plugins');
 
 const { readJsonFileSync } = require('@feathers-plus/test-utils');
@@ -27,7 +27,7 @@ describe('<<=== Opcua-Tags Service Test (opcua-tags.test.js) ===>>', () => {
     const service = app.service('opcua-tags');
     const data = await service.find({});
     if(isLog) inspector('Save fake data to \'opcua-tags\' service.data[0]', data.data[0]);
-    assert.ok(errPath === '' && data, `Not save fakes to services - '${errPath}'`);
+    assert.ok(errPath === '' && data.data.length, `Not save fakes to services - '${errPath}'`);
   });
 
   it('#3: Error on unique `browseName`', async () => {
