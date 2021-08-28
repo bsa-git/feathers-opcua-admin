@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { inspector, isString, isObject, isNumber, isNull } = require('../lib');
 const HookHelper = require('./hook-helper.class');
 const loToNumber = require('lodash/toNumber');
@@ -16,21 +17,6 @@ const baseNormalize = async (record) => {
   if (isLog) inspector('plugins.contextNormalize::record:', record);
 };
 
-/**
- * Normalize OpcuaValues
- * @async
- * @param {Object} record 
- */
-const normalizeOpcuaValues = async (record) => {
-  if (!record) return;
-  if (record.values) {
-    record.values.forEach(item => {
-      if (!isNumber(item.value)) {
-        item.value = loToNumber(item.value)
-      }
-    })
-  }
-};
 
 /**
  * Before normalize user auth
@@ -144,20 +130,14 @@ module.exports = async function contextNormalize(context) {
   }
   // Run normalize
   switch (`${hh.contextPath}.${hh.contextType}`) {
-    case 'users.before':
-      await hh.forEachRecords(beforeNormalizeUserAuth);
-      break;
-    case 'opcua-values.before':
-      await hh.forEachRecords(normalizeOpcuaValues);
-      break;
-    case 'users.after':
-      await hh.forEachRecords(afterNormalizeUserAuth);
-      break;
-    case 'opcua-values.after':
-      await hh.forEachRecords(normalizeOpcuaValues);
-      break;
-    default:
-      break;
+  case 'users.before':
+    await hh.forEachRecords(beforeNormalizeUserAuth);
+    break;
+  case 'users.after':
+    await hh.forEachRecords(afterNormalizeUserAuth);
+    break;
+  default:
+    break;
   }
   return hh.contextRecords;
 };

@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 // !code: init // !end
 
 let moduleExports = merge({},
-  // !<DEFAULT> code: model
+  // !code: model
   {
     tagId: mongoose.Schema.Types.ObjectId,
     tagName: String,
@@ -16,7 +16,7 @@ let moduleExports = merge({},
       {
         tagId: mongoose.Schema.Types.ObjectId,
         key: String,
-        value: String
+        value: mongoose.Schema.Types.Mixed
       }
     ]
   },

@@ -1,12 +1,12 @@
 const errors = require('@feathersjs/errors');
-const { getCapitalizeStr } = require('../lib');
+const { inspector, getCapitalizeStr } = require('../lib');
 const { dbNullIdValue } = require('../db-helpers');
 const AuthServer = require('../auth/auth-server.class');
 const HookHelper = require('./hook-helper.class');
 const debug = require('debug')('app:plugins.servicesConstraint');
 
 const isDebug = false;
-// const isLog = false;
+const isLog = false;
 
 /**
  * Services constraint
@@ -134,6 +134,8 @@ module.exports = async function servicesConstraint(context) {
         const tagId = tag[idField].toString();
         record.tagId = tagId;
       }
+      if(isLog) inspector('"services-constraint"."opcua-values.create.before".record:', record);
+      // inspector('"services-constraint"."opcua-values.create.before".record:', record);
     };
     validate = async (record) => {
       if (record.tagId && record.tagId !== dbNullIdValue()) await hookHelper.validateRelationship('opcua-tags', record.tagId);
@@ -241,6 +243,8 @@ module.exports = async function servicesConstraint(context) {
     break;
   case 'opcua-values.create.after':
     tagId = hookHelper.contextResult.tagId;
+    if(isLog) inspector('"services-constraint"."opcua-values.create.after".contextResult:', hookHelper.contextResult);
+    // inspector('"services-constraint"."opcua-values.create.after".contextResult:', hookHelper.contextResult);
     await hookHelper.restrictMaxRows('opcua-values', maxOpcuaValuesRows, { tagId });
     break;
   case 'opcua-tags.remove.after':

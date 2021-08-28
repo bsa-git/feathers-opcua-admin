@@ -526,14 +526,14 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       // Get count items
       serviceName = 'opcua-values';
       opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-      if(isDebug) debug('opcuaValuesCount:', opcuaValuesCount);
+      if(isDebug) debug('BeforeAdding.opcuaValuesCount:', opcuaValuesCount);
       // Create items
       for (let index = 0; index < maxOpcuaValuesRows + 20; index++) {
         await createItem(app, serviceName, valueData);
       }
       // Get count items
       opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-      if(isDebug) debug('opcuaValuesCount:', opcuaValuesCount);
+      if(isDebug) debug('AfterAdding.opcuaValuesCount:', opcuaValuesCount);
 
       // Run constraints hook
       contextAfter.path = serviceName;
@@ -544,7 +544,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
 
       // Get count items
       opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-      if(isDebug) debug('opcuaValuesCount:', opcuaValuesCount);
+      if(isDebug) debug('AfterConstraintsHook.opcuaValuesCount:', opcuaValuesCount);
       
       assert.ok(opcuaValuesCount === maxOpcuaValuesRows, 'Restrict max rows when add a record to \'opcua-values\' service');
     });
