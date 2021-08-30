@@ -126,6 +126,37 @@
     ]
   },
   {
+    "title": "Real time data",
+    "group": "data",
+    "name": "data",
+    "alias": "data",
+    "icon": "mdi-chart-line",
+    "to": "/data",
+    "items": [
+      {
+        "title": "Cherkassy `AZOT`",
+        "group": "data",
+        "name": "data-ch-azot",
+        "alias": "ch_azot",
+        "to": "/data/ch-azot",
+        "children": [
+          {
+            "name": "data-ch-azot-m51",
+            "alias": "ch_azot_m51",
+            "title": "M5-1",
+            "to": "/data/ch-azot/m51"
+          },
+          {
+            "name": "data-ch-azot-m52",
+            "alias": "ch_azot_m52",
+            "title": "M5-2",
+            "to": "/data/ch-azot/m52"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "title": "Media",
     "group": "apps",
     "name": "media",

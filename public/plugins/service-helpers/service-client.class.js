@@ -212,12 +212,12 @@ class Service {
       }
       // Find chat messages for user
       await this.findChatMessagesForUser(user);
-      // Find all opcua tags
-      await this.findAll('opcua-tags', { query: {} });
-      // Find all opcua values
-      await this.findAll('opcua-values', { query: {} });
       // Init state chat checkAt
       this.initStateChatCheckAt();
+      // Find all opcua tags
+      this.findAll('opcua-tags', { query: {} });
+      // Find all opcua values
+      this.findAll('opcua-values', { query: {} });
     }
   }
 
