@@ -127,30 +127,30 @@
   },
   {
     "title": "Real time data",
-    "group": "data",
-    "name": "data",
-    "alias": "data",
+    "group": "rtdata",
+    "name": "rtdata",
+    "alias": "rtdata",
     "icon": "mdi-chart-line",
-    "to": "/data",
+    "to": "/rtdata",
     "items": [
       {
-        "title": "Cherkassy `AZOT`",
-        "group": "data",
-        "name": "data-ch-azot",
+        "title": "Cherkassy `Azot`",
+        "group": "rtdata",
+        "name": "rtdata-ch-azot",
         "alias": "ch_azot",
-        "to": "/data/ch-azot",
+        "to": "/rtdata/ch-azot",
         "children": [
           {
-            "name": "data-ch-azot-m51",
-            "alias": "ch_azot_m51",
+            "name": "rtdata-ch-azot-m51",
+            "alias": "ch_m51",
             "title": "M5-1",
-            "to": "/data/ch-azot/m51"
+            "to": "/rtdata/ch-azot/m51"
           },
           {
-            "name": "data-ch-azot-m52",
-            "alias": "ch_azot_m52",
+            "name": "rtdata-ch-azot-m52",
+            "alias": "ch_m52",
             "title": "M5-2",
-            "to": "/data/ch-azot/m52"
+            "to": "/rtdata/ch-azot/m52"
           }
         ]
       }

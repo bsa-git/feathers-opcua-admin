@@ -68,6 +68,10 @@
     "inbox": "Inbox",
     "media": "Media",
     "services": "Services",
+    "rtdata": "Real time data",
+    "ch_azot": "Cherkassy `Azot`",
+    "ch_m51": "M5-1",
+    "ch_m52": "M5-2",
     "admins": "Administration",
     "accounts": "Accounts",
     "management": "Management",
@@ -492,6 +496,18 @@
   "graphql_get": {
     "title": "GraphQL",
     "description": "Get data for GraphQL"
+  },
+  "rtdata": {
+    "title": "Real time data",
+    "description": "Real time data"
+  },
+  "ch_m51": {
+    "title": "Cherkassy `Azot` department M5-1",
+    "description": "Department М5-1 `Production of HNO3`"
+  },
+  "ch_m52": {
+    "title": "Cherkassy `Azot` department M5-2",
+    "description": "Department М5-2 `Production of HNO3`"
   },
   "authManagement": {
     "titleVerifySignUp": "Verification Sign up",
