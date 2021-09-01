@@ -115,6 +115,49 @@ let moduleExports = merge({},
             }
           }
         }
+      },
+      tabs: {
+        bsonType: "object",
+        additionalProperties: false,
+        properties: {
+          _id: {
+            bsonType: "objectId"
+          },
+          tab1: {
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string"
+                },
+                items: {
+                  type: "array",
+                  items: {
+                    type: "string"
+                  }
+                }
+              }
+            },
+            bsonType: "array"
+          },
+          tab2: {
+            items: {
+              type: "object",
+              properties: {
+                name: {
+                  type: "string"
+                },
+                items: {
+                  type: "array",
+                  items: {
+                    type: "string"
+                  }
+                }
+              }
+            },
+            bsonType: "array"
+          }
+        }
       }
     }
   },

@@ -100,6 +100,7 @@ const twoLevelsFields = {
     getter: 1,
     getterParams: 1,
     valueParams: 1,
+    tabs: 1,
   }
 };
 */

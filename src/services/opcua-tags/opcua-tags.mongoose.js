@@ -42,6 +42,24 @@ let moduleExports = merge({},
         low: Number,
         high: Number
       }
+    },
+    tabs: {
+      tab1: [
+        {
+          name: String,
+          items: [
+            String
+          ]
+        }
+      ],
+      tab2: [
+        {
+          name: String,
+          items: [
+            String
+          ]
+        }
+      ]
     }
   },
   // !end

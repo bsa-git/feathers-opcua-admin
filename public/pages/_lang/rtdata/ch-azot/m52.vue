@@ -157,6 +157,9 @@
           },
         ],
         options,
+        initOptions: {
+          renderer: ''
+        },
         barChart: null,
         barOptions,
       }

@@ -61,6 +61,9 @@ let moduleExports = merge({},
     },
     valueParams: {
       type: DataTypes.JSONB
+    },
+    tabs: {
+      type: DataTypes.JSONB
     }
   },
   // !end

@@ -95,6 +95,31 @@ let schema = {
           }
         }
       }
+    },
+    tabs: {
+      type: 'object',
+      properties: {
+        tab1: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              items: { type: 'array', items: { type: 'string' } }
+            }
+          }
+        },
+        tab2: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              items: { type: 'array', items: { type: 'string' } }
+            }
+          }
+        }
+      }
     }
     //-------------------------
     // !end
