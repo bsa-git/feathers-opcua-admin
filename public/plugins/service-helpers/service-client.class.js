@@ -626,12 +626,20 @@ class Service {
 
   /**
    * Find method, which is a proxy to the find action
-   * @param path
-   * @param params
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} params
+   * @return {Object[]}
    */
   async find(path, params = {}) {
-    let results = await this.dispatch(`${path}/find`, params);
+    let results;
+    //--------------------
+    if (params.query) {
+      results = await this.dispatch(`${path}/find`, params);
+    } else {
+      results = await this.dispatch(`${path}/find`, { query: params });
+    }
     results = results.data || results;
     if (isLog) debug(`find.path: ${path}`, `find.params: ${JSON.stringify(params)}`, 'find.results:', results);
     return results;
@@ -639,13 +647,22 @@ class Service {
 
   /**
    * Find count method, which is a proxy to the find action
-   * @param path
-   * @param params
-   * @return {Promise.<*>}
+   *  @async
+   * 
+   * @param {String} path
+   * @param {Object} params
+   * @return {Number}
    */
   async findCount(path, params = {}) {
-    const newParams = loMerge(params, { query: { $limit: 0 } });
-    let results = await this.dispatch(`${path}/find`, newParams);
+    let newParams, results;
+    //--------------------
+    if (params.query) {
+      newParams = loMerge({}, params, { query: { $limit: 0 } });
+    } else {
+      newParams = loMerge({}, params, { $limit: 0 });
+      newParams = { query: newParams };
+    }
+    results = await this.dispatch(`${path}/find`, newParams);
     results = results.total;
     if (isLog) debug(`findCount.path: ${path}`, `findCount.params: ${JSON.stringify(newParams)}`, 'findCount.results:', results);
     return results;
@@ -653,13 +670,22 @@ class Service {
 
   /**
    * Find all method, which is a proxy to the find action
-   * @param path
-   * @param params
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object} params
+   * @return {Object[]}
    */
   async findAll(path, params = {}) {
-    const newParams = loMerge(params, { query: { $limit: null } });
-    let results = await this.dispatch(`${path}/find`, newParams);
+    let newParams, results;
+    //--------------------
+    if (params.query) {
+      newParams = loMerge({}, params, { query: { $limit: null } });
+    } else {
+      newParams = loMerge({}, params, { $limit: null });
+      newParams = { query: newParams };
+    }
+    results = await this.dispatch(`${path}/find`, newParams);
     if (isLog) debug(`findAll.path: ${path}`, `findAll.params: ${JSON.stringify(newParams)}`, 'findAll.results:', results);
     results = results.data || results;
     return results;
@@ -667,12 +693,18 @@ class Service {
 
   /**
    * findInStore method, which is a proxy to the find getter
-   * @param path
-   * @param params
-   * @return {Array}
+   * @param {String} path
+   * @param {Object} params
+   * @return {Object[]}
    */
   findInStore(path, params = {}) {
-    let results = this.getters[`${path}/find`](params);
+    let results;
+    //--------------------
+    if (params.query) {
+      results = this.getters[`${path}/find`](params);
+    } else {
+      results = this.getters[`${path}/find`]({ query: params });
+    }
     results = results.data || results;
     if (isLog) debug(`findInStore.path: ${path}`, `findInStore.params: ${JSON.stringify(params)}`, 'findInStore.results:', results);
     return results;
@@ -680,13 +712,20 @@ class Service {
 
   /**
    * findCountInStore method, which is a proxy to the find getter
-   * @param path
-   * @param params
-   * @return {Array}
+   * @param {String} path
+   * @param {Object} params
+   * @return {Number}
    */
   findCountInStore(path, params = {}) {
-    const newParams = loMerge(params, { query: { $limit: 0 } });
-    let results = this.getters[`${path}/find`](newParams);
+    let newParams, results;
+    //--------------------
+    if (params.query) {
+      newParams = loMerge({}, params, { query: { $limit: 0 } });
+    } else {
+      newParams = loMerge({}, params, { $limit: 0 });
+      newParams = { query: newParams };
+    }
+    results = this.getters[`${path}/find`](newParams);
     results = results.total;
     if (isLog) debug(`findCountInStore.path: ${path}`, `findCountInStore.params: ${JSON.stringify(newParams)}`, 'findCountInStore.results:', results);
     return results;
@@ -694,13 +733,20 @@ class Service {
 
   /**
    * findAllInStore method, which is a proxy to the find getter
-   * @param path
-   * @param params
-   * @return {Array}
+   * @param {String} path
+   * @param {Object} params
+   * @return {Object[]}
    */
   findAllInStore(path, params = {}) {
-    const newParams = loMerge(params, { query: { $limit: null } });
-    let results = this.getters[`${path}/find`](newParams);
+    let newParams, results;
+    //--------------------
+    if (params.query) {
+      newParams = loMerge({}, params, { query: { $limit: null } });
+    } else {
+      newParams = loMerge({}, params, { $limit: null });
+      newParams = { query: newParams };
+    }
+    results = this.getters[`${path}/find`](newParams);
     results = results.data || results;
     if (isLog) debug(`findAllInStore.path: ${path}`, `findAllInStore.params: ${JSON.stringify(newParams)}`, 'findAllInStore.results:', results);
     return results;
@@ -708,10 +754,12 @@ class Service {
 
   /**
    * Get method, which is a proxy to the get action
-   * @param path
-   * @param id
-   * @param params
-   * @return {Promise.<*>}
+   * @async
+   * 
+   * @param {String} path
+   * @param {String} id
+   * @param {Object} params
+   * @return {Object}
    */
   async get(path, id, params = {}) {
     let results = await this.dispatch(`${path}/get`, id, params);
@@ -721,9 +769,9 @@ class Service {
 
   /**
    * getFromStore method, which is a proxy to the get getter
-   * @param path
-   * @param id
-   * @param params
+   * @param {String} path
+   * @param {String} id
+   * @param {Object} params
    * @return {Object}
    */
   getFromStore(path, id, params = {}) {
@@ -734,9 +782,11 @@ class Service {
 
   /**
    * Create method, which is a proxy to the create action
-   * @param path
-   * @param data {Object|Array}
-   * @param params
+   * @async
+   * 
+   * @param {String} path
+   * @param {Object|Object[]} data 
+   * @param {Object} params
    * @return {Object}
    */
   async create(path, data, params = {}) {
@@ -747,10 +797,12 @@ class Service {
 
   /**
    * Patch method, which is a proxy to the patch action
-   * @param path
-   * @param id
-   * @param data {Object}
-   * @param params
+   * @async
+   * 
+   * @param {String} path
+   * @param {String} id
+   * @param {Object} data 
+   * @param {Object} params
    * @return {Object}
    */
   async patch(path, id, data, params = {}) {
@@ -761,8 +813,10 @@ class Service {
 
   /**
    * Remove method, which is a proxy to the remove action
-   * @param path
-   * @param id {Number|String}
+   * @async
+   * 
+   * @param {String} path
+   * @param {String} id 
    * @return {Object}
    */
   async remove(path, id) {
