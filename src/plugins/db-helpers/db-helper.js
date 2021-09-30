@@ -87,7 +87,7 @@ const getIdField = function (items) {
  * @param {Object} query
  * @return {Number}
  */
- const getCountItems = async function (app, path = '', query = {}) {
+const getCountItems = async function (app, path = '', query = {}) {
   let newQuery, findResults;
   //--------------------
   const service = app.service(path);
