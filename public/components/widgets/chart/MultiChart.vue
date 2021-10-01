@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!--=== Page Header ===-->
-    <!-- <app-page-header
-      :page-title="description"
-    ></app-page-header> -->
-
     <!--=== Bootons ===-->
     <panels-top-bar
       btn1-icon="mdi-plus"
@@ -104,6 +99,9 @@
       PanelsTopBar,
       chart: ECharts
     },
+    props: {
+      items: Array
+    },
     data() {
       let options = qs.parse(location.search, {ignoreQueryPrefix: true});
       return {
@@ -113,48 +111,6 @@
         seconds: -1,
         themeVintageBackgroundColor: '#fef8ef',
         themeDarkBackgroundColor: themeDark.backgroundColor,
-        items: [
-          {
-            panel: 'bar',
-            name: this.$t('echartDemo.barTitle'),
-            icon: 'mdi-chart-bar'
-          },
-          {
-            panel: 'pie',
-            name: this.$t('echartDemo.pieTitle'),
-            icon: 'mdi-chart-pie'
-          },
-          {
-            panel: 'polar',
-            name: this.$t('echartDemo.polarTitle'),
-            icon: 'mdi-chart-donut'
-          },
-          {
-            panel: 'scatter',
-            name: this.$t('echartDemo.scatterTitle'),
-            icon: 'mdi-chart-scatter-plot'
-          },
-          {
-            panel: 'map',
-            name: this.$t('echartDemo.mapTitle'),
-            icon: 'mdi-chart-bubble'
-          },
-          {
-            panel: 'radar',
-            name: this.$t('echartDemo.radarTitle'),
-            icon: 'mdi-chart-donut-variant'
-          },
-          {
-            panel: 'connect',
-            name: this.$t('echartDemo.connectTitle'),
-            icon: 'mdi-chart-scatter-plot-hexbin'
-          },
-          {
-            panel: 'flight',
-            name: this.$t('echartDemo.flightTitle'),
-            icon: 'mdi-chart-multiline'
-          },
-        ],
         options,
         initOptions: {
           renderer: ''
