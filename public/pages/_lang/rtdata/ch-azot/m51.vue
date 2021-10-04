@@ -7,7 +7,7 @@
 
     <!--=== Multi-Chart ===-->
     <multi-chart
-      :items="items"
+      :items="panels"
     ></multi-chart>
   </div>
 </template>
@@ -20,6 +20,9 @@
   const isLog = false;
   const isDebug = false;
 
+  const OpcuaOwnerName = 'CH_M51';
+  const OpcuaOwnerGroup = 'CH_M51::ValueFromFile';
+
   
   export default {
     components: {
@@ -30,48 +33,6 @@
       return {
         title: this.$t('ch_m51.title'),
         description: this.$t('ch_m51.description'),
-        items: [
-          {
-            panel: 'bar',
-            name: this.$t('echartDemo.barTitle'),
-            icon: 'mdi-chart-bar'
-          },
-          {
-            panel: 'pie',
-            name: this.$t('echartDemo.pieTitle'),
-            icon: 'mdi-chart-pie'
-          },
-          {
-            panel: 'polar',
-            name: this.$t('echartDemo.polarTitle'),
-            icon: 'mdi-chart-donut'
-          },
-          {
-            panel: 'scatter',
-            name: this.$t('echartDemo.scatterTitle'),
-            icon: 'mdi-chart-scatter-plot'
-          },
-          {
-            panel: 'map',
-            name: this.$t('echartDemo.mapTitle'),
-            icon: 'mdi-chart-bubble'
-          },
-          {
-            panel: 'radar',
-            name: this.$t('echartDemo.radarTitle'),
-            icon: 'mdi-chart-donut-variant'
-          },
-          {
-            panel: 'connect',
-            name: this.$t('echartDemo.connectTitle'),
-            icon: 'mdi-chart-scatter-plot-hexbin'
-          },
-          {
-            panel: 'flight',
-            name: this.$t('echartDemo.flightTitle'),
-            icon: 'mdi-chart-multiline'
-          },
-        ],
       }
     },
     head() {
@@ -82,21 +43,54 @@
         ],
       }
     },
+    created: function () {
+    },
     mounted: function () {
       this.$nextTick(function () {
-        console.log('numberOfValues.count:', this.numberOfValues);
+        // console.log('numberOfValues.count:', this.numberOfValues);
+        // console.log('getPanels.panels:', this.panels);
       })
     },
     computed: {
-      numberOfValues() {
-        const idFieldOpcuaValue = this.$store.state['opcua-values'].idField;
+      panels() {
+        const panels = [];
+        let value = 0;
+        //----------------------
+        const {OpcuaTag} = this.$FeathersVuex;
+        const opcuaTags = OpcuaTag.findInStore({query: { ownerName: OpcuaOwnerName, type: 'variable.analog', $sort: {displayName: 1}}}).data;
+        opcuaTags.forEach(tag => {
+          if(this.values.length){
+            const finded =  this.values.find(v => v.key === tag.browseName);
+            if(finded){
+              value = finded.value;
+              // if(tag.browseName === 'CH_M51::01PGAZ:01T16'){
+              //   console.log('CH_M51::01PGAZ:01T16=', value);
+              // }
+            }
+          }
+          panels.push({
+            panel: 'line',
+            browseName: tag.browseName,
+            displayName: tag.displayName, 
+            // name: `${tag.displayName} (${tag.description})`,
+            name: tag.description,
+            icon: 'mdi-chart-line',
+            lowRange: tag.valueParams.engineeringUnitsRange.low,
+            highRange: tag.valueParams.engineeringUnitsRange.high,
+            engineeringUnits: tag.valueParams.engineeringUnits,
+            currentValue: value
+          })
+        })
+        return panels;
+      },
+      values() {
         const {OpcuaValue} = this.$FeathersVuex;
-        const opcuaValues = OpcuaValue.findInStore({query: { tagName: 'CH_M51::ValueFromFile', $sort: {fullName: 1}}}).data;
-        // if(opcuaValues && opcuaValues.length){
-        //   console.log('numberOfValues.count:', opcuaValues.length);
-        // }
-        return opcuaValues.length;
+        const opcuaValues = OpcuaValue.findInStore({query: { tagName: OpcuaOwnerGroup, $sort: {createdAt: 0}}}).data;
+        return opcuaValues.length? opcuaValues[0].values : [];
       }
+    },
+    methods: {
+      
     }
   }
 </script>

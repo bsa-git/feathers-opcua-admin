@@ -24,8 +24,8 @@
       >
         <v-expansion-panel-header>
           <div class="d-flex align-baseline">
-            <v-icon class="mr-3">{{ item.icon }}</v-icon>
-            <span>{{ item.name }}</span>
+            <v-icon class="mr-3">{{ (item.icon === 'mdi-chart-line')? '' : item.icon }}</v-icon>
+            <span>{{ item.name }}</span> <span> ({{ item.displayName + ' = ' + item.currentValue }})</span>
           </div>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
@@ -107,7 +107,8 @@
       return {
         title: this.$t('ch_m51.title'),
         description: this.$t('ch_m51.description'),
-        panels: [0],
+        // panels: [0],
+        panels: [],
         seconds: -1,
         themeVintageBackgroundColor: '#fef8ef',
         themeDarkBackgroundColor: themeDark.backgroundColor,

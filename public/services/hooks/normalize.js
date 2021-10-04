@@ -19,7 +19,7 @@ export default function (options = {}) {
     const hh = new HookHelper(context);
     // Show debug info
     hh.showDebugInfo('', isLog);
-    hh.showDebugRecords('', true);
+    // hh.showDebugRecords('', true);
 
     // let records = hh.contextRecords;
     let _records;
@@ -42,7 +42,7 @@ export default function (options = {}) {
     }
 
 
-    hh.showDebugRecords('', true);
+    // hh.showDebugRecords('', true);
 
     // Place the modified records back in the context.
     replaceItems(context, hh.contextRecords);
