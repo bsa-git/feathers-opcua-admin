@@ -143,13 +143,13 @@
           {
             "name": "rtdata-ch-azot-m51",
             "alias": "ch_m51",
-            "title": "M5-1",
+            "title": "M51",
             "to": "/rtdata/ch-azot/m51"
           },
           {
             "name": "rtdata-ch-azot-m52",
             "alias": "ch_m52",
-            "title": "M5-2",
+            "title": "M52",
             "to": "/rtdata/ch-azot/m52"
           }
         ]
