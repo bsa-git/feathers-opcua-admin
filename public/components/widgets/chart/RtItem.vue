@@ -16,6 +16,8 @@
   // import qs from 'qs'
   import AppPageHeader from '~/components/app/layout/AppPageHeader';
   import MultiChart from '~/components/widgets/chart/MultiChart';
+
+  const loRound = require('lodash/round');
   
   const debug = require('debug')('app:page.echarts');
   const isLog = false;
@@ -57,21 +59,19 @@
             const finded =  this.values.find(v => v.key === tag.browseName);
             if(finded){
               value = finded.value;
-              // if(tag.browseName === 'CH_M51::01PGAZ:01T16'){
-              //   console.log('CH_M51::01PGAZ:01T16=', value);
-              // }
+              value = (tag.dataType === 'Double') ? loRound(value, 3) : value;
             }
           }
+          const lowRange = tag.valueParams.engineeringUnitsRange.low;
+          const highRange = tag.valueParams.engineeringUnitsRange.high;
           panels.push({
             panel: 'line',
             browseName: tag.browseName,
             displayName: tag.displayName, 
-            // name: `${tag.displayName} (${tag.description})`,
             name: tag.description,
             icon: 'mdi-chart-line',
-            lowRange: tag.valueParams.engineeringUnitsRange.low,
-            highRange: tag.valueParams.engineeringUnitsRange.high,
-            engineeringUnits: tag.valueParams.engineeringUnits,
+            engineeringUnits: this.$t(`standardUnits.${tag.valueParams.engineeringUnits}.shortName`),
+            range: `${this.$t('common.range')}: (${lowRange}, ${highRange})`,
             currentValue: value
           })
         })
@@ -79,7 +79,7 @@
       },
       values() {
         const {OpcuaValue} = this.$FeathersVuex;
-        const opcuaValues = OpcuaValue.findInStore({query: { tagName: this.group, $sort: {createdAt: 0}}}).data;
+        const opcuaValues = OpcuaValue.findInStore({query: { tagName: this.group, $sort: {createdAt: -1}}}).data;
         return opcuaValues.length? opcuaValues[0].values : [];
       }
     },

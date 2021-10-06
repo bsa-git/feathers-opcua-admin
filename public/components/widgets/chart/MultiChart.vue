@@ -21,19 +21,28 @@
           <v-row no-gutters>
             <v-col cols="6">
               <div class="d-flex align-baseline">
-                <v-icon class="mr-3">{{ item.icon === "mdi-chart-line" ? item.icon : item.icon }}</v-icon>
+                <v-icon class="mr-3">{{
+                  item.icon === "mdi-chart-line" ? item.icon : item.icon
+                }}</v-icon>
                 <span>{{ item.name }}</span>
               </div>
             </v-col>
-            <v-col cols="6" class="text--secondary">
-                <v-row no-gutters style="width: 100%">
-                  <v-col cols="10">
-                    <span class="green--text font-weight-bold" :class=" theme.dark? 'text--lighten-1' : 'text--darken-2'">{{ item.currentValue }}</span>
-                  </v-col>
-                  <v-col cols="2">
-                    <v-icon class="mr-3">mdi-menu</v-icon>
-                  </v-col>
-                </v-row>
+            <v-col cols="5">
+              <span
+                class="green--text font-weight-bold"
+                :class="theme.dark ? 'text--lighten-1' : 'text--darken-2'"
+                >{{ item.currentValue }} {{ item.engineeringUnits }}</span
+              >
+            </v-col>
+            <v-col cols="1">
+              <v-tooltip top>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-icon class="mr-3" v-bind="attrs" v-on="on">
+                    mdi-menu
+                  </v-icon>
+                </template>
+                <span>{{ item.range }}</span>
+              </v-tooltip>
             </v-col>
           </v-row>
         </v-expansion-panel-header>

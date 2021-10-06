@@ -1,6 +1,18 @@
 import Vue from 'vue';
 import VueI18n from 'vue-i18n';
 
+const loMerge = require('lodash/merge');
+
+let en = require('~/plugins/localization/locales/en.json');
+let ru = require('~/plugins/localization/locales/ru.json')
+const enRtdata = require('~/plugins/localization/locales/en-rtdata.json');
+const ruRtdata = require('~/plugins/localization/locales/ru-rtdata.json')
+const enUnits = require('~/plugins/localization/locales/en-units.json');
+const ruUnits = require('~/plugins/localization/locales/ru-units.json')
+
+en = loMerge({}, en, enRtdata, enUnits);
+ru = loMerge({}, ru, ruRtdata, ruUnits);
+
 Vue.use(VueI18n);
 
 export default (context) => {
@@ -12,8 +24,8 @@ export default (context) => {
     locale: config.locale,
     fallbackLocale: config.fallbackLocale,
     messages: {
-      'en': require('~/plugins/localization/locales/en.json'),
-      'ru': require('~/plugins/localization/locales/ru.json')
+      en,
+      ru
     }
   });
   context.$t = VueI18n.prototype.t.bind(app.i18n);
