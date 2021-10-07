@@ -1,19 +1,26 @@
 <template>
   <div>
-    <!--=== Rt-Item ===-->
-    <rt-item
+    <!--=== Page Header ===-->
+    <app-page-header
+      :page-title="description"
+    ></app-page-header>
+    
+    <!--=== RtData ===-->
+    <rt-data
       :owner="owner"
       :group="group"
-    ></rt-item>
+    ></rt-data>
   </div>
 </template>
 
 <script>
-  import RtItem from '~/components/widgets/chart/RtItem';
+  import AppPageHeader from '~/components/app/layout/AppPageHeader';
+  import RtData from '~/components/widgets/chart/RtData';
   
   export default {
     components: {
-      RtItem
+      AppPageHeader,
+      RtData
     },
     data() {
       const owner = 'CH_M51';

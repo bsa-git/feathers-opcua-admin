@@ -10,7 +10,67 @@
       :click-btn2="allClose"
     ></panels-top-bar>
 
+    <!--=== Tabs ===-->
+    <v-card
+      flat
+      outlined
+    >
+      <v-tabs v-model="tab" background-color="primary">
+        <v-tab v-for="(tabItem, i) in tabItems" :key="i">
+          {{ tabItem.tabName }}
+        </v-tab>
+      </v-tabs>
+
+      <v-tabs-items v-model="tab">
+        <v-tab-item v-for="(tabItem, i) in tabItems" :key="i">
+          <v-card flat>
+            <v-card-text>
+              <!--=== Expansion panels ===-->
+              <v-expansion-panels v-model="panels" focusable multiple inset>
+                <v-expansion-panel
+                  v-for="(item, i) in tabItem.tabPanels"
+                  :key="i"
+                  :ref="`panel${i + 1}`"
+                >
+                  <v-expansion-panel-header>
+                    <v-row no-gutters>
+                      <v-col cols="6">
+                        <v-icon class="mr-3">{{ item.icon }}</v-icon>
+                        <span>{{ item.name }}</span>
+                      </v-col>
+                      <v-col cols="5">
+                        <span
+                          class="green--text font-weight-bold"
+                          :class="
+                            theme.dark ? 'text--lighten-1' : 'text--darken-2'
+                          "
+                          >{{ item.currentValue }}
+                          {{ item.engineeringUnits }}</span
+                        >
+                      </v-col>
+                      <v-col cols="1">
+                        <v-tooltip top>
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-icon class="mr-3" v-bind="attrs" v-on="on">
+                              mdi-menu
+                            </v-icon>
+                          </template>
+                          <span>{{ item.range }}</span>
+                        </v-tooltip>
+                      </v-col>
+                    </v-row>
+                  </v-expansion-panel-header>
+                  <v-expansion-panel-content> </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </v-card-text>
+          </v-card>
+        </v-tab-item>
+      </v-tabs-items>
+    </v-card>
+
     <!--=== Expansion panels ===-->
+    <!--  
     <v-expansion-panels v-model="panels" focusable multiple inset>
       <v-expansion-panel
         v-for="(item, i) in items"
@@ -42,10 +102,10 @@
             </v-col>
           </v-row>
         </v-expansion-panel-header>
-        <v-expansion-panel-content>
-        </v-expansion-panel-content>
+        <v-expansion-panel-content> </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
+    -->
   </div>
 </template>
 
@@ -63,16 +123,18 @@ export default {
   },
   props: {
     items: Array,
+    tabItems: Array,
   },
   data() {
     return {
       panels: [],
+      tab: null,
     };
   },
   mounted: function () {
     this.$nextTick(function () {
       if (isLog) debug("mounted.$refs:", this.$refs);
-      // debug("mounted.theme:", this.theme);
+      debug("mounted.tabItems:", this.tabItems);
     });
   },
   watch: {
