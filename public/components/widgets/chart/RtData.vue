@@ -5,20 +5,16 @@
       :items="panels"
     ></multi-chart> -->
 
-    <panels-chart 
-      v-if="isPanelsChart" 
-      :items="panels"
-    ></panels-chart>
+    <panels-chart v-if="isPanelsChart" :items="panels"></panels-chart>
 
     <tab-panels-chart
       v-if="isTabPanelsChart"
-      :items="panels"
       :tab-items="tabItems"
     ></tab-panels-chart>
 
     <tab2-panels-chart
       v-if="isTab2PanelsChart"
-      :items="panels"
+      :tab-items="tab2Items"
     ></tab2-panels-chart>
   </div>
 </template>
@@ -117,7 +113,7 @@ export default {
     },
     tabItems() {
       const tabItems = [];
-      this.tabs.tab1.forEach((tab) => {
+      this.tabs.tab1.forEach((tab, index) => {
         const tabPanels = this.panels.filter((panel) => {
           let result = false;
           let browseName = panel.browseName; // CH_M51::01AMIAK:01T4
@@ -129,6 +125,33 @@ export default {
           tab.items.forEach((item) => {
             if (!result) {
               result = browseNames[0].includes(item);
+            }
+          });
+          return result;
+        });
+        tabItems.push({
+          tabName: tab.name,
+          tabPanels,
+        });
+      });
+      return tabItems;
+    },
+    tab2Items() {
+      const tab1Items = [];
+      const tab2Items = [];
+      this.tabs.tab1.forEach((tab1, index) => {
+        // Get tabPanels for tab1
+        const tab1Panels = this.panels.filter((panel) => {
+          let result = false;
+          let browseName = panel.browseName; // CH_M51::01AMIAK:01T4
+          let browseNames = browseName.split("::");
+          if (browseNames.length > 1) {
+            browseName = browseNames[1];
+            browseNames = browseName.split(":");
+          }
+          tab1.items.forEach((item) => {
+            if (!result) {
+              result = browseNames[0].includes(item);
               // if (!result && browseNames.length > 1) {
               //   result = browseNames[1].includes(item);
               // }
@@ -136,10 +159,37 @@ export default {
           });
           return result;
         });
-        tabItems.push({
-          tabName: tab.name,
-          tabPanels
-        })
+        
+        // Get tabPanels for tab2
+        this.tabs.tab2.forEach((tab2, index) => {
+          const tab2Panels = tab1Panels.filter((panel) => {
+            let result = false;
+            let browseName = panel.browseName; // CH_M51::01AMIAK:01T4
+            let browseNames = browseName.split("::");
+            if (browseNames.length > 1) {
+              browseName = browseNames[1];
+              browseNames = browseName.split(":");
+            }
+            tab2.items.forEach((item) => {
+              if (!result) {
+                result = browseNames[0].includes(item);
+                if (!result && browseNames.length > 1) {
+                  result = browseNames[1].includes(item);
+                }
+              }
+            });
+            return result;
+          });
+          tab2Items.push({
+            tab2Name: tab2.name,
+            tab2Panels,
+          });
+        });
+        tab1Items.push({
+          tab1Name: tab1.name,
+          tab1Panels,
+          tab2Items
+        });
       });
       return tabItems;
     },
@@ -156,7 +206,7 @@ export default {
           objectTag.tabs && objectTag.tabs.tab1 && !!objectTag.tabs.tab1.length;
         const isTab2 =
           objectTag.tabs && objectTag.tabs.tab2 && !!objectTag.tabs.tab2.length;
-        
+
         // this.isPanelsChart = !isTab1 && !isTab2;
         // this.isTabPanelsChart = isTab1 && !isTab2;
         // this.isTab2PanelsChart = isTab1 && isTab2;
