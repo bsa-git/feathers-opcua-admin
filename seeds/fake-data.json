@@ -265,7 +265,7 @@
           { "name": "Steam16", "items": ["PAR"] },
           { "name": "HNO3 Store", "items": ["SKLAD"] },
           { "name": "Water", "items": ["VODA", "VODA_XOB"] },
-          { "name": "Compression", "items": ["PS180", "SBS_OC", "GTT", "UKST", "RD"] },
+          { "name": "Compression", "items": ["PS180", "GTT", "UKST", "RD"] },
           { "name": "Conversion", "items": ["KONV", "ABSOR", "OXG"] }
         ]
       }

@@ -26,6 +26,7 @@ import TabPanelsChart from "~/components/widgets/chart/TabPanelsChart";
 import Tab2PanelsChart from "~/components/widgets/chart/Tab2PanelsChart";
 
 const loRound = require("lodash/round");
+const loMerge = require("lodash/merge");
 
 const debug = require("debug")("app:page.echarts");
 const isLog = false;
@@ -111,6 +112,7 @@ export default {
       }).data;
       return opcuaValues.length ? opcuaValues[0].values : [];
     },
+    // Get tabItems for tab1
     tabItems() {
       const tabItems = [];
       this.tabs.tab1.forEach((tab, index) => {
@@ -136,10 +138,11 @@ export default {
       });
       return tabItems;
     },
+    // Get tabItems for tab1 and tab2
     tab2Items() {
       const tab1Items = [];
-      const tab2Items = [];
       this.tabs.tab1.forEach((tab1, index) => {
+        const tab2Items = [];
         // Get tabPanels for tab1
         const tab1Panels = this.panels.filter((panel) => {
           let result = false;
@@ -159,12 +162,13 @@ export default {
           });
           return result;
         });
-        
-        // Get tabPanels for tab2
+
+        // Get tabItems for tab2
         this.tabs.tab2.forEach((tab2, index) => {
+          let result = false;
           const tab2Panels = tab1Panels.filter((panel) => {
-            let result = false;
-            let browseName = panel.browseName; // CH_M51::01AMIAK:01T4
+            result = false;
+            let browseName = panel.browseName; //e.g. CH_M51::01AMIAK:01T4
             let browseNames = browseName.split("::");
             if (browseNames.length > 1) {
               browseName = browseNames[1];
@@ -180,18 +184,20 @@ export default {
             });
             return result;
           });
-          tab2Items.push({
-            tab2Name: tab2.name,
-            tab2Panels,
-          });
+          if (tab2Panels &&  tab2Panels.length) {
+            tab2Items.push({
+              tab2Name: tab2.name,
+              tab2Panels: loMerge({}, tab2Panels),
+            });
+          }
         });
         tab1Items.push({
           tab1Name: tab1.name,
           tab1Panels,
-          tab2Items
+          tab2Items,
         });
       });
-      return tabItems;
+      return tab1Items;
     },
   },
   methods: {
@@ -212,8 +218,8 @@ export default {
         // this.isTab2PanelsChart = isTab1 && isTab2;
 
         this.isPanelsChart = false;
-        this.isTabPanelsChart = true;
-        this.isTab2PanelsChart = false;
+        this.isTabPanelsChart = false;
+        this.isTab2PanelsChart = true;
 
         if (this.isTabPanelsChart) {
           this.tabs.tab1 = objectTag.tabs.tab1;
