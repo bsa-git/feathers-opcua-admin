@@ -53,7 +53,7 @@
 import { mapGetters } from "vuex";
 import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
 
-const debug = require("debug")("app:component.MultiChart");
+const debug = require("debug")("app:component.PanelChart");
 const isLog = false;
 const isDebug = false;
 

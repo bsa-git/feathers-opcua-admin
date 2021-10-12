@@ -9,35 +9,32 @@
       :click-btn1="allOpen"
       :click-btn2="allClose"
     ></panels-top-bar>
-    <div> Tab: {{ tab }} </div>
-    <div> Tab1Panels: {{ panels['tab0'] }} </div>
-    <div> Tab2Panels: {{ panels['tab1'] }} </div>
-    <div> Tab3Panels: {{ panels['tab2'] }} </div>
+    
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="12" md="10">
         <v-card flat outlined>
           <v-tabs v-model="tab" show-arrows background-color="primary">
-            <v-tab v-for="(tabItem, i) in tabItems" :key="i">
+            <v-tab v-for="(tabItem, tabIndex) in tabItems" :key="tabIndex">
               {{ tabItem.tabName }}
             </v-tab>
           </v-tabs>
 
           <v-tabs-items v-model="tab">
-            <v-tab-item v-for="(tabItem, i) in tabItems" :key="i">
+            <v-tab-item v-for="(tabItem, tabIndex) in tabItems" :key="tabIndex">
               <v-card flat>
                 <v-card-text>
-                  <v-expansion-panels v-model="panels[`tab${tab}`]" focusable multiple inset>
+                  <v-expansion-panels v-model="panels[`tab${tabIndex}`]" focusable multiple inset>
                     <v-expansion-panel
-                      v-for="(item, i) in tabItem.tabPanels"
-                      :key="`panel_${tab}${i}`"
-                      :ref="`panel_${tab}${i}`"
+                      v-for="(panelItem, panelIndex) in tabItem.tabPanels"
+                      :key="`panel${tabIndex}_${panelIndex}`"
+                      :ref="`panel${tabIndex}_${panelIndex}`"
                     >
                       <v-expansion-panel-header>
                         <v-row no-gutters>
                           <v-col cols="6">
-                            <v-icon class="mr-3">{{ item.icon }}</v-icon>
-                            <span>{{ item.name }}</span>
+                            <v-icon class="mr-3">{{ panelItem.icon }}</v-icon>
+                            <span>{{ panelItem.name }}</span>
                           </v-col>
                           <v-col cols="5">
                             <span
@@ -47,8 +44,8 @@
                                   ? 'text--lighten-1'
                                   : 'text--darken-2'
                               "
-                              >{{ item.currentValue }}
-                              {{ item.engineeringUnits }}</span
+                              >{{ panelItem.currentValue }}
+                              {{ panelItem.engineeringUnits }}</span
                             >
                           </v-col>
                           <v-col cols="1">
@@ -58,7 +55,7 @@
                                   mdi-menu
                                 </v-icon>
                               </template>
-                              <span>{{ item.range }}</span>
+                              <span>{{ panelItem.range }}</span>
                             </v-tooltip>
                           </v-col>
                         </v-row>
@@ -82,7 +79,7 @@ import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
 
 const loForEach = require("lodash/forEach");
 
-const debug = require("debug")("app:component.MultiChart");
+const debug = require("debug")("app:component.TabPanelsChart");
 const isLog = false;
 const isDebug = false;
 
@@ -116,9 +113,6 @@ export default {
     },
   },
   computed: {
-    isMobile: function () {
-      return this.$vuetify.breakpoint.xsOnly;
-    },
     ...mapGetters({
       config: "getConfig",
       theme: "getTheme",
@@ -129,9 +123,9 @@ export default {
     // Open the panels
     allOpen() {
       this.tabItems[this.tab]['tabPanels'].forEach((item, i) => {
-        if (!this.panels.includes(i)) {
-          const panel = this.$refs[`panel_${this.tab}${i}`]
-            ? this.$refs[`panel_${this.tab}${i}`][0]
+        if (!this.panels[`tab${this.tab}`].includes(i)) {  
+          const panel = this.$refs[`panel${this.tab}_${i}`]
+            ? this.$refs[`panel${this.tab}_${i}`][0]
             : null;
           if (panel && panel.toggle) {
             panel.toggle();
@@ -141,8 +135,15 @@ export default {
     },
     // Close the panels
     allClose() {
-      this.panels.loForEach((panel, key) => {
-        panel = [];
+      this.tabItems[this.tab]['tabPanels'].forEach((item, i) => {
+        if (this.panels[`tab${this.tab}`].includes(i)) {  
+          const panel = this.$refs[`panel${this.tab}_${i}`]
+            ? this.$refs[`panel${this.tab}_${i}`][0]
+            : null;
+          if (panel && panel.toggle) {
+            panel.toggle();
+          }
+        }
       });
     },
   },

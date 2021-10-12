@@ -1,19 +1,14 @@
 <template>
   <div>
-    <!--=== Multi-Chart ===-->
-    <!-- <multi-chart
-      :items="panels"
-    ></multi-chart> -->
-
     <panels-chart v-if="isPanelsChart" :items="panels"></panels-chart>
 
     <tab-panels-chart
-      v-if="isTabPanelsChart"
+      v-if="isTabPanelsChart || isTab2PanelsChart && isTablet"
       :tab-items="tabItems"
     ></tab-panels-chart>
 
     <tab2-panels-chart
-      v-if="isTab2PanelsChart"
+      v-if="isTab2PanelsChart && !isTablet"
       :tab-items="tab2Items"
     ></tab2-panels-chart>
   </div>
@@ -65,6 +60,12 @@ export default {
     });
   },
   computed: {
+    isMobile: function () {
+      return this.$vuetify.breakpoint.xsOnly; 
+    },
+    isTablet: function () {
+      return this.$vuetify.breakpoint.smAndDown; 
+    },
     panels() {
       const panels = [];
       let value = 0;
@@ -155,9 +156,6 @@ export default {
           tab1.items.forEach((item) => {
             if (!result) {
               result = browseNames[0].includes(item);
-              // if (!result && browseNames.length > 1) {
-              //   result = browseNames[1].includes(item);
-              // }
             }
           });
           return result;
@@ -184,10 +182,10 @@ export default {
             });
             return result;
           });
-          if (tab2Panels &&  tab2Panels.length) {
+          if (tab2Panels && tab2Panels.length) {
             tab2Items.push({
               tab2Name: tab2.name,
-              tab2Panels: loMerge({}, tab2Panels),
+              tab2Panels: tab2Panels,
             });
           }
         });
@@ -213,13 +211,13 @@ export default {
         const isTab2 =
           objectTag.tabs && objectTag.tabs.tab2 && !!objectTag.tabs.tab2.length;
 
-        // this.isPanelsChart = !isTab1 && !isTab2;
-        // this.isTabPanelsChart = isTab1 && !isTab2;
-        // this.isTab2PanelsChart = isTab1 && isTab2;
+        this.isPanelsChart = !isTab1 && !isTab2;
+        this.isTabPanelsChart = isTab1 && !isTab2;
+        this.isTab2PanelsChart = isTab1 && isTab2;
 
-        this.isPanelsChart = false;
-        this.isTabPanelsChart = false;
-        this.isTab2PanelsChart = true;
+        // this.isPanelsChart = false;
+        // this.isTabPanelsChart = false;
+        // this.isTab2PanelsChart = true;
 
         if (this.isTabPanelsChart) {
           this.tabs.tab1 = objectTag.tabs.tab1;

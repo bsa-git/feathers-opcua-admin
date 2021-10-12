@@ -9,12 +9,7 @@
       :click-btn1="allOpen"
       :click-btn2="allClose"
     ></panels-top-bar>
-    <div>Tab1: {{ tab1 }}</div>
-    <div>Tab2: {{ tab2 }}</div>
-    <div>Panels: {{ panels }}</div>
-    <div>Tab1Panels: {{ panels["tab00"] }}</div>
-    <div>Tab2Panels: {{ panels["tab10"] }}</div>
-    <div>Tab3Panels: {{ panels["tab20"] }}</div>
+    
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="12" md="10">
@@ -35,25 +30,26 @@
             >
               <v-row>
                 <v-col cols="3">
-                  <v-tabs v-model="tab2" vertical background-color="" active-class="primary--text">
+                  <v-tabs v-model="tabs2[tab1Index]" vertical >
                     <v-tab
+                      :active-class="tabActiveClass"
                       v-for="(tab2Item, tab2Index) in tab1Item['tab2Items']"
-                      :key="`tab2_${tab1Index}${tab2Index}`"
+                      :key="`tab2_${tab1Index}_${tab2Index}`"
                     >
                       {{ tab2Item.tab2Name }}
                     </v-tab>
                   </v-tabs>
                 </v-col>
                 <v-col cols="9">
-                  <v-tabs-items v-model="tab2">
+                  <v-tabs-items v-model="tabs2[tab1Index]">
                     <v-tab-item
                       v-for="(tab2Item, tab2Index) in tab1Item['tab2Items']"
-                      :key="`tab2_${tab1Index}${tab2Index}`"
+                      :key="`tab2_${tab1Index}_${tab2Index}`"
                     >
                       <v-card flat>
                         <v-card-text>
                           <v-expansion-panels
-                            v-model="panels[`tab${tab1Index}${tab2Index}`]"
+                            v-model="panels[`tab${tab1Index}_${tab2Index}`]"
                             focusable
                             multiple
                             inset
@@ -62,8 +58,8 @@
                               v-for="(
                                 tab2PanelItem, tab2PanelIndex
                               ) in tab2Item.tab2Panels"
-                              :key="`panel_${tab1Index}${tab2Index}${tab2PanelIndex}`"
-                              :ref="`panel_${tab1Index}${tab2Index}${tab2PanelIndex}`"
+                              :key="`panel${tab1Index}_${tab2Index}_${tab2PanelIndex}`"
+                              :ref="`panel${tab1Index}_${tab2Index}_${tab2PanelIndex}`"
                             >
                               <v-expansion-panel-header>
                                 <v-row no-gutters>
@@ -127,7 +123,7 @@ import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
 
 const loForEach = require("lodash/forEach");
 
-const debug = require("debug")("app:component.MultiChart");
+const debug = require("debug")("app:component.Tab2PanelsChart");
 const isLog = false;
 const isDebug = false;
 
@@ -142,21 +138,22 @@ export default {
     return {
       panels: {},
       tab1: null,
-      tab2: null,
+      tabs2: [],
     };
   },
   created: function () {
     this.tabItems.forEach((tab1Item, tab1Index) => {
+      this.tabs2[tab1Index] = 0;
       tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
-        this.panels[`tab${tab1Index}${tab2Index}`] = [];
+        this.panels[`tab${tab1Index}_${tab2Index}`] = [];
       });
     });
   },
   mounted: function () {
     this.$nextTick(function () {
       if (isLog) debug("mounted.$refs:", this.$refs);
-      debug("mounted.tabItems:", this.tabItems);
-      debug("mounted.panels:", this.panels);
+      // debug("mounted.tabItems:", this.tabItems);
+      // debug("mounted.panels:", this.panels);
     });
   },
   watch: {
@@ -173,15 +170,24 @@ export default {
       theme: "getTheme",
       primaryColor: "getPrimaryBaseColor",
     }),
+    tabActiveClass: function () {
+      return this.theme.dark? 'white--text' : 'black--text';
+    }
   },
   methods: {
     // Open the panels
     allOpen() {
-      this.tabItems[this.tab1]["tab2Items"][this.tab2]["tab2Panels"].forEach(
+      let tabPanels = this.tabItems[this.tab1]["tab2Items"];
+      tabPanels = tabPanels[this.tabs2[this.tab1]];
+      tabPanels = tabPanels["tab2Panels"];
+      tabPanels.forEach(
         (item, i) => {
-          if (!this.panels.includes(i)) {
-            const panel = this.$refs[`panel_${this.tab1}${this.tab2}${i}`]
-              ? this.$refs[`panel_${this.tab}${this.tab2}${i}`][0]
+          const isInclude = this.panels[`tab${this.tab1}_${this.tabs2[this.tab1]}`].includes(i);
+          if (!isInclude) {
+            const refIndex = `panel${this.tab1}_${this.tabs2[this.tab1]}_${i}`;
+            const panelRef = this.$refs[refIndex];
+            const panel = panelRef
+              ? panelRef[0]
               : null;
             if (panel && panel.toggle) {
               panel.toggle();
@@ -192,9 +198,24 @@ export default {
     },
     // Close the panels
     allClose() {
-      this.panels.loForEach((panel, key) => {
-        panel = [];
-      });
+      let tabPanels = this.tabItems[this.tab1]["tab2Items"];
+      tabPanels = tabPanels[this.tabs2[this.tab1]];
+      tabPanels = tabPanels["tab2Panels"];
+      tabPanels.forEach(
+        (item, i) => {
+          const isInclude = this.panels[`tab${this.tab1}_${this.tabs2[this.tab1]}`].includes(i);
+          if (isInclude) {
+            const refIndex = `panel${this.tab1}_${this.tabs2[this.tab1]}_${i}`;
+            const panelRef = this.$refs[refIndex];
+            const panel = panelRef
+              ? panelRef[0]
+              : null;
+            if (panel && panel.toggle) {
+              panel.toggle();
+            }
+          }
+        }
+      );
     },
   },
 };
