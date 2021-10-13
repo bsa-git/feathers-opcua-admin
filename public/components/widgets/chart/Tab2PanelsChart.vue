@@ -9,7 +9,7 @@
       :click-btn1="allOpen"
       :click-btn2="allClose"
     ></panels-top-bar>
-    
+
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="12" md="10">
@@ -30,7 +30,7 @@
             >
               <v-row>
                 <v-col cols="3">
-                  <v-tabs v-model="tabs2[tab1Index]" vertical >
+                  <v-tabs v-model="tabs2[tab1Index]" vertical>
                     <v-tab
                       :active-class="tabActiveClass"
                       v-for="(tab2Item, tab2Index) in tab1Item['tab2Items']"
@@ -100,6 +100,19 @@
                                 </v-row>
                               </v-expansion-panel-header>
                               <v-expansion-panel-content>
+                                <!--  Box Chart  -->
+                                <v-row justify="center">
+                                  <v-col cols="12" sm="12">
+                                    <box-chart
+                                      :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
+                                      :sub-title="`${tab2PanelItem.currentValue} ${tab2PanelItem.engineeringUnits}`"
+                                      icon="mdi-chart-line-variant"
+                                      :options="boxLineOptions"
+                                      :data="dataset.monthUniqueVisit.data"
+                                      :theme="theme.dark ? 'dark' : 'shine'"
+                                    />
+                                  </v-col>
+                                </v-row>
                               </v-expansion-panel-content>
                             </v-expansion-panel>
                           </v-expansion-panels>
@@ -120,6 +133,9 @@
 <script>
 import { mapGetters } from "vuex";
 import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
+import BoxChart from "~/components/widgets/chart/BoxChart";
+import boxLineOptions from "~/api/app/chart/box-line";
+import { monthUniqueVisitData } from "~/api/demo/chart/chart-data";
 
 const loForEach = require("lodash/forEach");
 
@@ -130,6 +146,7 @@ const isDebug = false;
 export default {
   components: {
     PanelsTopBar,
+    BoxChart,
   },
   props: {
     tabItems: Array,
@@ -139,6 +156,10 @@ export default {
       panels: {},
       tab1: null,
       tabs2: [],
+      boxLineOptions,
+      dataset: {
+        monthUniqueVisit: monthUniqueVisitData(),
+      },
     };
   },
   created: function () {
@@ -171,8 +192,8 @@ export default {
       primaryColor: "getPrimaryBaseColor",
     }),
     tabActiveClass: function () {
-      return this.theme.dark? 'white--text' : 'black--text';
-    }
+      return this.theme.dark ? "white--text" : "black--text";
+    },
   },
   methods: {
     // Open the panels
@@ -180,42 +201,36 @@ export default {
       let tabPanels = this.tabItems[this.tab1]["tab2Items"];
       tabPanels = tabPanels[this.tabs2[this.tab1]];
       tabPanels = tabPanels["tab2Panels"];
-      tabPanels.forEach(
-        (item, i) => {
-          const isInclude = this.panels[`tab${this.tab1}_${this.tabs2[this.tab1]}`].includes(i);
-          if (!isInclude) {
-            const refIndex = `panel${this.tab1}_${this.tabs2[this.tab1]}_${i}`;
-            const panelRef = this.$refs[refIndex];
-            const panel = panelRef
-              ? panelRef[0]
-              : null;
-            if (panel && panel.toggle) {
-              panel.toggle();
-            }
+      tabPanels.forEach((item, i) => {
+        const isInclude =
+          this.panels[`tab${this.tab1}_${this.tabs2[this.tab1]}`].includes(i);
+        if (!isInclude) {
+          const refIndex = `panel${this.tab1}_${this.tabs2[this.tab1]}_${i}`;
+          const panelRef = this.$refs[refIndex];
+          const panel = panelRef ? panelRef[0] : null;
+          if (panel && panel.toggle) {
+            panel.toggle();
           }
         }
-      );
+      });
     },
     // Close the panels
     allClose() {
       let tabPanels = this.tabItems[this.tab1]["tab2Items"];
       tabPanels = tabPanels[this.tabs2[this.tab1]];
       tabPanels = tabPanels["tab2Panels"];
-      tabPanels.forEach(
-        (item, i) => {
-          const isInclude = this.panels[`tab${this.tab1}_${this.tabs2[this.tab1]}`].includes(i);
-          if (isInclude) {
-            const refIndex = `panel${this.tab1}_${this.tabs2[this.tab1]}_${i}`;
-            const panelRef = this.$refs[refIndex];
-            const panel = panelRef
-              ? panelRef[0]
-              : null;
-            if (panel && panel.toggle) {
-              panel.toggle();
-            }
+      tabPanels.forEach((item, i) => {
+        const isInclude =
+          this.panels[`tab${this.tab1}_${this.tabs2[this.tab1]}`].includes(i);
+        if (isInclude) {
+          const refIndex = `panel${this.tab1}_${this.tabs2[this.tab1]}_${i}`;
+          const panelRef = this.$refs[refIndex];
+          const panel = panelRef ? panelRef[0] : null;
+          if (panel && panel.toggle) {
+            panel.toggle();
           }
         }
-      );
+      });
     },
   },
 };
