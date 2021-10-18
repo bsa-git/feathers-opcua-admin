@@ -107,8 +107,8 @@
                                       :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
                                       :sub-title="`${tab2PanelItem.currentValue} ${tab2PanelItem.engineeringUnits}`"
                                       icon="mdi-chart-line-variant"
-                                      :options="boxLineOptions"
-                                      :data="dataset.monthUniqueVisit.data"
+                                      :options="boxLineOptions({engineeringUnits: tab2PanelItem.engineeringUnits})"
+                                      :data="tab2PanelItem.histValues"
                                       :theme="theme.dark ? 'dark' : 'shine'"
                                     />
                                   </v-col>
@@ -134,7 +134,7 @@
 import { mapGetters } from "vuex";
 import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
 import BoxChart from "~/components/widgets/chart/BoxChart";
-import boxLineOptions from "~/api/app/chart/box-line";
+import boxLineOptions from "~/api/app/chart/box-line2";
 import { monthUniqueVisitData } from "~/api/demo/chart/chart-data";
 
 const loForEach = require("lodash/forEach");

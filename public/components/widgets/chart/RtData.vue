@@ -3,7 +3,7 @@
     <panels-chart v-if="isPanelsChart" :items="panels"></panels-chart>
 
     <tab-panels-chart
-      v-if="isTabPanelsChart || isTab2PanelsChart && isTablet"
+      v-if="isTabPanelsChart || (isTab2PanelsChart && isTablet)"
       :tab-items="tabItems"
     ></tab-panels-chart>
 
@@ -61,10 +61,10 @@ export default {
   },
   computed: {
     isMobile: function () {
-      return this.$vuetify.breakpoint.xsOnly; 
+      return this.$vuetify.breakpoint.xsOnly;
     },
     isTablet: function () {
-      return this.$vuetify.breakpoint.smAndDown; 
+      return this.$vuetify.breakpoint.smAndDown;
     },
     panels() {
       const panels = [];
@@ -79,12 +79,29 @@ export default {
         },
       }).data;
       opcuaTags.forEach((tag) => {
+        const tagHistValues = [["Time", "Value"]];
+        //------------------------
         if (this.values.length) {
           const finded = this.values.find((v) => v.key === tag.browseName);
           if (finded) {
             value = finded.value;
             value = tag.dataType === "Double" ? loRound(value, 3) : value;
           }
+        }
+        if (this.histValues.length) {
+          this.histValues.forEach((histValue) => {
+            value = 0;
+            if (histValue.values.length) {
+              const finded = histValue.values.find(
+                (v) => v.key === tag.browseName
+              );
+              if (finded) {
+                value = finded.value;
+                value = tag.dataType === "Double" ? loRound(value, 3) : value;
+              }
+            }
+            tagHistValues.push([histValue['createdAt'], value]);
+          });
         }
         const lowRange = tag.valueParams.engineeringUnitsRange.low;
         const highRange = tag.valueParams.engineeringUnitsRange.high;
@@ -102,6 +119,7 @@ export default {
             "common.range"
           )}: (${lowRange}, ${highRange}) ${engineeringUnits}`,
           currentValue: value,
+          histValues: tagHistValues
         });
       });
       return panels;
@@ -112,6 +130,13 @@ export default {
         query: { tagName: this.group, $sort: { createdAt: -1 } },
       }).data;
       return opcuaValues.length ? opcuaValues[0].values : [];
+    },
+    histValues() {
+      const { OpcuaValue } = this.$FeathersVuex;
+      const opcuaValues = OpcuaValue.findInStore({
+        query: { tagName: this.group, $sort: { createdAt: 1 } },
+      }).data;
+      return opcuaValues.length ? opcuaValues : [];
     },
     // Get tabItems for tab1
     tabItems() {
