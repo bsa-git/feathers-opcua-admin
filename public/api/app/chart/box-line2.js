@@ -1,4 +1,4 @@
-const debug = require("debug")("app:config.box-line2");
+const debug = require("debug")("app:api.box-line2");
 
 export default function (params) {
   
