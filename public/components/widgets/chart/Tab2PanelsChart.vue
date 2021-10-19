@@ -103,14 +103,49 @@
                                 <!--  Box Chart  -->
                                 <v-row justify="center">
                                   <v-col cols="12" sm="12">
-                                    <box-chart
-                                      :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
-                                      :sub-title="`${tab2PanelItem.currentValue} ${tab2PanelItem.engineeringUnits}`"
-                                      icon="mdi-chart-line-variant"
-                                      :options="boxLineOptions({engineeringUnits: tab2PanelItem.engineeringUnits})"
-                                      :data="tab2PanelItem.histValues"
-                                      :theme="theme.dark ? 'dark' : 'shine'"
-                                    />
+                                    <v-card
+                                      color="primary"
+                                      :dark="theme.dark"
+                                      outlined
+                                    >
+                                      <box-chart
+                                        :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
+                                        :sub-title="`${tab2PanelItem.currentValue} ${tab2PanelItem.engineeringUnits}`"
+                                        icon="mdi-chart-line-variant"
+                                        :options="
+                                          boxLineOptions({
+                                            engineeringUnits:
+                                              tab2PanelItem.engineeringUnits,
+                                          })
+                                        "
+                                        :data="tab2PanelItem.histValues"
+                                        :theme="theme.dark ? 'dark' : 'shine'"
+                                        :outlined="true"
+                                      />
+                                      <v-divider />
+                                      <v-card-actions>
+                                        <v-btn-toggle
+                                          v-model="chartRange"
+                                          color="primary"
+                                          dense
+                                        >
+                                          <v-btn value="1h"> 1H </v-btn>
+
+                                          <v-btn value="6h"> 6H </v-btn>
+
+                                          <v-btn value="24h"> 24H </v-btn>
+
+                                          <v-btn value="all">
+                                            All
+                                          </v-btn>
+                                        </v-btn-toggle>
+                                        <v-spacer />
+                                        <!-- color="primary" -->
+                                        <v-btn small dark text>
+                                          {{ $t("echartDemo.start") }}
+                                        </v-btn>
+                                      </v-card-actions>
+                                    </v-card>
                                   </v-col>
                                 </v-row>
                               </v-expansion-panel-content>
@@ -156,6 +191,7 @@ export default {
       panels: {},
       tab1: null,
       tabs2: [],
+      chartRange: '1h',
       boxLineOptions,
       dataset: {
         monthUniqueVisit: monthUniqueVisitData(),
