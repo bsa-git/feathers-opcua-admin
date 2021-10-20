@@ -16,7 +16,7 @@
         <v-card flat outlined>
           <v-tabs v-model="tab1" show-arrows background-color="primary">
             <v-tab
-              v-for="(tab1Item, tab1Index) in tabItems"
+              v-for="(tab1Item, tab1Index) in filterTabItems"
               :key="`tab1_${tab1Index}`"
             >
               {{ tab1Item.tab1Name }}
@@ -25,7 +25,7 @@
 
           <v-tabs-items v-model="tab1">
             <v-tab-item
-              v-for="(tab1Item, tab1Index) in tabItems"
+              v-for="(tab1Item, tab1Index) in filterTabItems"
               :key="`tab1_${tab1Index}`"
             >
               <v-row>
@@ -125,24 +125,22 @@
                                       <v-divider />
                                       <v-card-actions>
                                         <v-btn-toggle
-                                          v-model="chartRange"
+                                          v-model="timeRange"
                                           color="primary"
                                           dense
                                         >
-                                          <v-btn value="1h"> 1H </v-btn>
+                                          <v-btn value="0.1"> 0.1H </v-btn>
 
-                                          <v-btn value="6h"> 6H </v-btn>
+                                          <v-btn value="1"> 1H </v-btn>
 
-                                          <v-btn value="24h"> 24H </v-btn>
+                                          <v-btn value="6"> 6H </v-btn>
 
-                                          <v-btn value="all">
-                                            All
-                                          </v-btn>
+                                          <v-btn value="48"> All </v-btn>
                                         </v-btn-toggle>
                                         <v-spacer />
                                         <!-- color="primary" -->
                                         <v-btn small dark text>
-                                          {{ $t("echartDemo.start") }}
+                                          {{ $t("chartDemo.more") }} ...
                                         </v-btn>
                                       </v-card-actions>
                                     </v-card>
@@ -170,8 +168,9 @@ import { mapGetters } from "vuex";
 import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
 import BoxChart from "~/components/widgets/chart/BoxChart";
 import boxLineOptions from "~/api/app/chart/box-line2";
-import { monthUniqueVisitData } from "~/api/demo/chart/chart-data";
+// import { monthUniqueVisitData } from "~/api/demo/chart/chart-data";
 
+const moment = require('moment');
 const loForEach = require("lodash/forEach");
 
 const debug = require("debug")("app:component.Tab2PanelsChart");
@@ -191,11 +190,8 @@ export default {
       panels: {},
       tab1: null,
       tabs2: [],
-      chartRange: '1h',
+      timeRange: "0.1",
       boxLineOptions,
-      dataset: {
-        monthUniqueVisit: monthUniqueVisitData(),
-      },
     };
   },
   created: function () {
@@ -217,6 +213,10 @@ export default {
     panels: function (val) {
       if (isLog) debug("watch.panels.$refs:", this.$refs);
     },
+    timeRange: function (val) {
+      if (isDebug) debug("watch.panels.$refs:", this.$refs);
+      // debug("watch.timeRange:", this.timeRange);
+    },
   },
   computed: {
     isMobile: function () {
@@ -229,6 +229,24 @@ export default {
     }),
     tabActiveClass: function () {
       return this.theme.dark ? "white--text" : "black--text";
+    }, 
+    filterTabItems: function () {
+      this.tabItems.forEach((tab1Item, tab1Index) => {
+        tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
+          tab2Item.tab2Panels.forEach(panel => {
+            const filterHistValues = panel.histValues.filter(item => {
+              // Get now date-time
+              // const dtNow = moment.utc().format('YYYY-MM-DDTHH:mm:ss');
+              const dtSubtract_1h = moment().utc().subtract(this.timeRange, 'h').format('YYYY-MM-DDTHH:mm:ss');
+              const dtAt = item[0].split('.')[0];
+              // debug('filterTabItems.times:', dtNow, dtSubtract_1h, dtAt)
+              return dtAt >= dtSubtract_1h;
+            })
+            panel.histValues = filterHistValues;
+          })
+        });
+      });
+      return this.tabItems;
     },
   },
   methods: {
