@@ -10,13 +10,19 @@
       :click-btn2="allClose"
     ></panels-top-bar>
 
+    <!--=== Debug ===-->
+    <!--  
+    <div>
+      <span>Tabs:</span> <span>{{ panels["tab0_0"] }}</span>
+    </div>
+    -->
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="12" md="10">
         <v-card flat outlined>
           <v-tabs v-model="tab1" show-arrows background-color="primary">
             <v-tab
-              v-for="(tab1Item, tab1Index) in filterTabItems"
+              v-for="(tab1Item, tab1Index) in tabItems"
               :key="`tab1_${tab1Index}`"
             >
               {{ tab1Item.tab1Name }}
@@ -25,7 +31,7 @@
 
           <v-tabs-items v-model="tab1">
             <v-tab-item
-              v-for="(tab1Item, tab1Index) in filterTabItems"
+              v-for="(tab1Item, tab1Index) in tabItems"
               :key="`tab1_${tab1Index}`"
             >
               <v-row>
@@ -77,7 +83,7 @@
                                           ? 'text--lighten-1'
                                           : 'text--darken-2'
                                       "
-                                      >{{ tab2PanelItem.currentValue }}
+                                      >{{ tab2PanelItem.currentValue? tab2PanelItem.currentValue : 1234 }}
                                       {{ tab2PanelItem.engineeringUnits }}</span
                                     >
                                   </v-col>
@@ -110,7 +116,7 @@
                                     >
                                       <box-chart
                                         :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
-                                        :sub-title="`${tab2PanelItem.currentValue} ${tab2PanelItem.engineeringUnits}`"
+                                        :sub-title="`${tab2PanelItem.currentValue? tab2PanelItem.currentValue : 1234 } ${tab2PanelItem.engineeringUnits}`"
                                         icon="mdi-chart-line-variant"
                                         :options="
                                           boxLineOptions({
@@ -118,7 +124,7 @@
                                               tab2PanelItem.engineeringUnits,
                                           })
                                         "
-                                        :data="tab2PanelItem.histValues"
+                                        :data="tab2PanelItem.histValues? tab2PanelItem.histValues : []"
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
                                       />
@@ -138,7 +144,6 @@
                                           <v-btn value="48"> All </v-btn>
                                         </v-btn-toggle>
                                         <v-spacer />
-                                        <!-- color="primary" -->
                                         <v-btn small dark text>
                                           {{ $t("chartDemo.more") }} ...
                                         </v-btn>
@@ -170,7 +175,7 @@ import BoxChart from "~/components/widgets/chart/BoxChart";
 import boxLineOptions from "~/api/app/chart/box-line2";
 // import { monthUniqueVisitData } from "~/api/demo/chart/chart-data";
 
-const moment = require('moment');
+const moment = require("moment");
 const loForEach = require("lodash/forEach");
 
 const debug = require("debug")("app:component.Tab2PanelsChart");
@@ -184,6 +189,7 @@ export default {
   },
   props: {
     tabItems: Array,
+    tabValues: Array,
   },
   data() {
     return {
@@ -212,6 +218,7 @@ export default {
   watch: {
     panels: function (val) {
       if (isLog) debug("watch.panels.$refs:", this.$refs);
+      debug("watch.panels:", this.panels);
     },
     timeRange: function (val) {
       if (isDebug) debug("watch.panels.$refs:", this.$refs);
@@ -229,27 +236,53 @@ export default {
     }),
     tabActiveClass: function () {
       return this.theme.dark ? "white--text" : "black--text";
-    }, 
-    filterTabItems: function () {
-      this.tabItems.forEach((tab1Item, tab1Index) => {
-        tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
-          tab2Item.tab2Panels.forEach(panel => {
-            const filterHistValues = panel.histValues.filter(item => {
-              // Get now date-time
-              // const dtNow = moment.utc().format('YYYY-MM-DDTHH:mm:ss');
-              const dtSubtract_1h = moment().utc().subtract(this.timeRange, 'h').format('YYYY-MM-DDTHH:mm:ss');
-              const dtAt = item[0].split('.')[0];
-              // debug('filterTabItems.times:', dtNow, dtSubtract_1h, dtAt)
-              return dtAt >= dtSubtract_1h;
-            })
-            panel.histValues = filterHistValues;
-          })
-        });
-      });
-      return this.tabItems;
     },
+    // filterTabValues: function () {
+    //   //------------------------------------
+    //   debug("mounted.panels:", this.panels);
+    //   this.tabValues.forEach((tab1Item, tab1Index) => {
+    //     tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
+    //       tab2Item.tab2Panels.forEach((panel, panelIndex) => {
+    //         const filterHistValues = panel.histValues.filter((item) => {
+    //           // Get now date-time
+    //           const dtSubtract_nh = moment()
+    //             .utc()
+    //             .subtract(this.timeRange, "h")
+    //             .format("YYYY-MM-DDTHH:mm:ss");
+    //           const dtAt = item[0].split(".")[0];
+    //           // debug('filterTabItems.times:', dtNow, dtSubtract_1h, dtAt)
+    //           return dtAt >= dtSubtract_nh;
+    //         });
+    //         panel.histValues = filterHistValues;
+    //       });
+    //     });
+    //   });
+    //   return this.tabValues;
+    // },
   },
   methods: {
+    // getFilterTabItems: function () {
+    //   //------------------------------------
+    //   debug("mounted.panels:", this.panels);
+    //   this.tabItems.forEach((tab1Item, tab1Index) => {
+    //     tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
+    //       tab2Item.tab2Panels.forEach((panel, panelIndex) => {
+    //         const filterHistValues = panel.histValues.filter((item) => {
+    //           // Get now date-time
+    //           const dtSubtract_nh = moment()
+    //             .utc()
+    //             .subtract(this.timeRange, "h")
+    //             .format("YYYY-MM-DDTHH:mm:ss");
+    //           const dtAt = item[0].split(".")[0];
+    //           // debug('filterTabItems.times:', dtNow, dtSubtract_1h, dtAt)
+    //           return dtAt >= dtSubtract_nh;
+    //         });
+    //         panel.histValues = filterHistValues;
+    //       });
+    //     });
+    //   });
+    //   return this.tabItems;
+    // },
     // Open the panels
     allOpen() {
       let tabPanels = this.tabItems[this.tab1]["tab2Items"];
