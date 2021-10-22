@@ -10,7 +10,8 @@
     <tab2-panels-chart
       v-if="isTab2PanelsChart && !isTablet"
       :tab-items="tab2Items"
-      :tab-values="tab2Values"
+      :current-values="currentValues"
+      :hist-values="tagHistValues"
     ></tab2-panels-chart>
   </div>
 </template>
@@ -47,17 +48,23 @@ export default {
         tab1: [],
         tab2: [],
       },
+      tagHistValues: {},
+      // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ...["2021-10-22T14:25:55", 34.567]] }
       isPanelsChart: false,
       isTabPanelsChart: false,
       isTab2PanelsChart: false,
+      countItems: 0,
+      countValues: 0,
     };
   },
   created: function () {
     this.getPanelsChartType();
+    this.getTagHistValues();
   },
   mounted: function () {
     this.$nextTick(function () {
       // console.log('getPanels.panels:', this.panels);
+      // debug('mounted.tagHistValues:', this.tagHistValues);
     });
   },
   computed: {
@@ -80,30 +87,7 @@ export default {
         },
       }).data;
       opcuaTags.forEach((tag) => {
-        const tagHistValues = [["Time", "Value"]];
-        //------------------------
-        // if (this.values.length) {
-        //   const finded = this.values.find((v) => v.key === tag.browseName);
-        //   if (finded) {
-        //     value = finded.value;
-        //     value = tag.dataType === "Double" ? loRound(value, 3) : value;
-        //   }
-        // }
-        // if (this.histValues.length) {
-        //   this.histValues.forEach((histValue) => {
-        //     value = 0;
-        //     if (histValue.values.length) {
-        //       const finded = histValue.values.find(
-        //         (v) => v.key === tag.browseName
-        //       );
-        //       if (finded) {
-        //         value = finded.value;
-        //         value = tag.dataType === "Double" ? loRound(value, 3) : value;
-        //       }
-        //     }
-        //     tagHistValues.push([histValue['createdAt'], value]);
-        //   });
-        // }
+
         const lowRange = tag.valueParams.engineeringUnitsRange.low;
         const highRange = tag.valueParams.engineeringUnitsRange.high;
         const engineeringUnits = this.$t(
@@ -119,17 +103,18 @@ export default {
           range: `${this.$t(
             "common.range"
           )}: (${lowRange}, ${highRange}) ${engineeringUnits}`,
-          // currentValue: value,
-          // histValues: tagHistValues
         });
       });
       return panels;
     },
-    panelValues() {
+    /** 
+      panelValues() {
       const panels = [];
       let value = 0;
       //----------------------
+      // Get FeathersVuex service
       const { OpcuaTag } = this.$FeathersVuex;
+      // Find tags
       const opcuaTags = OpcuaTag.findInStore({
         query: {
           ownerName: this.owner,
@@ -138,30 +123,18 @@ export default {
         },
       }).data;
       opcuaTags.forEach((tag) => {
-        const tagHistValues = [["Time", "Value"]];
-        //------------------------
-        if (this.values.length) {
-          const finded = this.values.find((v) => v.key === tag.browseName);
+        // Get current value
+        value = 0;
+        if (this.currentValues) {
+          const finded = this.currentValues.find(
+            (v) => v.key === tag.browseName
+          );
           if (finded) {
             value = finded.value;
             value = tag.dataType === "Double" ? loRound(value, 3) : value;
           }
         }
-        if (this.histValues.length) {
-          this.histValues.forEach((histValue) => {
-            value = 0;
-            if (histValue.values.length) {
-              const finded = histValue.values.find(
-                (v) => v.key === tag.browseName
-              );
-              if (finded) {
-                value = finded.value;
-                value = tag.dataType === "Double" ? loRound(value, 3) : value;
-              }
-            }
-            tagHistValues.push([histValue['createdAt'], value]);
-          });
-        }
+
         const lowRange = tag.valueParams.engineeringUnitsRange.low;
         const highRange = tag.valueParams.engineeringUnitsRange.high;
         const engineeringUnits = this.$t(
@@ -178,24 +151,58 @@ export default {
             "common.range"
           )}: (${lowRange}, ${highRange}) ${engineeringUnits}`,
           currentValue: value,
-          histValues: tagHistValues
+          histValues: this.tagHistValues[tag.browseName],
         });
       });
       return panels;
     },
-    values() {
+    */
+    
+    /**
+     * @method  currentValues
+     * @returns Object[]
+     * e.g. [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ...{key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
+     */
+    currentValues() {
+      const currentValues = {};
+      //-------------------------------
       const { OpcuaValue } = this.$FeathersVuex;
       const opcuaValues = OpcuaValue.findInStore({
-        query: { tagName: this.group, $sort: { createdAt: -1 } },
+        query: { tagName: this.group, $sort: { createdAt: -1 }, $limit: 1 },
       }).data;
-      return opcuaValues.length ? opcuaValues[0].values : [];
+      
+      if (opcuaValues.length && opcuaValues[0].values.length) {
+        opcuaValues[0].values.forEach((valueItem) => {
+          // Add values to tagHistValues
+          if (!this.tagHistValues[valueItem.key]) {
+            this.tagHistValues[valueItem.key] = [["Time", "Value"]];
+          }
+          this.tagHistValues[valueItem.key].push([
+            opcuaValues[0]["createdAt"],
+            valueItem.value,
+          ]);
+          // Add values to currentValues
+          currentValues[valueItem.key] = valueItem.value;
+        });
+      }
+
+      return currentValues;
     },
+    /**
+     * @method  histValues
+     * @returns Object[]
+     * e.g. [{ 
+     *  tagName: 'CH_M51::ValueFromFile', 
+     *  createdAt: '2021-10-21T04:51:30.275+00:00',
+     *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
+     *  }, ...]
+     */
     histValues() {
       const { OpcuaValue } = this.$FeathersVuex;
       const opcuaValues = OpcuaValue.findInStore({
         query: { tagName: this.group, $sort: { createdAt: 1 } },
       }).data;
-      return opcuaValues.length ? opcuaValues : [];
+      return opcuaValues;
     },
     // Get tabItems for tab1
     tabItems() {
@@ -225,6 +232,9 @@ export default {
     },
     // Get tabItems for tab1 and tab2
     tab2Items() {
+      debug("RtData.tab2Items.countItems:", this.countItems);
+      this.countItems = this.countItems + 1;
+
       const tab1Items = [];
       this.tabs.tab1.forEach((tab1, index) => {
         const tab2Items = [];
@@ -283,6 +293,9 @@ export default {
     },
     // Get tabValues for tab1 and tab2
     tab2Values() {
+      debug("RtData.tab2Values.countValues:", this.countValues);
+      this.countValues = this.countValues + 1;
+
       const tab1Items = [];
       this.tabs.tab1.forEach((tab1, index) => {
         const tab2Items = [];
@@ -324,6 +337,7 @@ export default {
             });
             return result;
           });
+
           if (tab2Panels && tab2Panels.length) {
             tab2Items.push({
               tab2Name: tab2.name,
@@ -341,6 +355,23 @@ export default {
     },
   },
   methods: {
+    getTagHistValues() {
+      if (this.histValues.length) {
+        this.histValues.forEach((item) => {
+          if (item.values.length) {
+            item.values.forEach((valueItem) => {
+              if (!this.tagHistValues[valueItem.key]) {
+                this.tagHistValues[valueItem.key] = [["Time", "Value"]];
+              }
+              this.tagHistValues[valueItem.key].push([
+                item["createdAt"],
+                valueItem.value,
+              ]);
+            });
+          }
+        });
+      }
+    },
     getPanelsChartType() {
       const { OpcuaTag } = this.$FeathersVuex;
       const objectTags = OpcuaTag.findInStore({

@@ -83,7 +83,7 @@
                                           ? 'text--lighten-1'
                                           : 'text--darken-2'
                                       "
-                                      >{{ tab2PanelItem.currentValue? tab2PanelItem.currentValue : 1234 }}
+                                      >{{ currentValues[tab2PanelItem.browseName] }}
                                       {{ tab2PanelItem.engineeringUnits }}</span
                                     >
                                   </v-col>
@@ -116,7 +116,7 @@
                                     >
                                       <box-chart
                                         :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
-                                        :sub-title="`${tab2PanelItem.currentValue? tab2PanelItem.currentValue : 1234 } ${tab2PanelItem.engineeringUnits}`"
+                                        :sub-title="`${ currentValues[tab2PanelItem.browseName] } ${tab2PanelItem.engineeringUnits}`"
                                         icon="mdi-chart-line-variant"
                                         :options="
                                           boxLineOptions({
@@ -124,7 +124,7 @@
                                               tab2PanelItem.engineeringUnits,
                                           })
                                         "
-                                        :data="tab2PanelItem.histValues? tab2PanelItem.histValues : []"
+                                        :data="histValues[tab2PanelItem.browseName]"
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
                                       />
@@ -189,7 +189,8 @@ export default {
   },
   props: {
     tabItems: Array,
-    tabValues: Array,
+    currentValues: Object,
+    histValues: Object
   },
   data() {
     return {
