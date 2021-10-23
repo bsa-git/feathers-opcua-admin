@@ -45,11 +45,11 @@ export default {
       title: this.$t(`${this.owner.toLowerCase()}.title`),
       description: this.$t(`${this.owner.toLowerCase()}.description`),
       tabs: {
-        tab1: [],
-        tab2: [],
+        tab1: [], // [{ "name": "Common plant", "items": ["01"] }, ... ,  { "name": "Aggregate 1/1", "items": ["11"] }]
+        tab2: [], // [{ "name": "Water", "items": ["VODA", "VODA_XOB"] }, ... , { "name": "Compression", "items": ["PS180", "GTT", "UKST", "RD"] },]
       },
-      tagHistValues: {},
-      // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ...["2021-10-22T14:25:55", 34.567]] }
+      tagCurrentValues: {}, // e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
+      tagHistValues: {}, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
       isPanelsChart: false,
       isTabPanelsChart: false,
       isTab2PanelsChart: false,
@@ -87,7 +87,6 @@ export default {
         },
       }).data;
       opcuaTags.forEach((tag) => {
-
         const lowRange = tag.valueParams.engineeringUnitsRange.low;
         const highRange = tag.valueParams.engineeringUnitsRange.high;
         const engineeringUnits = this.$t(
@@ -107,71 +106,22 @@ export default {
       });
       return panels;
     },
-    /** 
-      panelValues() {
-      const panels = [];
-      let value = 0;
-      //----------------------
-      // Get FeathersVuex service
-      const { OpcuaTag } = this.$FeathersVuex;
-      // Find tags
-      const opcuaTags = OpcuaTag.findInStore({
-        query: {
-          ownerName: this.owner,
-          type: "variable.analog",
-          $sort: { displayName: 1 },
-        },
-      }).data;
-      opcuaTags.forEach((tag) => {
-        // Get current value
-        value = 0;
-        if (this.currentValues) {
-          const finded = this.currentValues.find(
-            (v) => v.key === tag.browseName
-          );
-          if (finded) {
-            value = finded.value;
-            value = tag.dataType === "Double" ? loRound(value, 3) : value;
-          }
-        }
 
-        const lowRange = tag.valueParams.engineeringUnitsRange.low;
-        const highRange = tag.valueParams.engineeringUnitsRange.high;
-        const engineeringUnits = this.$t(
-          `standardUnits.${tag.valueParams.engineeringUnits}.shortName`
-        );
-        panels.push({
-          panel: "line",
-          browseName: tag.browseName,
-          displayName: tag.displayName,
-          name: tag.description,
-          icon: "mdi-chart-line",
-          engineeringUnits,
-          range: `${this.$t(
-            "common.range"
-          )}: (${lowRange}, ${highRange}) ${engineeringUnits}`,
-          currentValue: value,
-          histValues: this.tagHistValues[tag.browseName],
-        });
-      });
-      return panels;
-    },
-    */
-    
     /**
      * @method  currentValues
      * @returns Object[]
-     * e.g. [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ...{key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
+     * e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
      */
     currentValues() {
-      const currentValues = {};
+      // const currentValues = {};
       //-------------------------------
       const { OpcuaValue } = this.$FeathersVuex;
       const opcuaValues = OpcuaValue.findInStore({
         query: { tagName: this.group, $sort: { createdAt: -1 }, $limit: 1 },
       }).data;
-      
+
       if (opcuaValues.length && opcuaValues[0].values.length) {
+        //e.g. [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
         opcuaValues[0].values.forEach((valueItem) => {
           // Add values to tagHistValues
           if (!this.tagHistValues[valueItem.key]) {
@@ -182,17 +132,28 @@ export default {
             valueItem.value,
           ]);
           // Add values to currentValues
-          currentValues[valueItem.key] = valueItem.value;
+          if (!this.tagCurrentValues[valueItem.key]) {
+            this.tagCurrentValues[valueItem.key] = {
+              isModified: true,
+              value: valueItem.value,
+            };
+          } else {
+            const oldValue = this.tagCurrentValues[valueItem.key].value;
+            this.tagCurrentValues[valueItem.key].isModified =
+              oldValue !== valueItem.value;
+            if (oldValue !== valueItem.value) {
+              this.tagCurrentValues[valueItem.key].value = valueItem.value;
+            }
+          }
         });
       }
-
-      return currentValues;
+      return this.tagCurrentValues;
     },
     /**
      * @method  histValues
      * @returns Object[]
-     * e.g. [{ 
-     *  tagName: 'CH_M51::ValueFromFile', 
+     * e.g. [{
+     *  tagName: 'CH_M51::ValueFromFile',
      *  createdAt: '2021-10-21T04:51:30.275+00:00',
      *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
      *  }, ...]
@@ -276,68 +237,6 @@ export default {
             });
             return result;
           });
-          if (tab2Panels && tab2Panels.length) {
-            tab2Items.push({
-              tab2Name: tab2.name,
-              tab2Panels: tab2Panels,
-            });
-          }
-        });
-        tab1Items.push({
-          tab1Name: tab1.name,
-          tab1Panels,
-          tab2Items,
-        });
-      });
-      return tab1Items;
-    },
-    // Get tabValues for tab1 and tab2
-    tab2Values() {
-      debug("RtData.tab2Values.countValues:", this.countValues);
-      this.countValues = this.countValues + 1;
-
-      const tab1Items = [];
-      this.tabs.tab1.forEach((tab1, index) => {
-        const tab2Items = [];
-        // Get tabPanels for tab1
-        const tab1Panels = this.panelValues.filter((panel) => {
-          let result = false;
-          let browseName = panel.browseName; // CH_M51::01AMIAK:01T4
-          let browseNames = browseName.split("::");
-          if (browseNames.length > 1) {
-            browseName = browseNames[1];
-            browseNames = browseName.split(":");
-          }
-          tab1.items.forEach((item) => {
-            if (!result) {
-              result = browseNames[0].includes(item);
-            }
-          });
-          return result;
-        });
-
-        // Get tabItems for tab2
-        this.tabs.tab2.forEach((tab2, index) => {
-          let result = false;
-          const tab2Panels = tab1Panels.filter((panel) => {
-            result = false;
-            let browseName = panel.browseName; //e.g. CH_M51::01AMIAK:01T4
-            let browseNames = browseName.split("::");
-            if (browseNames.length > 1) {
-              browseName = browseNames[1];
-              browseNames = browseName.split(":");
-            }
-            tab2.items.forEach((item) => {
-              if (!result) {
-                result = browseNames[0].includes(item);
-                if (!result && browseNames.length > 1) {
-                  result = browseNames[1].includes(item);
-                }
-              }
-            });
-            return result;
-          });
-
           if (tab2Panels && tab2Panels.length) {
             tab2Items.push({
               tab2Name: tab2.name,

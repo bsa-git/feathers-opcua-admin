@@ -83,7 +83,7 @@
                                           ? 'text--lighten-1'
                                           : 'text--darken-2'
                                       "
-                                      >{{ currentValues[tab2PanelItem.browseName] }}
+                                      >{{ currentValues[tab2PanelItem.browseName]? currentValues[tab2PanelItem.browseName].value : 0 }}
                                       {{ tab2PanelItem.engineeringUnits }}</span
                                     >
                                   </v-col>
@@ -116,7 +116,8 @@
                                     >
                                       <box-chart
                                         :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
-                                        :sub-title="`${ currentValues[tab2PanelItem.browseName] } ${tab2PanelItem.engineeringUnits}`"
+                                        :sub-title="`${ currentValues[tab2PanelItem.browseName]? currentValues[tab2PanelItem.browseName].value : 0
+                                        } ${tab2PanelItem.engineeringUnits}`"
                                         icon="mdi-chart-line-variant"
                                         :options="
                                           boxLineOptions({
@@ -124,7 +125,9 @@
                                               tab2PanelItem.engineeringUnits,
                                           })
                                         "
-                                        :data="histValues[tab2PanelItem.browseName]"
+                                        :data="
+                                          histValues[tab2PanelItem.browseName]
+                                        "
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
                                       />
@@ -190,7 +193,7 @@ export default {
   props: {
     tabItems: Array,
     currentValues: Object,
-    histValues: Object
+    histValues: Object,
   },
   data() {
     return {
@@ -212,8 +215,8 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       if (isLog) debug("mounted.$refs:", this.$refs);
-      // debug("mounted.tabItems:", this.tabItems);
-      // debug("mounted.panels:", this.panels);
+      debug("mounted.histValues:", this.histValues);
+      debug("mounted.currentValues:", this.currentValues);
     });
   },
   watch: {
@@ -260,30 +263,34 @@ export default {
     //   });
     //   return this.tabValues;
     // },
+
+    /**
+     * @method filterHistValues
+     * @returns Object
+     * // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
+     */
+    filterHistValues: function () {
+      const histValues = {};
+      const self = this;
+      //------------------------------------
+      loForEach(this.histValues, function (value, key) {
+        // Get filter hist values 
+        const filterHistValues = value.filter((item) => {
+          // Get now timeRange
+          const dtTimeRange = moment()
+            .utc()
+            .subtract(self.timeRange, "h")
+            .format("YYYY-MM-DDTHH:mm:ss");
+          // Get histValue date-time  
+          const dtAt = item[0].split(".")[0];
+          return dtAt >= dtTimeRange;
+        });
+        histValues[key] = filterHistValues;
+      });
+      return histValues;
+    },
   },
   methods: {
-    // getFilterTabItems: function () {
-    //   //------------------------------------
-    //   debug("mounted.panels:", this.panels);
-    //   this.tabItems.forEach((tab1Item, tab1Index) => {
-    //     tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
-    //       tab2Item.tab2Panels.forEach((panel, panelIndex) => {
-    //         const filterHistValues = panel.histValues.filter((item) => {
-    //           // Get now date-time
-    //           const dtSubtract_nh = moment()
-    //             .utc()
-    //             .subtract(this.timeRange, "h")
-    //             .format("YYYY-MM-DDTHH:mm:ss");
-    //           const dtAt = item[0].split(".")[0];
-    //           // debug('filterTabItems.times:', dtNow, dtSubtract_1h, dtAt)
-    //           return dtAt >= dtSubtract_nh;
-    //         });
-    //         panel.histValues = filterHistValues;
-    //       });
-    //     });
-    //   });
-    //   return this.tabItems;
-    // },
     // Open the panels
     allOpen() {
       let tabPanels = this.tabItems[this.tab1]["tab2Items"];
