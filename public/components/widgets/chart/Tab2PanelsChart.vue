@@ -83,7 +83,22 @@
                                           ? 'text--lighten-1'
                                           : 'text--darken-2'
                                       "
-                                      >{{ currentValues[tab2PanelItem.browseName]? currentValues[tab2PanelItem.browseName].value : 0 }}
+                                    >
+                                      <span
+                                        v-if="numberChanges"
+                                        :ref="`txt/${tab2PanelItem.browseName}`"
+                                        >{{
+                                          currentValues[
+                                            tab2PanelItem.browseName
+                                          ].value
+                                        }}</span
+                                      >
+                                      <span v-else
+                                        ><v-icon small :color="iconColor"
+                                          >fas fa-circle-notch fa-spin</v-icon
+                                        ></span
+                                      >
+
                                       {{ tab2PanelItem.engineeringUnits }}</span
                                     >
                                   </v-col>
@@ -116,8 +131,7 @@
                                     >
                                       <box-chart
                                         :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
-                                        :sub-title="`${ currentValues[tab2PanelItem.browseName]? currentValues[tab2PanelItem.browseName].value : 0
-                                        } ${tab2PanelItem.engineeringUnits}`"
+                                        :sub-title="`${tab2PanelItem.engineeringUnits}`"
                                         icon="mdi-chart-line-variant"
                                         :options="
                                           boxLineOptions({
@@ -125,11 +139,10 @@
                                               tab2PanelItem.engineeringUnits,
                                           })
                                         "
-                                        :data="
-                                          histValues[tab2PanelItem.browseName]
-                                        "
+                                        :data="[]"
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
+                                        :ref="`chart/${tab2PanelItem.browseName}`"
                                       />
                                       <v-divider />
                                       <v-card-actions>
@@ -181,7 +194,7 @@ import boxLineOptions from "~/api/app/chart/box-line2";
 const moment = require("moment");
 const loForEach = require("lodash/forEach");
 
-const debug = require("debug")("app:component.Tab2PanelsChart");
+const debug = require("debug")("app:comp.Tab2PanelsChart");
 const isLog = false;
 const isDebug = false;
 
@@ -194,6 +207,7 @@ export default {
     tabItems: Array,
     currentValues: Object,
     histValues: Object,
+    numberChanges: Number,
   },
   data() {
     return {
@@ -215,8 +229,8 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       if (isLog) debug("mounted.$refs:", this.$refs);
-      debug("mounted.histValues:", this.histValues);
-      debug("mounted.currentValues:", this.currentValues);
+      // debug("mounted.histValues:", this.histValues);
+      // debug("mounted.currentValues:", this.currentValues);
     });
   },
   watch: {
@@ -227,6 +241,23 @@ export default {
     timeRange: function (val) {
       if (isDebug) debug("watch.panels.$refs:", this.$refs);
       // debug("watch.timeRange:", this.timeRange);
+    },
+    numberChanges: function (val) {
+      // if (isDebug) debug("watch.panels.$refs:", this.$refs);
+      debug("watch.numberChanges.$refs:", this.$refs);
+      
+      // innerText
+      loForEach(this.currentValues, (value, key) => {
+        // Update values
+        if (this.$refs[`txt/${key}`] && this.currentValues[key].isModified) {
+          this.$refs[`txt/${key}`][0].innerText = this.currentValues[key].value;
+        }
+
+        // Update chart
+        if (this.$refs[`chart/${key}`]) {
+          // this.$refs[`chart/${key}`][0].data = this.histValues[key];
+        }
+      });
     },
   },
   computed: {
@@ -241,9 +272,12 @@ export default {
     tabActiveClass: function () {
       return this.theme.dark ? "white--text" : "black--text";
     },
+    iconColor: function () {
+      return this.theme.dark ? "white" : "black";
+    },
     // filterTabValues: function () {
     //   //------------------------------------
-    //   debug("mounted.panels:", this.panels);
+    //   // debug("filterTabValues.panels:", this.panels);
     //   this.tabValues.forEach((tab1Item, tab1Index) => {
     //     tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
     //       tab2Item.tab2Panels.forEach((panel, panelIndex) => {
@@ -274,20 +308,29 @@ export default {
       const self = this;
       //------------------------------------
       loForEach(this.histValues, function (value, key) {
-        // Get filter hist values 
+        // Get filter hist values
         const filterHistValues = value.filter((item) => {
           // Get now timeRange
           const dtTimeRange = moment()
             .utc()
             .subtract(self.timeRange, "h")
             .format("YYYY-MM-DDTHH:mm:ss");
-          // Get histValue date-time  
+          // Get histValue date-time
           const dtAt = item[0].split(".")[0];
           return dtAt >= dtTimeRange;
         });
         histValues[key] = filterHistValues;
       });
+      debug("filterHistValues.histValues:", histValues);
       return histValues;
+    },
+    computedCurrentValues: function name() {
+      debug("computedCurrentValues.currentValues:", this.currentValues);
+      return this.currentValues;
+    },
+    computedHistValues: function name() {
+      debug("computedHistValues.histValues:", this.histValues);
+      return this.histValues;
     },
   },
   methods: {

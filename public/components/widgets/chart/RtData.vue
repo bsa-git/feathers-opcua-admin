@@ -12,6 +12,7 @@
       :tab-items="tab2Items"
       :current-values="currentValues"
       :hist-values="tagHistValues"
+      :number-changes="numberChanges"
     ></tab2-panels-chart>
   </div>
 </template>
@@ -25,7 +26,7 @@ import Tab2PanelsChart from "~/components/widgets/chart/Tab2PanelsChart";
 const loRound = require("lodash/round");
 const loMerge = require("lodash/merge");
 
-const debug = require("debug")("app:page.echarts");
+const debug = require("debug")("app:comp.RtData");
 const isLog = false;
 const isDebug = false;
 
@@ -54,12 +55,13 @@ export default {
       isTabPanelsChart: false,
       isTab2PanelsChart: false,
       countItems: 0,
-      countValues: 0,
+      numberChanges: 0,
     };
   },
   created: function () {
     this.getPanelsChartType();
-    this.getTagHistValues();
+    // const tagHistValues = this.getTagHistValues();
+    // debug('created.tagHistValues:', tagHistValues);
   },
   mounted: function () {
     this.$nextTick(function () {
@@ -98,6 +100,7 @@ export default {
           displayName: tag.displayName,
           name: tag.description,
           icon: "mdi-chart-line",
+          dataType: tag.dataType,
           engineeringUnits,
           range: `${this.$t(
             "common.range"
@@ -120,9 +123,20 @@ export default {
         query: { tagName: this.group, $sort: { createdAt: -1 }, $limit: 1 },
       }).data;
 
+      debug('currentValues.opcuaValues.length', opcuaValues.length)
+
       if (opcuaValues.length && opcuaValues[0].values.length) {
-        //e.g. [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
+
+        this.numberChanges ++;  
+
+        // Get tagHistValues
+        if(!Object.keys(this.tagHistValues).length){
+          this.getTagHistValues();
+          debug('currentValues.tagHistValues:', this.tagHistValues)
+        }
+        //e.g. opcuaValues[0].values = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
         opcuaValues[0].values.forEach((valueItem) => {
+          valueItem.value = loRound(valueItem.value, 3)
           // Add values to tagHistValues
           if (!this.tagHistValues[valueItem.key]) {
             this.tagHistValues[valueItem.key] = [["Time", "Value"]];
@@ -131,7 +145,7 @@ export default {
             opcuaValues[0]["createdAt"],
             valueItem.value,
           ]);
-          // Add values to currentValues
+          // Add values to tagCurrentValues
           if (!this.tagCurrentValues[valueItem.key]) {
             this.tagCurrentValues[valueItem.key] = {
               isModified: true,
@@ -146,7 +160,9 @@ export default {
             }
           }
         });
+        debug('currentValues.tagCurrentValues:', this.tagCurrentValues)
       }
+      
       return this.tagCurrentValues;
     },
     /**
@@ -158,13 +174,13 @@ export default {
      *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
      *  }, ...]
      */
-    histValues() {
-      const { OpcuaValue } = this.$FeathersVuex;
-      const opcuaValues = OpcuaValue.findInStore({
-        query: { tagName: this.group, $sort: { createdAt: 1 } },
-      }).data;
-      return opcuaValues;
-    },
+    // histValues() {
+    //   const { OpcuaValue } = this.$FeathersVuex;
+    //   const opcuaValues = OpcuaValue.findInStore({
+    //     query: { tagName: this.group, $sort: { createdAt: 1 } },
+    //   }).data;
+    //   return opcuaValues;
+    // },
     // Get tabItems for tab1
     tabItems() {
       const tabItems = [];
@@ -193,8 +209,8 @@ export default {
     },
     // Get tabItems for tab1 and tab2
     tab2Items() {
-      debug("RtData.tab2Items.countItems:", this.countItems);
       this.countItems = this.countItems + 1;
+      debug("tab2Items.countItems:", this.countItems);
 
       const tab1Items = [];
       this.tabs.tab1.forEach((tab1, index) => {
@@ -255,8 +271,21 @@ export default {
   },
   methods: {
     getTagHistValues() {
-      if (this.histValues.length) {
-        this.histValues.forEach((item) => {
+     /* e.g. opcuaValues = [{
+     *  tagName: 'CH_M51::ValueFromFile',
+     *  createdAt: '2021-10-21T04:51:30.275+00:00',
+     *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
+     *  }, ...]
+     */
+      const { OpcuaValue } = this.$FeathersVuex;
+      const opcuaValues = OpcuaValue.findInStore({
+        query: { tagName: this.group, $sort: { createdAt: 1 } },
+      }).data;
+
+      debug('getTagHistValues.opcuaValues.length', opcuaValues.length)
+
+      if (opcuaValues.length) {
+        opcuaValues.forEach((item) => {
           if (item.values.length) {
             item.values.forEach((valueItem) => {
               if (!this.tagHistValues[valueItem.key]) {
@@ -264,12 +293,13 @@ export default {
               }
               this.tagHistValues[valueItem.key].push([
                 item["createdAt"],
-                valueItem.value,
+                loRound(valueItem.value, 3),
               ]);
             });
           }
         });
       }
+      return this.tagHistValues;
     },
     getPanelsChartType() {
       const { OpcuaTag } = this.$FeathersVuex;
