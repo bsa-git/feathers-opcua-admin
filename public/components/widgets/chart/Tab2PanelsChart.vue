@@ -15,6 +15,10 @@
     <div>
       <span>Tabs:</span> <span>{{ panels["tab0_0"] }}</span>
     </div>
+    
+    <div>
+      <span>numberChanges:</span> <span>{{ numberChanges }}</span>
+    </div>
     -->
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
@@ -86,21 +90,17 @@
                                     >
                                       <span
                                         v-if="numberChanges"
-                                        :ref="`txt/${tab2PanelItem.browseName}`"
                                         >{{
                                           currentValues[
                                             tab2PanelItem.browseName
                                           ].value
-                                        }}</span
-                                      >
+                                        }}</span>
                                       <span v-else
                                         ><v-icon small :color="iconColor"
                                           >fas fa-circle-notch fa-spin</v-icon
-                                        ></span
-                                      >
+                                        ></span>
 
-                                      {{ tab2PanelItem.engineeringUnits }}</span
-                                    >
+                                      {{ tab2PanelItem.engineeringUnits }}</span>
                                   </v-col>
                                   <v-col cols="1">
                                     <v-tooltip top>
@@ -130,8 +130,13 @@
                                       outlined
                                     >
                                       <box-chart
+                                        v-if="numberChanges"
                                         :title="`${tab1Item.tab1Name} - ${tab2Item.tab2Name}`"
-                                        :sub-title="`${tab2PanelItem.engineeringUnits}`"
+                                        :sub-title="`${
+                                          currentValues[
+                                            tab2PanelItem.browseName
+                                          ].value
+                                        } ${tab2PanelItem.engineeringUnits}`"
                                         icon="mdi-chart-line-variant"
                                         :options="
                                           boxLineOptions({
@@ -139,7 +144,11 @@
                                               tab2PanelItem.engineeringUnits,
                                           })
                                         "
-                                        :data="[]"
+                                        :data="
+                                          filterHistValues[
+                                            tab2PanelItem.browseName
+                                          ]
+                                        "
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
                                         :ref="`chart/${tab2PanelItem.browseName}`"
@@ -161,7 +170,7 @@
                                         </v-btn-toggle>
                                         <v-spacer />
                                         <v-btn small dark text>
-                                          {{ $t("chartDemo.more") }} ...
+                                          {{ $t("chat_messages.moreDetails") }}
                                         </v-btn>
                                       </v-card-actions>
                                     </v-card>
@@ -189,7 +198,6 @@ import { mapGetters } from "vuex";
 import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
 import BoxChart from "~/components/widgets/chart/BoxChart";
 import boxLineOptions from "~/api/app/chart/box-line2";
-// import { monthUniqueVisitData } from "~/api/demo/chart/chart-data";
 
 const moment = require("moment");
 const loForEach = require("lodash/forEach");
@@ -229,41 +237,10 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       if (isLog) debug("mounted.$refs:", this.$refs);
-      // debug("mounted.histValues:", this.histValues);
-      // debug("mounted.currentValues:", this.currentValues);
     });
   },
-  watch: {
-    panels: function (val) {
-      if (isLog) debug("watch.panels.$refs:", this.$refs);
-      debug("watch.panels:", this.panels);
-    },
-    timeRange: function (val) {
-      if (isDebug) debug("watch.panels.$refs:", this.$refs);
-      // debug("watch.timeRange:", this.timeRange);
-    },
-    numberChanges: function (val) {
-      // if (isDebug) debug("watch.panels.$refs:", this.$refs);
-      debug("watch.numberChanges.$refs:", this.$refs);
-      
-      // innerText
-      loForEach(this.currentValues, (value, key) => {
-        // Update values
-        if (this.$refs[`txt/${key}`] && this.currentValues[key].isModified) {
-          this.$refs[`txt/${key}`][0].innerText = this.currentValues[key].value;
-        }
-
-        // Update chart
-        if (this.$refs[`chart/${key}`]) {
-          // this.$refs[`chart/${key}`][0].data = this.histValues[key];
-        }
-      });
-    },
-  },
+  watch: {},
   computed: {
-    isMobile: function () {
-      return this.$vuetify.breakpoint.xsOnly;
-    },
     ...mapGetters({
       config: "getConfig",
       theme: "getTheme",
@@ -275,62 +252,34 @@ export default {
     iconColor: function () {
       return this.theme.dark ? "white" : "black";
     },
-    // filterTabValues: function () {
-    //   //------------------------------------
-    //   // debug("filterTabValues.panels:", this.panels);
-    //   this.tabValues.forEach((tab1Item, tab1Index) => {
-    //     tab1Item.tab2Items.forEach((tab2Item, tab2Index) => {
-    //       tab2Item.tab2Panels.forEach((panel, panelIndex) => {
-    //         const filterHistValues = panel.histValues.filter((item) => {
-    //           // Get now date-time
-    //           const dtSubtract_nh = moment()
-    //             .utc()
-    //             .subtract(this.timeRange, "h")
-    //             .format("YYYY-MM-DDTHH:mm:ss");
-    //           const dtAt = item[0].split(".")[0];
-    //           // debug('filterTabItems.times:', dtNow, dtSubtract_1h, dtAt)
-    //           return dtAt >= dtSubtract_nh;
-    //         });
-    //         panel.histValues = filterHistValues;
-    //       });
-    //     });
-    //   });
-    //   return this.tabValues;
-    // },
-
+    
     /**
      * @method filterHistValues
      * @returns Object
      * // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
      */
     filterHistValues: function () {
-      const histValues = {};
-      const self = this;
+      const _histValues = {};
+      const timeRange = this.timeRange;
       //------------------------------------
-      loForEach(this.histValues, function (value, key) {
-        // Get filter hist values
-        const filterHistValues = value.filter((item) => {
-          // Get now timeRange
-          const dtTimeRange = moment()
-            .utc()
-            .subtract(self.timeRange, "h")
-            .format("YYYY-MM-DDTHH:mm:ss");
-          // Get histValue date-time
-          const dtAt = item[0].split(".")[0];
-          return dtAt >= dtTimeRange;
+      if (this.numberChanges) {
+        loForEach(this.histValues, function (value, key) {
+          // Get filter hist values
+          if (Array.isArray(value)) {
+            const filterHistValues = value.filter((item) => {
+              // Get now timeRange
+              const dtTimeRange = moment()
+                .subtract(timeRange, "h")
+                .format("YYYY-MM-DDTHH:mm:ss");
+              // Get histValue date-time
+              const dtAt = item[0];
+              return dtAt >= dtTimeRange;
+            });
+            _histValues[key] = filterHistValues;
+          }
         });
-        histValues[key] = filterHistValues;
-      });
-      debug("filterHistValues.histValues:", histValues);
-      return histValues;
-    },
-    computedCurrentValues: function name() {
-      debug("computedCurrentValues.currentValues:", this.currentValues);
-      return this.currentValues;
-    },
-    computedHistValues: function name() {
-      debug("computedHistValues.histValues:", this.histValues);
-      return this.histValues;
+      }
+      return _histValues;
     },
   },
   methods: {

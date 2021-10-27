@@ -151,6 +151,48 @@
             "alias": "ch_m52",
             "title": "M52",
             "to": "/rtdata/ch-azot/m52"
+          },
+          {
+            "name": "rtdata-ch-azot-a3",
+            "alias": "ch_a3",
+            "title": "A3",
+            "to": "/rtdata/ch-azot/a3"
+          },
+          {
+            "name": "rtdata-ch-azot-ch_ng-upg2",
+            "alias": "ch_ng-upg2",
+            "title": "NG-UPG2",
+            "to": "/rtdata/ch-azot/ng-upg2"
+          },
+          {
+            "name": "rtdata-ch-azot-ch_m7-313",
+            "alias": "ch_m7-313",
+            "title": "M7-313",
+            "to": "/rtdata/ch-azot/m7-313"
+          },
+          {
+            "name": "rtdata-ch-azot-ch_m7-357",
+            "alias": "ch_m7-357",
+            "title": "M7-357",
+            "to": "/rtdata/ch-azot/m7-357"
+          },
+          {
+            "name": "rtdata-ch-azot-ch_m7-657",
+            "alias": "ch_m7-657",
+            "title": "M7-657",
+            "to": "/rtdata/ch-azot/m7-657"
+          },
+          {
+            "name": "rtdata-ch-azot-ch_m9",
+            "alias": "ch_m9",
+            "title": "M9",
+            "to": "/rtdata/ch-azot/m9"
+          },
+          {
+            "name": "rtdata-ch-azot-ch_m2",
+            "alias": "ch_m2",
+            "title": "M2",
+            "to": "/rtdata/ch-azot/m2"
           }
         ]
       }

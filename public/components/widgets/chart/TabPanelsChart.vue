@@ -9,10 +9,10 @@
       :click-btn1="allOpen"
       :click-btn2="allClose"
     ></panels-top-bar>
-    
+
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
-      <v-col cols="12" md="10">
+      <v-col cols="12" md="12">
         <v-card flat outlined>
           <v-tabs v-model="tab" show-arrows background-color="primary">
             <v-tab v-for="(tabItem, tabIndex) in tabItems" :key="tabIndex">
@@ -24,7 +24,12 @@
             <v-tab-item v-for="(tabItem, tabIndex) in tabItems" :key="tabIndex">
               <v-card flat>
                 <v-card-text>
-                  <v-expansion-panels v-model="panels[`tab${tabIndex}`]" focusable multiple inset>
+                  <v-expansion-panels
+                    v-model="panels[`tab${tabIndex}`]"
+                    focusable
+                    multiple
+                    inset
+                  >
                     <v-expansion-panel
                       v-for="(panelItem, panelIndex) in tabItem.tabPanels"
                       :key="`panel${tabIndex}_${panelIndex}`"
@@ -32,11 +37,11 @@
                     >
                       <v-expansion-panel-header>
                         <v-row no-gutters>
-                          <v-col cols="6">
+                          <v-col cols="7">
                             <v-icon class="mr-3">{{ panelItem.icon }}</v-icon>
                             <span>{{ panelItem.name }}</span>
                           </v-col>
-                          <v-col cols="5">
+                          <v-col cols="4">
                             <span
                               class="green--text font-weight-bold"
                               :class="
@@ -44,7 +49,16 @@
                                   ? 'text--lighten-1'
                                   : 'text--darken-2'
                               "
-                              >{{ panelItem.currentValue }}
+                            >
+                              <span v-if="numberChanges">{{
+                                currentValues[panelItem.browseName].value
+                              }}</span>
+                              <span v-else
+                                ><v-icon small :color="iconColor"
+                                  >fas fa-circle-notch fa-spin</v-icon
+                                ></span
+                              >
+
                               {{ panelItem.engineeringUnits }}</span
                             >
                           </v-col>
@@ -60,7 +74,55 @@
                           </v-col>
                         </v-row>
                       </v-expansion-panel-header>
-                      <v-expansion-panel-content> </v-expansion-panel-content>
+                      <v-expansion-panel-content>
+                        <!--  Box Chart  -->
+                        <v-row justify="center">
+                          <v-col cols="12" sm="12">
+                            <v-card color="primary" :dark="theme.dark" outlined>
+                              <box-chart
+                                v-if="numberChanges"
+                                :title="`${tabItem.tabName}`"
+                                :sub-title="`${
+                                  currentValues[panelItem.browseName].value
+                                } ${panelItem.engineeringUnits}`"
+                                icon="mdi-chart-line-variant"
+                                :options="
+                                  boxLineOptions({
+                                    engineeringUnits:
+                                      panelItem.engineeringUnits,
+                                  })
+                                "
+                                :data="
+                                  filterHistValues[panelItem.browseName]
+                                "
+                                :theme="theme.dark ? 'dark' : 'shine'"
+                                :outlined="true"
+                                :ref="`chart/${panelItem.browseName}`"
+                              />
+                              <v-divider />
+                              <v-card-actions>
+                                <v-btn-toggle
+                                  v-model="timeRange"
+                                  color="primary"
+                                  dense
+                                >
+                                  <v-btn value="0.1"> 0.1H </v-btn>
+
+                                  <v-btn value="1"> 1H </v-btn>
+
+                                  <v-btn value="6"> 6H </v-btn>
+
+                                  <v-btn value="48"> All </v-btn>
+                                </v-btn-toggle>
+                                <v-spacer />
+                                <v-btn small dark text>
+                                  {{ $t("chat_messages.moreDetails") }}
+                                </v-btn>
+                              </v-card-actions>
+                            </v-card>
+                          </v-col>
+                        </v-row>
+                      </v-expansion-panel-content>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </v-card-text>
@@ -75,31 +137,40 @@
 
 <script>
 import { mapGetters } from "vuex";
-import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons"; 
+import PanelsTopBar from "~/components/widgets/top-bars/TwoButtons";
+import BoxChart from "~/components/widgets/chart/BoxChart";
+import boxLineOptions from "~/api/app/chart/box-line2";
 
+const moment = require("moment");
 const loForEach = require("lodash/forEach");
 
-const debug = require("debug")("app:component.TabPanelsChart");
+const debug = require("debug")("app:comp.TabPanelsChart");
 const isLog = false;
 const isDebug = false;
 
 export default {
   components: {
     PanelsTopBar,
+    BoxChart,
   },
   props: {
     tabItems: Array,
+    currentValues: Object,
+    histValues: Object,
+    numberChanges: Number,
   },
   data() {
     return {
       panels: {},
       tab: null,
+      timeRange: "0.1",
+      boxLineOptions,
     };
   },
   created: function () {
     this.tabItems.forEach((tab, i) => {
       this.panels[`tab${i}`] = [];
-    })
+    });
   },
   mounted: function () {
     this.$nextTick(function () {
@@ -107,23 +178,51 @@ export default {
       // debug("mounted.tabItems:", this.tabItems);
     });
   },
-  watch: {
-    panels: function (val) {
-      if (isLog) debug("watch.panels.$refs:", this.$refs);
-    },
-  },
+  watch: {},
   computed: {
     ...mapGetters({
       config: "getConfig",
       theme: "getTheme",
       primaryColor: "getPrimaryBaseColor",
     }),
+    iconColor: function () {
+      return this.theme.dark ? "white" : "black";
+    },
+
+    /**
+     * @method filterHistValues
+     * @returns Object
+     * // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
+     */
+    filterHistValues: function () {
+      const _histValues = {};
+      const timeRange = this.timeRange;
+      //------------------------------------
+      if (this.numberChanges) {
+        loForEach(this.histValues, function (value, key) {
+          // Get filter hist values
+          if (Array.isArray(value)) {
+            const filterHistValues = value.filter((item) => {
+              // Get now timeRange
+              const dtTimeRange = moment()
+                .subtract(timeRange, "h")
+                .format("YYYY-MM-DDTHH:mm:ss");
+              // Get histValue date-time
+              const dtAt = item[0];
+              return dtAt >= dtTimeRange;
+            });
+            _histValues[key] = filterHistValues;
+          }
+        });
+      }
+      return _histValues;
+    },
   },
   methods: {
     // Open the panels
     allOpen() {
-      this.tabItems[this.tab]['tabPanels'].forEach((item, i) => {
-        if (!this.panels[`tab${this.tab}`].includes(i)) {  
+      this.tabItems[this.tab]["tabPanels"].forEach((item, i) => {
+        if (!this.panels[`tab${this.tab}`].includes(i)) {
           const panel = this.$refs[`panel${this.tab}_${i}`]
             ? this.$refs[`panel${this.tab}_${i}`][0]
             : null;
@@ -135,8 +234,8 @@ export default {
     },
     // Close the panels
     allClose() {
-      this.tabItems[this.tab]['tabPanels'].forEach((item, i) => {
-        if (this.panels[`tab${this.tab}`].includes(i)) {  
+      this.tabItems[this.tab]["tabPanels"].forEach((item, i) => {
+        if (this.panels[`tab${this.tab}`].includes(i)) {
           const panel = this.$refs[`panel${this.tab}_${i}`]
             ? this.$refs[`panel${this.tab}_${i}`][0]
             : null;

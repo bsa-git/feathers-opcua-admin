@@ -23,8 +23,8 @@
       RtData
     },
     data() {
-      const owner = 'CH_M52';// CH_A3
-      const group = 'CH_M52::ValueFromFile';// CH_A3::ValuesFromDB
+      const owner = 'CH_M7-313';
+      const group = 'CH_M7-313::ValuesFromDB';
       return {
         title: this.$t(`${owner.toLowerCase()}.title`),
         description: this.$t(`${owner.toLowerCase()}.description`),
@@ -42,8 +42,6 @@
     },
     mounted: function () {
       this.$nextTick(function () {
-        // console.log('numberOfValues.count:', this.numberOfValues);
-        // console.log('getPanels.panels:', this.panels);
       })
     },
   }

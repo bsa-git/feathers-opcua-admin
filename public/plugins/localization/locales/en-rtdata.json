@@ -2,19 +2,54 @@
   "app_menu": {
     "rtdata": "Real time data",
     "ch_azot": "Cherkassy `Azot`",
-    "ch_m51": "M5-1",
-    "ch_m52": "M5-2"
+    "ch_m51": "M5/1",
+    "ch_m52": "M5/2",
+    "ch_a3": "A3",
+    "ch_ng-upg2": "NG node №2",
+    "ch_m7-313": "М7/313",
+    "ch_m7-357": "М7/357",
+    "ch_m7-657": "М7/657",
+    "ch_m9": "М9",
+    "ch_m2": "М2"
   },
   "rtdata": {
     "title": "Real time data",
     "description": "Real time data"
   },
   "ch_m51": {
-    "title": "Cherkassy `Azot` department M5-1",
-    "description": "Department М5-1 `Production of HNO3`"
+    "title": "Cherkassy `Azot` M5/1 workshop",
+    "description": "М5/1 `HNO3 production`"
   },
   "ch_m52": {
-    "title": "Cherkassy `Azot` department M5-2",
-    "description": "Department М5-2 `Production of HNO3`"
+    "title": "Cherkassy `Azot` M5/2 workshop",
+    "description": "М5/2 `HNO3 production`"
+  },
+  "ch_a3": {
+    "title": "Cherkassy `Azot` A3 workshop",
+    "description": "A3 `Ammonia production`"
+  },
+  "ch_ng-upg2": {
+    "title": "Cherkassy `Azot` NG node №2",
+    "description": "NG node №2"
+  },
+  "ch_m7-313": {
+    "title": "Cherkassy `Azot` М7/313 workshop",
+    "description": "М7/313 `Ammonia water production`"
+  },
+  "ch_m7-357": {
+    "title": "Cherkassy `Azot` М7/357 workshop",
+    "description": "М7/357 №2 storage"
+  },
+  "ch_m7-657": {
+    "title": "Cherkassy `Azot` М7/657 workshop",
+    "description": "М7/657 №3 storage"
+  },
+  "ch_m9": {
+    "title": "Cherkassy `Azot` М9 workshop",
+    "description": "М9 `Ammonium nitrate production`"
+  },
+  "ch_m2": {
+    "title": "Cherkassy `Azot` М2 workshop",
+    "description": "М2 `Urea production`"
   }
 }
