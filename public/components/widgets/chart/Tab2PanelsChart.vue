@@ -88,19 +88,21 @@
                                           : 'text--darken-2'
                                       "
                                     >
-                                      <span
-                                        v-if="numberChanges"
-                                        >{{
-                                          currentValues[
-                                            tab2PanelItem.browseName
-                                          ].value
-                                        }}</span>
+                                      <span v-if="numberChanges">{{
+                                        currentValues[tab2PanelItem.browseName]
+                                          ? currentValues[
+                                              tab2PanelItem.browseName
+                                            ].value
+                                          : 0
+                                      }}</span>
                                       <span v-else
                                         ><v-icon small :color="iconColor"
                                           >fas fa-circle-notch fa-spin</v-icon
-                                        ></span>
+                                        ></span
+                                      >
 
-                                      {{ tab2PanelItem.engineeringUnits }}</span>
+                                      {{ tab2PanelItem.engineeringUnits }}</span
+                                    >
                                   </v-col>
                                   <v-col cols="1">
                                     <v-tooltip top>
@@ -135,7 +137,11 @@
                                         :sub-title="`${
                                           currentValues[
                                             tab2PanelItem.browseName
-                                          ].value
+                                          ]
+                                            ? currentValues[
+                                                tab2PanelItem.browseName
+                                              ].value
+                                            : 0
                                         } ${tab2PanelItem.engineeringUnits}`"
                                         icon="mdi-chart-line-variant"
                                         :options="
@@ -145,9 +151,7 @@
                                           })
                                         "
                                         :data="
-                                          filterHistValues[
-                                            tab2PanelItem.browseName
-                                          ]
+                                          filterHistValues[tab2PanelItem.browseName] ? filterHistValues[tab2PanelItem.browseName] : []
                                         "
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
@@ -235,11 +239,18 @@ export default {
     });
   },
   mounted: function () {
-    this.$nextTick(function () {
-      if (isLog) debug("mounted.$refs:", this.$refs);
-    });
+    this.$nextTick(function () {});
   },
-  watch: {},
+  watch: {
+    numberChanges: function (val) {
+      if (val) {
+        if (isDebug) debug("watch.numberChanges.val:", val);
+        if (isLog)
+          debug("watch.numberChanges.currentValues:", this.currentValues);
+        if (isLog) debug("watch.numberChanges.histValues:", this.histValues);
+      }
+    },
+  },
   computed: {
     ...mapGetters({
       config: "getConfig",
@@ -252,7 +263,7 @@ export default {
     iconColor: function () {
       return this.theme.dark ? "white" : "black";
     },
-    
+
     /**
      * @method filterHistValues
      * @returns Object

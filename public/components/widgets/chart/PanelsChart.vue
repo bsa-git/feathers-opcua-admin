@@ -33,7 +33,9 @@
                     >
                       <!-- {{ item.currentValue }}  -->
                       <span v-if="numberChanges">{{
-                        currentValues[item.browseName].value
+                        currentValues[item.browseName]
+                          ? currentValues[item.browseName].value
+                          : 0
                       }}</span>
                       <span v-else
                         ><v-icon small :color="iconColor"
@@ -64,7 +66,9 @@
                         v-if="numberChanges"
                         :title="`${item.name}`"
                         :sub-title="`${
-                          currentValues[item.browseName].value
+                          currentValues[item.browseName]
+                            ? currentValues[item.browseName].value
+                            : 0
                         } ${item.engineeringUnits}`"
                         icon="mdi-chart-line-variant"
                         :options="
@@ -72,7 +76,11 @@
                             engineeringUnits: item.engineeringUnits,
                           })
                         "
-                        :data="filterHistValues[item.browseName]"
+                        :data="
+                          filterHistValues[item.browseName]
+                            ? filterHistValues[item.browseName]
+                            : []
+                        "
                         :theme="theme.dark ? 'dark' : 'shine'"
                         :outlined="true"
                         :ref="`chart/${item.browseName}`"
@@ -137,12 +145,18 @@ export default {
     };
   },
   mounted: function () {
-    this.$nextTick(function () {
-      if (isLog) debug("mounted.$refs:", this.$refs);
-      // debug("mounted.theme:", this.theme);
-    });
+    this.$nextTick(function () {});
   },
-  watch: {},
+  watch: {
+    numberChanges: function (val) {
+      if (val) {
+        if (isDebug) debug("watch.numberChanges.val:", val);
+        if (isLog) debug("watch.numberChanges.currentValues:", this.currentValues);
+        debug("watch.numberChanges.currentValues:", this.currentValues);
+        if (isLog) debug("watch.numberChanges.histValues:", this.histValues);
+      }
+    },
+  },
   computed: {
     ...mapGetters({
       config: "getConfig",

@@ -12,7 +12,7 @@
 
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
-      <v-col cols="12" md="12">
+      <v-col cols="10">
         <v-card flat outlined>
           <v-tabs v-model="tab" show-arrows background-color="primary">
             <v-tab v-for="(tabItem, tabIndex) in tabItems" :key="tabIndex">
@@ -51,7 +51,9 @@
                               "
                             >
                               <span v-if="numberChanges">{{
-                                currentValues[panelItem.browseName].value
+                                currentValues[panelItem.browseName]
+                                  ? currentValues[panelItem.browseName].value
+                                  : 0
                               }}</span>
                               <span v-else
                                 ><v-icon small :color="iconColor"
@@ -83,7 +85,9 @@
                                 v-if="numberChanges"
                                 :title="`${tabItem.tabName}`"
                                 :sub-title="`${
-                                  currentValues[panelItem.browseName].value
+                                  currentValues[panelItem.browseName]
+                                    ? currentValues[panelItem.browseName].value
+                                    : 0
                                 } ${panelItem.engineeringUnits}`"
                                 icon="mdi-chart-line-variant"
                                 :options="
@@ -94,6 +98,8 @@
                                 "
                                 :data="
                                   filterHistValues[panelItem.browseName]
+                                    ? filterHistValues[panelItem.browseName]
+                                    : []
                                 "
                                 :theme="theme.dark ? 'dark' : 'shine'"
                                 :outlined="true"

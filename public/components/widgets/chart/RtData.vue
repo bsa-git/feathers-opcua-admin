@@ -136,15 +136,13 @@ export default {
         // Check new update values
         if (this.tagHistValues["updatedAt"] !== opcuaValues[0]["updatedAt"]) {
           
-          this.numberChanges++;
-          
           // Update time
           this.tagHistValues["updatedAt"] = opcuaValues[0]["updatedAt"];
 
           // Get tagHistValues
           if (Object.keys(this.tagHistValues).length === 1) {
             this.getTagHistValues();
-            debug("currentValues.tagHistValues:", this.tagHistValues);
+            if(isLog) debug("currentValues.tagHistValues:", this.tagHistValues);
           }
           //e.g. opcuaValues[0].values = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
           opcuaValues[0].values.forEach((valueItem) => {
@@ -174,6 +172,7 @@ export default {
             }
           });
           if(isLog) debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
+          this.numberChanges++;
         }
       }
       return this.tagCurrentValues;
