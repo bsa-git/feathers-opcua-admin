@@ -10,6 +10,13 @@
       :click-btn2="allClose"
     ></panels-top-bar>
 
+    <!--=== Debug ===-->
+    <!--  
+    <div>
+      <span>tabItems:</span> <span>{{ tabItems.length }}</span>
+    </div>
+    -->
+
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="10">

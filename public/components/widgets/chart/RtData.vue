@@ -1,7 +1,17 @@
 <template>
   <div>
-    <panels-chart 
-      v-if="isPanelsChart" 
+
+    <div
+      v-if="isNoPanels"
+      class="d-flex text-center justify-center align-center primary--text mt-16"
+    >
+      <span class="display-1">
+        {{ $t("management.noData") }}
+      </span>
+    </div>
+
+    <panels-chart
+      v-if="isPanelsChart"
       :items="panels"
       :current-values="currentValues"
       :hist-values="tagHistValues"
@@ -31,7 +41,7 @@ import MultiChart from "~/components/widgets/chart/MultiChart";
 import PanelsChart from "~/components/widgets/chart/PanelsChart";
 import TabPanelsChart from "~/components/widgets/chart/TabPanelsChart";
 import Tab2PanelsChart from "~/components/widgets/chart/Tab2PanelsChart";
-import moment from 'moment';
+import moment from "moment";
 
 const loRound = require("lodash/round");
 const loMerge = require("lodash/merge");
@@ -64,6 +74,7 @@ export default {
       isPanelsChart: false,
       isTabPanelsChart: false,
       isTab2PanelsChart: false,
+      isNoPanels: false,
       countItems: 0,
       numberChanges: 0,
     };
@@ -72,8 +83,7 @@ export default {
     this.getPanelsChartType();
   },
   mounted: function () {
-    this.$nextTick(function () {
-    });
+    this.$nextTick(function () {});
   },
   computed: {
     isMobile: function () {
@@ -122,40 +132,41 @@ export default {
      * e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
      */
     currentValues() {
-
       const { OpcuaValue } = this.$FeathersVuex;
       const opcuaValues = OpcuaValue.findInStore({
         query: { tagName: this.group, $sort: { updatedAt: -1 }, $limit: 1 },
       }).data;
 
       if (!opcuaValues.length)
-        if(isDebug) debug("currentValues.opcuaValues.length", opcuaValues.length);
+        if (isDebug)
+          debug("currentValues.opcuaValues.length", opcuaValues.length);
 
       if (opcuaValues.length && opcuaValues[0].values.length) {
-
         // Check new update values
         if (this.tagHistValues["updatedAt"] !== opcuaValues[0]["updatedAt"]) {
-          
           // Update time
           this.tagHistValues["updatedAt"] = opcuaValues[0]["updatedAt"];
 
           // Get tagHistValues
           if (Object.keys(this.tagHistValues).length === 1) {
             this.getTagHistValues();
-            if(isLog) debug("currentValues.tagHistValues:", this.tagHistValues);
+            if (isLog)
+              debug("currentValues.tagHistValues:", this.tagHistValues);
           }
           //e.g. opcuaValues[0].values = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
           opcuaValues[0].values.forEach((valueItem) => {
             valueItem.value = loRound(valueItem.value, 3);
-            
+
             // --- Add values to tagHistValues ---
-            if(this.numberChanges > 1){
+            if (this.numberChanges > 1) {
               this.tagHistValues[valueItem.key].push([
-              moment(opcuaValues[0]["updatedAt"]).format("YYYY-MM-DDTHH:mm:ss"),
-              valueItem.value,
-            ]);
+                moment(opcuaValues[0]["updatedAt"]).format(
+                  "YYYY-MM-DDTHH:mm:ss"
+                ),
+                valueItem.value,
+              ]);
             }
-            
+
             // --- Add values to tagCurrentValues ---
             if (!this.tagCurrentValues[valueItem.key]) {
               this.tagCurrentValues[valueItem.key] = {
@@ -171,7 +182,8 @@ export default {
               }
             }
           });
-          if(isLog) debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
+          if (isLog)
+            debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
           this.numberChanges++;
         }
       }
@@ -267,7 +279,6 @@ export default {
     },
   },
   methods: {
-
     getTagHistValues() {
       /* e.g. opcuaValues = [{
        *  tagName: 'CH_M51::ValueFromFile',
@@ -280,13 +291,16 @@ export default {
         query: { tagName: this.group, $sort: { updatedAt: 1 } },
       }).data;
 
-      if(isDebug) debug("getTagHistValues.opcuaValues.length", opcuaValues.length);
+      if (isDebug)
+        debug("getTagHistValues.opcuaValues.length", opcuaValues.length);
 
       if (opcuaValues.length) {
         opcuaValues.forEach((item) => {
           if (item.values.length) {
-            // const updatedAt = moment(item["updatedAt"]).utc().format("YYYY-MM-DDTHH:mm:ss"); 
-            const updatedAt = moment(item["updatedAt"]).format("YYYY-MM-DDTHH:mm:ss"); 
+            // const updatedAt = moment(item["updatedAt"]).utc().format("YYYY-MM-DDTHH:mm:ss");
+            const updatedAt = moment(item["updatedAt"]).format(
+              "YYYY-MM-DDTHH:mm:ss"
+            );
             item.values.forEach((valueItem) => {
               if (!this.tagHistValues[valueItem.key]) {
                 this.tagHistValues[valueItem.key] = [["Time", "Value"]];
@@ -328,6 +342,8 @@ export default {
           this.tabs.tab1 = objectTag.tabs.tab1;
           this.tabs.tab2 = objectTag.tabs.tab2;
         }
+      } else {
+        this.isNoPanels = true;
       }
     },
   },
