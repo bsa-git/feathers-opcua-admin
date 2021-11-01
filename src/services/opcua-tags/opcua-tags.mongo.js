@@ -14,7 +14,7 @@ let moduleExports = merge({},
       _id: {
         bsonType: "objectId"
       },
-      isDisable: {
+      isEnable: {
         bsonType: "boolean"
       },
       browseName: {

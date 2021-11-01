@@ -10,7 +10,7 @@ const mongoose = require('mongoose');
 let moduleExports = merge({},
   // !<DEFAULT> code: model
   {
-    isDisable: Boolean,
+    isEnable: Boolean,
     browseName: {
       type: String,
       unique: true

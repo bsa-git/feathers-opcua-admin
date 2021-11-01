@@ -30,7 +30,7 @@ let schema = {
     //-------------------------
     id: {type: 'ID'},
     _id: {type: 'ID'},
-    isDisable: {
+    isEnable: {
       type: 'boolean'
     },
     browseName: {

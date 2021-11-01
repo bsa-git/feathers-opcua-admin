@@ -95,7 +95,7 @@ const twoLevelsFields = {
       _args: {},
       id: 1,
       _id: 1,
-      isDisable: 1,
+      isEnable: 1,
       browseName: 1,
       displayName: 1,
       aliasName: 1,

@@ -16,7 +16,7 @@ let moduleExports = merge({},
       autoIncrement: true,
       primaryKey: true
     },
-    isDisable: {
+    isEnable: {
       type: DataTypes.BOOLEAN
     },
     browseName: {

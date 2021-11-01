@@ -34,7 +34,7 @@ type LogMessage {
 type OpcuaTag {
   id: ID
   _id: ID
-  isDisable: Boolean
+  isEnable: Boolean
   browseName: String
   displayName: String
   aliasName: String
