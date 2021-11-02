@@ -6,6 +6,7 @@ const {
 
 const loMerge = require('lodash/merge');
 const loIsObject = require('lodash/isObject');
+const loConcat = require('lodash/concat');
 
 const debug = require('debug')('app:db-helper');
 const isLog = false;
@@ -165,7 +166,7 @@ const findItems = async function (app, path = '', query = {}) {
  * @return {Object[]}
  */
 const findAllItems = async function (app, path = '', query = {}) {
-  let newParams, findResults;
+  let newParams, findResults, findData = [];
   //--------------------
   const service = app.service(path);
   if (service) {
@@ -176,7 +177,19 @@ const findAllItems = async function (app, path = '', query = {}) {
     }
     findResults = await service.find(newParams);
     if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(newParams)}).findResults:`, findResults);
-    return findResults;
+    if (!Array.isArray(findResults) && findResults.data.length) {
+      const total = findResults.total;
+      const limit = findResults.limit;
+      const cyclesNumber = Math.trunc(total / limit);
+      findData = loConcat(findData, findResults.data);
+      for (let index = 1; index <= cyclesNumber; index++) {
+        const skip = index * limit;
+        newParams = loMerge({}, newParams, { query: { $skip: skip } });
+        findResults = await service.find(newParams);
+        findData = loConcat(findData, findResults.data);
+      }
+    }
+    return Array.isArray(findResults) ? findResults : findData;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
   }
