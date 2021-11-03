@@ -129,6 +129,34 @@ const getItem = async function (app, path = '', id = null) {
 };
 
 /**
+ * Find item
+ * @async
+ * 
+ * @param {Object} app
+ * @param {String} path
+ * @param {Object} query
+ * @return {Object}
+ */
+ const findItem = async function (app, path = '', query = {}) {
+  let newParams, findResults;
+  //----------------------------
+  const service = app.service(path);
+  if (service) {
+    if (query.query) {
+      newParams = loMerge({}, query, { query: { $limit: 1 } });
+    } else {
+      newParams = loMerge({}, { query }, { query: { $limit: 1 } });
+    }
+    findResults = await service.find(newParams);
+    if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
+    inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
+    return findResults.data.length? findResults.data[0] : null;
+  } else {
+    throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  }
+};
+
+/**
  * Find items
  * @async
  * 
@@ -138,19 +166,30 @@ const getItem = async function (app, path = '', id = null) {
  * @return {Object[]}
  */
 const findItems = async function (app, path = '', query = {}) {
-  let findResults;
+  let newParams, findResults, findData = [];
   //----------------------------
   const service = app.service(path);
   if (service) {
     if (query.query) {
-      findResults = await service.find(query);
-      findResults = (query.query['$limit'] === 0) ? findResults.total : findResults.data;
+      newParams = loMerge({}, query);
     } else {
-      findResults = await service.find({ query });
-      findResults = (query['$limit'] === 0) ? findResults.total : findResults.data;
+      newParams = loMerge({}, { query });
     }
+    findResults = await service.find(newParams);
     if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
-    return findResults;
+    if (findResults.data.length) {
+      const total = findResults.total;
+      const limit = findResults.limit;
+      const cyclesNumber = Math.trunc(total / limit);
+      findData = loConcat(findData, findResults.data);
+      for (let index = 1; index <= cyclesNumber; index++) {
+        const skip = index * limit;
+        newParams = loMerge({}, newParams, { query: { $skip: skip } });
+        findResults = await service.find(newParams);
+        findData = loConcat(findData, findResults.data);
+      }
+    }
+    return findData;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
   }
@@ -341,6 +380,7 @@ module.exports = {
   getIdField,
   getCountItems,
   getItem,
+  findItem,
   findItems,
   findAllItems,
   removeItem,
