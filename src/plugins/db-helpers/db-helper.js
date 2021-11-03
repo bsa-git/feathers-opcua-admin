@@ -137,7 +137,7 @@ const getItem = async function (app, path = '', id = null) {
  * @param {Object} query
  * @return {Object}
  */
- const findItem = async function (app, path = '', query = {}) {
+const findItem = async function (app, path = '', query = {}) {
   let newParams, findResults;
   //----------------------------
   const service = app.service(path);
