@@ -19,18 +19,13 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
   });
 
   it('Read flight json data from "dataManagement" service', async () => {
-    try {
-      const service = app.service('data-management');
-      const flightData = await service.create({
-        action: 'readJsonFile',
-        path: '/public/api/demo/echarts/flight-data.json'
-      });
-      if (isLog) inspector('data-management.test.flightData from "dataManagement" service:', flightData);
-      // inspector('data-management.test.flightData from "dataManagement" service:', flightData);
-      assert.ok(flightData, 'OK - Read flight json data from "dataManagement" service');
-    } catch (ex) {
-      if (isLog) debug('Error on Read flight json data from "dataManagement" service:', ex);
-      assert.ok(false, 'ERROR - Read flight json data from "dataManagement" service');
-    }
+    const service = app.service('data-management');
+    const flightData = await service.create({
+      action: 'readJsonFile',
+      path: '/public/api/demo/echarts/flight-data.json'
+    });
+    if (isLog) inspector('data-management.test.flightData from "dataManagement" service:', flightData);
+    // inspector('data-management.test.flightData from "dataManagement" service:', flightData);
+    assert.ok(Object.keys(flightData).length, 'OK - Read flight json data from "dataManagement" service');
   });
 });
