@@ -21,7 +21,7 @@ const defaultPrimusOptions = {
   transformer: 'ws'
 };
 
-module.exports = function makeClient(options) {
+module.exports = async function makeClient(options) {
   let { transport, timeout, serverUrl, ioOptions, primusOptions, ifNoAuth } = options;
   transport = transport || 'socketio';
   timeout = timeout || 45000;
