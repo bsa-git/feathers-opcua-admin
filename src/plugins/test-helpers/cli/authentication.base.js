@@ -105,7 +105,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
               await usersService.remove(null);
               const user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
               await usersService.create(user);
-              appClient = makeClient({ transport, serverUrl, ioOptions, primusOptions });
+              appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
 
               done();
             }, delayAfterServerOnce);

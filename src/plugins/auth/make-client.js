@@ -36,18 +36,18 @@ module.exports = async function makeClient(options) {
 
     const appClient = feathersClient();
     switch (transport) {
-      case 'socketio':
-        socket = io(serverUrl, ioOptions);
-        appClient.configure(feathersClient.socketio(socket, { timeout }));
-        break;
-      case 'primus':
-        appClient.configure(primus(primusOptions));
-        break;
-      case 'rest':
-        appClient.configure(feathersClient.rest(serverUrl).axios(axios));
-        break;
-      default:
-        throw new Error(`Invalid transport ${transport}. (makeClient`);
+    case 'socketio':
+      socket = io(serverUrl, ioOptions);
+      appClient.configure(feathersClient.socketio(socket, { timeout }));
+      break;
+    case 'primus':
+      appClient.configure(primus(primusOptions));
+      break;
+    case 'rest':
+      appClient.configure(feathersClient.rest(serverUrl).axios(axios));
+      break;
+    default:
+      throw new Error(`Invalid transport ${transport}. (makeClient`);
     }
 
     if (!ifNoAuth) {

@@ -132,7 +132,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         server = app.listen(port);
         server.once('listening', () => {
           setTimeout(async () => {
-            appClient = makeClient({transport, serverUrl, ioOptions, primusOptions});
+            appClient = await makeClient({transport, serverUrl, ioOptions, primusOptions});
 
             if (ifAuth) {
               const usersService = app.service(usersPath);
