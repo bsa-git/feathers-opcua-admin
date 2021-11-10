@@ -10,4 +10,4 @@ const feathersClient = feathers()
   .configure(socketio(socket))
   .configure(auth({ storage: new CookieStorage() }));
 
-export default feathersClient;
+module.exports = feathersClient;

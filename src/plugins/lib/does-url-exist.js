@@ -1,22 +1,26 @@
 /* eslint-disable no-unused-vars */
 const url = require('url');
 const axios = require('axios');
+const logger = require('../../logger');
 
 const debug = require('debug')('app:lib.does-url-exist');
 const isLog = false;
 const isDebug = false;
 
-module.exports = async function doesUrlExist (target) {
+const doesUrlExist = async function (target) {
   let uri;
   try {
     uri = url.parse(target);
   } catch (error) {
+    logger.error(`Invalid url ${target}`);
     throw new Error(`Invalid url ${target}`);
   }
 
   try {
     await axios.get(uri);
+    return true;
   } catch (error) {
+    logger.error(`This URL "${target}" does not exist`);
     if (isDebug) console.log('http-operations.checkExistUrl.error.code:', error.code);
     if (isLog) inspector('http-operations.checkExistUrl.error.config:', error.config);
     if (isLog) inspector('http-operations.checkExistUrl.error.headers:', error.headers);
@@ -28,4 +32,18 @@ module.exports = async function doesUrlExist (target) {
     }
     throw error;
   }
+};
+
+const isUrlExist = async function (target) {
+  try {
+    await doesUrlExist(target);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+module.exports = {
+  doesUrlExist,
+  isUrlExist
 };

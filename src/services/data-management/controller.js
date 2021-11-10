@@ -4,7 +4,7 @@
 
 const errors = require('@feathersjs/errors');
 // const {readJsonFileSync, inspector, appRoot} = require('../../plugins/lib');
-const { actionReadJsonFile, actionGetHistOpcuaValues } = require('../../plugins/controllers');
+const { readJsonFileAction, opcuaClientActions } = require('../../plugins/controllers');
 
 const debug = require('debug')('app:service.dataManagement.controller');
 // const isLog = false;
@@ -37,9 +37,9 @@ function dataManagement(options, app) {
 
       switch (data.action) {
       case 'readJsonFile':
-        return await actionReadJsonFile(data.path);
-      case 'getHistOpcuaValues':
-        return await actionGetHistOpcuaValues(data.path);
+        return await readJsonFileAction(data);
+      case 'opcuaClient':
+        return await opcuaClientActions(data);
       case 'options':
         return Promise.resolve(options);
       default:

@@ -1,7 +1,7 @@
-const actionReadJsonFile = require('./actionReadJsonFile');
-const actionGetHistOpcuaValues = require('./actionGetHistOpcuaValues');
+const readJsonFileAction = require('./readJsonFileAction');
+const opcuaClientActions = require('./opcuaClientActions');
 
 module.exports = {
-  actionReadJsonFile,
-  actionGetHistOpcuaValues
+  readJsonFileAction,
+  opcuaClientActions
 };
