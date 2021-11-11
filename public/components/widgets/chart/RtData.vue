@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <div
       v-if="isNoPanels"
       class="d-flex text-center justify-center align-center primary--text mt-16"
@@ -42,6 +41,8 @@ import PanelsChart from "~/components/widgets/chart/PanelsChart";
 import TabPanelsChart from "~/components/widgets/chart/TabPanelsChart";
 import Tab2PanelsChart from "~/components/widgets/chart/Tab2PanelsChart";
 import moment from "moment";
+
+import feathersClient from '~/plugins/auth/feathers-client';
 
 const loRound = require("lodash/round");
 const loMerge = require("lodash/merge");
@@ -279,17 +280,39 @@ export default {
     },
   },
   methods: {
-    getTagHistValues() {
+    async getTagHistValues() {
       /* e.g. opcuaValues = [{
        *  tagName: 'CH_M51::ValueFromFile',
        *  updatedAt: '2021-10-21T04:51:30.275+00:00',
        *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
        *  }, ...]
        */
-      const { OpcuaValue } = this.$FeathersVuex;
-      const opcuaValues = OpcuaValue.findInStore({
-        query: { tagName: this.group, $sort: { updatedAt: 1 } },
-      }).data;
+      const serverUrl = 'http://localhost:3030';
+      const id = 'ua-cherkassy-azot-asutp_dev1';
+
+      // Get start time
+      const start = moment(0);
+      // Get end time
+      const end = moment();
+
+      const data = {
+        id,
+        action: 'opcuaClient',
+        opcuaAction: 'sessionReadHistoryValues',
+        opcuaURL: serverUrl,
+        opcuaCallback: 'cbSessionReadHistoryValues',
+        nameNodeIds: this.group,
+        start,
+        end,
+      };
+      const service = feathersClient.service("data-management");
+      const opcuaValues = await service.create(data);
+      // debug("sessionReadHistoryValues.actionResult:", actionResult);
+
+      // const { OpcuaValue } = this.$FeathersVuex;
+      // const opcuaValues = OpcuaValue.findInStore({
+      //   query: { tagName: this.group, $sort: { updatedAt: 1 } },
+      // }).data;
 
       if (isDebug)
         debug("getTagHistValues.opcuaValues.length", opcuaValues.length);

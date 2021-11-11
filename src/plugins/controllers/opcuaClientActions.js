@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const errors = require('@feathersjs/errors');
-const { inspector} = require('../lib');
+const { inspector } = require('../lib');
 const {
   localStorage,
   loginLocal,
@@ -14,17 +14,23 @@ const isLog = false;
 const isDebug = false;
 
 module.exports = async function (params) {
-  let data = {}, serverUrl = params.opcuaURL;
+  let data = {}, actionResult, serverUrl = params.opcuaURL;
+  let cb = params.opcuaCallback ? params.opcuaCallback : '';
+  //----------------------------------------
   data.action = params.opcuaAction;
-  Object.assign(data, loOmit(params, ['action', 'opcuaAction', 'opcuaURL']));
-  const appClient = await makeClient({ serverUrl });
+  Object.assign(data, loOmit(params, ['action', 'opcuaAction', 'opcuaURL', 'opcuaCallback']));
   try {
+    const appClient = await makeClient({ serverUrl });
     const service = appClient.service('opcua-clients');
-    const actionResult = await service.create(data);
-    if(isLog) inspector('controller.opcuaClientActions.result', actionResult);
+    actionResult = await service.create(data);
+    if (isLog) inspector('controller.opcuaClientActions.result', actionResult);
+    if(cb){
+      cb = require(`./cbs/${cb}`);
+      actionResult = await cb(data, actionResult);
+    }
     return actionResult;
   } catch (ex) {
-    if (isDebug) debug('Error on read jsonFile:', ex);
+    if (isDebug) debug('Error on opcuaClientActions:', ex.message);
     throw new errors.BadRequest('Service request error:', ex.message);
   }
 };

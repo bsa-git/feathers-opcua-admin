@@ -2,6 +2,7 @@
 const { join } = require('path');
 const debug = require('debug')('app:util');
 const appRoot = join(__dirname, '../../../');
+const moment = require('moment');
 
 /**
  * Delay time
@@ -41,6 +42,57 @@ const waitTimeout = function (fn, cb = null, delay = 0) {
       clearInterval(timerId);
     }
   }, _delay);
+};
+
+/**
+ * @method dtToObject
+ * e.g. { year: 2020, month: 9, date: 22, hours: 13, minutes: 31, seconds: 10, milliseconds: 555 }
+ * @param {Number|String} dt 
+ * @param {Boolean} isUtc 
+ * @returns {Object}
+ */
+const dtToObject = function (dt = '', isUtc = true) {
+  if (isUtc) {
+    dt = moment.utc(dt === '' ? undefined : dt);
+  } else {
+    dt = moment(dt === '' ? undefined : dt);
+  }
+  dt = dt.toObject();
+  dt.months = dt.months + 1;
+  return dt;
+};
+
+/**
+ * @method getDate
+ * @param {Number|String} dt 
+ * @param {Boolean} isUtc 
+ * @returns {String} e.g. 2021-01-10
+ */
+const getDate = function (dt = '', isUtc = true) {
+  dt = dtToObject(dt, isUtc);
+  return `${dt.years}-${dt.months}-${dt.date}`;
+};
+
+/**
+ * @method getTime
+ * @param {Number|String} dt 
+ * @param {Boolean} isUtc 
+ * @returns {String} e.g. 15:50:10.134
+ */
+const getTime = function (dt = '', isUtc = true) {
+  dt = dtToObject(dt, isUtc);
+  return `${dt.hours}:${dt.minutes}:${dt.seconds}.${dt.milliseconds}`;
+};
+
+/**
+ * @method getDateTime
+ * @param {Number|String} dt 
+ * @param {Boolean} isUtc 
+ * @returns {String} e.g. 2021-01-10T15:50:10.134
+ */
+const getDateTime = function (dt = '', isUtc = true) {
+  dt = dtToObject(dt, isUtc);
+  return `${dt.years}-${dt.months}-${dt.date}T${dt.hours}:${dt.minutes}:${dt.seconds}.${dt.milliseconds}`;
 };
 
 /**
@@ -312,6 +364,10 @@ module.exports = {
   delayTime,
   pause,
   waitTimeout,
+  dtToObject,
+  getDate,
+  getTime,
+  getDateTime,
   stripSlashes,
   stripSpecific,
   getCapitalizeStr,

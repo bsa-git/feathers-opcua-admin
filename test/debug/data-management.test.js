@@ -5,7 +5,9 @@ const port = app.get('port') || 3131;
 const {
   appRoot,
   inspector,
-  isUrlExist
+  isUrlExist,
+  getTime,
+  readJsonFileSync
 } = require('../../src/plugins/lib');
 
 const {
@@ -19,7 +21,13 @@ const {
   saveFakesToServices
 } = require('../../src/plugins/test-helpers');
 
-const { readJsonFileSync } = require('@feathers-plus/test-utils');
+const moment = require('moment');
+const chalk = require('chalk');
+const loRound = require('lodash/round');
+const loForEach = require('lodash/forEach');
+const logger = require('../../src/logger');
+
+// const { readJsonFileSync } = require('@feathers-plus/test-utils');
 // Get generated fake data
 const fakes = readJsonFileSync(`${appRoot}/seeds/fake-data.json`) || {};
 const fakeUsers = fakes['users'];
@@ -82,7 +90,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
 
   it('#3. OPC-UA clients: registered the service', async () => {
 
-    if (!isUrlExist(serverUrl)) return;
+    if (! await isUrlExist(serverUrl)) return;
 
     const appClient = await makeClient({ serverUrl });
     const service = appClient.service('opcua-clients');
@@ -91,7 +99,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
 
   it('#4. OPC-UA servers: registered the service', async () => {
 
-    if (!isUrlExist(serverUrl)) return;
+    if (! await isUrlExist(serverUrl)) return;
 
     const appClient = await makeClient({ serverUrl });
     const service = appClient.service('opcua-servers');
@@ -100,7 +108,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
 
   it('#5. OPC-UA clients: operations with service', async () => {
 
-    if (!isUrlExist(serverUrl)) return;
+    if (! await isUrlExist(serverUrl)) return;
 
     const appClient = await makeClient({ serverUrl });
     const service = appClient.service('opcua-clients');
@@ -113,7 +121,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
     // Get client currentState
     let data = { id, action: 'getCurrentState' };
     const currentState = await service.create(data);
-    inspector('clientCurrentState:', currentState);
+    // inspector('clientCurrentState:', currentState);
     assert.ok(currentState, 'OPC-UA clients: get service currentState');
     // Get clientInfo
     data = { id, action: 'getClientInfo' };
@@ -124,7 +132,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
 
   it('#6. Get getItemNodeId from "dataManagement" service', async () => {
 
-    if (!isUrlExist(serverUrl)) return;
+    if (! await isUrlExist(serverUrl)) return;
 
     const service = feathersClient.service('data-management');
     const data = {
@@ -137,28 +145,70 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
 
     const actionResult = await service.create(data);
     if (isLog) inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
-    inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
+    // inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
     assert.ok(actionResult, 'Get getItemNodeId from "dataManagement" service');
 
   });
 
   it('#7. Get sessionReadHistoryValues from "dataManagement" service', async () => {
+    let dataItems, histOpcuaValues = [], values = [], accumulator;
+    let start, end;
+    //-------------------------------------------
+    if (! await isUrlExist(serverUrl)) return;
 
-    if (!isUrlExist(serverUrl)) return;
+    // Get start time
+    start = moment(0);
+    // Get end time
+    end = moment();
 
-    const service = feathersClient.service('data-management');
+
     const data = {
       id,
       action: 'opcuaClient',
-      opcuaAction: 'getItemNodeId',
+      opcuaAction: 'sessionReadHistoryValues',
       opcuaURL: serverUrl,
-      nameNodeId: 'CH_M51::ValueFromFile'
+      // opcuaCallback: 'cbSessionReadHistoryValues',
+      nameNodeIds: 'CH_M51::ValueFromFile',
+      start,
+      end
     };
-
+    const service = feathersClient.service('data-management');
     const actionResult = await service.create(data);
     if (isLog) inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
-    inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
-    assert.ok(actionResult, 'Get getItemNodeId from "dataManagement" service');
-
+    // inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
+    if (actionResult.length && actionResult[0].statusCode.value === 0) {
+      if (actionResult[0].historyData.dataValues.length) {
+        let dataValues = actionResult[0].historyData.dataValues;
+        dataValues.forEach(dataValue => {
+          if (dataValue.statusCode.value === 0) {
+            const updatedAt = moment(dataValue.sourceTimestamp).format('YYYY-MM-DDTHH:mm:ss');
+            const tagName = data.nameNodeIds;
+            dataItems = JSON.parse(dataValue.value.value);
+            values = [];
+            loForEach(dataItems, function (value, key) {
+              values.push({ key, value });
+            });
+            histOpcuaValues.push({ tagName, updatedAt, values });
+            assert.ok(true, 'OPC-UA clients: session history value from file');
+          } else {
+            assert.ok(false, 'OPC-UA clients: session history value from file');
+          }
+        });
+      } else {
+        assert.ok(false, 'OPC-UA clients: session history value from file');
+      }
+    } else {
+      assert.ok(false, 'OPC-UA clients: session history value from file');
+    }
+    if (isLog) inspector('SessionHistoryValue_ForCH_M51.histOpcuaValues:', histOpcuaValues);
+    // inspector('SessionHistoryValue_ForCH_M51.histOpcuaValues:', histOpcuaValues);
+    accumulator = histOpcuaValues.length;
+    start = histOpcuaValues[0].updatedAt;
+    end = histOpcuaValues[accumulator - 1].updatedAt;
+    logger.info(`sessionHistoryValue.StartTime: ${chalk.yellow(start)}`);
+    logger.info(`sessionHistoryValue.EndTime: ${chalk.yellow(end)}`);
+    logger.info(`sessionReadHistoryValues.count: ${chalk.yellow(accumulator)}`);
+    
+    assert.ok(histOpcuaValues.length, 'Get sessionReadHistoryValues from "dataManagement" service');
   });
 });
