@@ -57,9 +57,7 @@ module.exports = async function makeClient(options) {
     }
     return appClient;
   } catch (error) {
-    if (error.code === 'ECONNREFUSED') {
-      console.log(chalk.red('error:'), 'feathers-client.serverUrl:', chalk.cyan(`Server url "${serverUrl}" does not exist!`));
-    } else {
+    if (error.code !== 'ECONNREFUSED') {
       console.log(chalk.red('error:'), 'feathers-client.serverUrl:', chalk.cyan(`${error.message}!`));
     }
   }

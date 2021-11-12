@@ -133,8 +133,8 @@ export default {
   },
   props: {
     items: Array,
-    currentValues: Object,
-    histValues: Object,
+    currentValues: Object,// e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
+    histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
   },
   data() {

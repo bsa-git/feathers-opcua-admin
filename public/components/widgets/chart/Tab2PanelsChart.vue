@@ -127,6 +127,9 @@
                                 <v-row justify="center">
                                   <v-col cols="12" sm="12">
                                     <v-card
+                                      v-if="filterHistValues[
+                                            tab2PanelItem.browseName
+                                          ]"
                                       color="primary"
                                       :dark="theme.dark"
                                       outlined
@@ -151,7 +154,13 @@
                                           })
                                         "
                                         :data="
-                                          filterHistValues[tab2PanelItem.browseName] ? filterHistValues[tab2PanelItem.browseName] : []
+                                          filterHistValues[
+                                            tab2PanelItem.browseName
+                                          ]
+                                            ? filterHistValues[
+                                                tab2PanelItem.browseName
+                                              ]
+                                            : []
                                         "
                                         :theme="theme.dark ? 'dark' : 'shine'"
                                         :outlined="true"
@@ -178,6 +187,12 @@
                                         </v-btn>
                                       </v-card-actions>
                                     </v-card>
+                                    <span v-else
+                                      ><v-icon small :color="iconColor"
+                                        >fas fa-circle-notch fa-spin</v-icon
+                                      ></span
+                                    >
+                                    <div v-if="startHist">123456</div>
                                   </v-col>
                                 </v-row>
                               </v-expansion-panel-content>
@@ -217,9 +232,10 @@ export default {
   },
   props: {
     tabItems: Array,
-    currentValues: Object,
-    histValues: Object,
+    currentValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
+    histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
+    startHist: Boolean,
   },
   data() {
     return {
@@ -245,11 +261,21 @@ export default {
     numberChanges: function (val) {
       if (val) {
         if (isDebug) debug("watch.numberChanges.val:", val);
+        // debug("watch.numberChanges.val:", val);
         if (isLog)
           debug("watch.numberChanges.currentValues:", this.currentValues);
         if (isLog) debug("watch.numberChanges.histValues:", this.histValues);
       }
     },
+    startHist: function (val) {
+      if (val) {
+        if (isDebug) debug("watch.numberChanges.val:", val);
+        debug("watch.startHist.val:", val);
+        if (isLog)
+          debug("watch.numberChanges.currentValues:", this.currentValues);
+        if (isLog) debug("watch.numberChanges.histValues:", this.histValues);
+      }
+    }
   },
   computed: {
     ...mapGetters({
@@ -262,6 +288,10 @@ export default {
     },
     iconColor: function () {
       return this.theme.dark ? "white" : "black";
+    },
+
+    histValuesCount: function () {
+      return Object.keys(this.histValues).length; 
     },
 
     /**

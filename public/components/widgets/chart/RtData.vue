@@ -31,6 +31,7 @@
       :current-values="currentValues"
       :hist-values="tagHistValues"
       :number-changes="numberChanges"
+      :start-hist="startHist"
     ></tab2-panels-chart>
   </div>
 </template>
@@ -189,6 +190,11 @@ export default {
         }
       }
       return this.tagCurrentValues;
+    },
+
+    startHist() {
+      debug('startHist:', Object.keys(this.tagHistValues).length);
+      return Object.keys(this.tagHistValues).length > 1;
     },
 
     // Get tabItems for tab1
