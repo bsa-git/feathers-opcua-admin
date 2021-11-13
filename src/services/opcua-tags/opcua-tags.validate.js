@@ -114,7 +114,21 @@ let base = merge({},
           }
         }
       },
-      tabs: {
+      histParams: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string"
+          },
+          url: {
+            type: "string"
+          },
+          savingValuesMode: {
+            type: "string"
+          }
+        }
+      },
+      view: {
         type: "object",
         properties: {
           tab1: {

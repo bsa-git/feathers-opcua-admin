@@ -43,7 +43,11 @@ let moduleExports = merge({},
         high: Number
       }
     },
-    tabs: {
+    histParams: {
+      url: String,
+      savingValuesMode: String
+    },
+    view: {
       tab1: [
         {
           name: String,

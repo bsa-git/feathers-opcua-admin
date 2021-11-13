@@ -49,7 +49,8 @@ type OpcuaTag {
   getter: String
   getterParams: JSON
   valueParams: JSON
-  tabs: JSON
+  histParams: JSON
+  view: JSON
 }
  
 type OpcuaValue {

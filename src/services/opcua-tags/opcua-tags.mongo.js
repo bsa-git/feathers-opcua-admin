@@ -116,7 +116,22 @@ let moduleExports = merge({},
           }
         }
       },
-      tabs: {
+      histParams: {
+        bsonType: "object",
+        additionalProperties: false,
+        properties: {
+          _id: {
+            bsonType: "objectId"
+          },
+          url: {
+            bsonType: "string"
+          },
+          savingValuesMode: {
+            bsonType: "string"
+          }
+        }
+      },
+      view: {
         bsonType: "object",
         additionalProperties: false,
         properties: {

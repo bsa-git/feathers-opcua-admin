@@ -352,9 +352,9 @@ export default {
       if (objectTags.length) {
         const objectTag = objectTags[0];
         const isTab1 =
-          objectTag.tabs && objectTag.tabs.tab1 && !!objectTag.tabs.tab1.length;
+          objectTag.view && objectTag.view.tab1 && !!objectTag.view.tab1.length;
         const isTab2 =
-          objectTag.tabs && objectTag.tabs.tab2 && !!objectTag.tabs.tab2.length;
+          objectTag.view && objectTag.view.tab2 && !!objectTag.view.tab2.length;
 
         this.isPanelsChart = !isTab1 && !isTab2;
         this.isTabPanelsChart = isTab1 && !isTab2;
@@ -365,11 +365,11 @@ export default {
         // this.isTab2PanelsChart = true;
 
         if (this.isTabPanelsChart) {
-          this.tabs.tab1 = objectTag.tabs.tab1;
+          this.view.tab1 = objectTag.view.tab1;
         }
         if (this.isTab2PanelsChart) {
-          this.tabs.tab1 = objectTag.tabs.tab1;
-          this.tabs.tab2 = objectTag.tabs.tab2;
+          this.view.tab1 = objectTag.view.tab1;
+          this.view.tab2 = objectTag.view.tab2;
         }
       } else {
         this.isNoPanels = true;

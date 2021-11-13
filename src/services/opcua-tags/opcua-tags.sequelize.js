@@ -62,7 +62,10 @@ let moduleExports = merge({},
     valueParams: {
       type: DataTypes.JSONB
     },
-    tabs: {
+    histParams: {
+      type: DataTypes.JSONB
+    },
+    view: {
       type: DataTypes.JSONB
     }
   },
