@@ -123,7 +123,10 @@ let moduleExports = merge({},
           _id: {
             bsonType: "objectId"
           },
-          url: {
+          opcuaId: {
+            bsonType: "string"
+          },
+          opcuaUrl: {
             bsonType: "string"
           },
           savingValuesMode: {

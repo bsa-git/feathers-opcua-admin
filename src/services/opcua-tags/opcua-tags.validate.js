@@ -117,10 +117,10 @@ let base = merge({},
       histParams: {
         type: "object",
         properties: {
-          id: {
+          opcuaId: {
             type: "string"
           },
-          url: {
+          opcuaUrl: {
             type: "string"
           },
           savingValuesMode: {

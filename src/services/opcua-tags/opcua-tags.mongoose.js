@@ -44,7 +44,8 @@ let moduleExports = merge({},
       }
     },
     histParams: {
-      url: String,
+      opcuaId: String,
+      opcuaUrl: String,
       savingValuesMode: String
     },
     view: {

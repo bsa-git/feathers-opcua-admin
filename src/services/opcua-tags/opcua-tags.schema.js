@@ -99,8 +99,8 @@ let schema = {
     histParams: {
       type: 'object',
       properties: {
-        id: {type: 'string'},
-        url: {type: 'string'},
+        opcuaId: {type: 'string'},
+        opcuaUrl: {type: 'string'},
         savingValuesMode: {type: 'string'}
       }
     },
