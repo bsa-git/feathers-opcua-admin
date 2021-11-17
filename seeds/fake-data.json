@@ -253,7 +253,12 @@
       "browseName": "CH_M51",
       "displayName": "Cherkassy 'AZOT' M5-1",
       "type": "object",
-      "tabs": {
+      "histParams": {
+        "opcuaId": "ua-cherkassy-azot_test2",
+        "opcuaUrl": "http://localhost:3030",
+        "savingValuesMode": "update"
+      },
+      "view": {
         "tab1": [
           { "name": "Common plant", "items": ["01"] },
           { "name": "Aggregate 1/1", "items": ["11"] },
