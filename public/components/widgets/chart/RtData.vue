@@ -43,7 +43,7 @@ import TabPanelsChart from "~/components/widgets/chart/TabPanelsChart";
 import Tab2PanelsChart from "~/components/widgets/chart/Tab2PanelsChart";
 import moment from "moment";
 
-import feathersClient from '~/plugins/auth/feathers-client';
+import feathersClient from "~/plugins/auth/feathers-client";
 
 const loRound = require("lodash/round");
 const loMerge = require("lodash/merge");
@@ -81,8 +81,9 @@ export default {
       numberChanges: 0,
     };
   },
-  created: function () {
+  created: async function () {
     this.getPanelsChartType();
+    await this.getTagHistValues();
   },
   mounted: function () {
     this.$nextTick(function () {});
@@ -151,7 +152,7 @@ export default {
 
           // Get tagHistValues
           if (Object.keys(this.tagHistValues).length === 1) {
-            this.getTagHistValues();
+            // this.getTagHistValues();
             if (isLog)
               debug("currentValues.tagHistValues:", this.tagHistValues);
           }
@@ -193,7 +194,7 @@ export default {
     },
 
     startHist() {
-      debug('startHist:', Object.keys(this.tagHistValues).length);
+      debug("startHist:", Object.keys(this.tagHistValues).length);
       return Object.keys(this.tagHistValues).length > 1;
     },
 
@@ -286,39 +287,63 @@ export default {
     },
   },
   methods: {
+    getOwnerObjectTag() {
+      let objectTag = null;
+      //--------------------------
+      const { OpcuaTag } = this.$FeathersVuex;
+      const objectTags = OpcuaTag.findInStore({
+        query: { browseName: this.owner, type: "object" },
+      }).data;
+      if (objectTags.length) {
+        objectTag = objectTags[0];
+      }
+      return objectTag;
+    },
+
     async getTagHistValues() {
+      let opcuaValues;
+      //-------------------
+
+      const objectTag = this.getOwnerObjectTag();
+      if (objectTag) {
+        const savingValuesMode = objectTag.histParams.savingValuesMode;
+
+        if (savingValuesMode === "update") {
+          const id = objectTag.histParams.opcuaId;
+          const opcuaURL = objectTag.histParams.opcuaUrl;
+          // Get start time
+          const start = moment(0);
+          // Get end time
+          const end = moment();
+
+          const data = {
+            action: "opcuaClient",
+            opcuaAction: "sessionReadHistoryValues",
+            id,
+            opcuaURL,
+            opcuaCallback: "cbSessionReadHistoryValues",
+            nameNodeIds: this.group,
+            start,
+            end,
+          };
+          const service = feathersClient.service("data-management");
+          opcuaValues = await service.create(data);
+        }
+
+        if (savingValuesMode === "add") {
+          const { OpcuaValue } = this.$FeathersVuex;
+          opcuaValues = OpcuaValue.findInStore({
+            query: { tagName: this.group, $sort: { updatedAt: 1 } },
+          }).data;
+        }
+      }
+
       /* e.g. opcuaValues = [{
        *  tagName: 'CH_M51::ValueFromFile',
        *  updatedAt: '2021-10-21T04:51:30.275+00:00',
        *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
        *  }, ...]
        */
-      const serverUrl = 'http://localhost:3030';
-      const id = 'ua-cherkassy-azot-asutp_dev1';
-
-      // Get start time
-      const start = moment(0);
-      // Get end time
-      const end = moment();
-
-      const data = {
-        id,
-        action: 'opcuaClient',
-        opcuaAction: 'sessionReadHistoryValues',
-        opcuaURL: serverUrl,
-        opcuaCallback: 'cbSessionReadHistoryValues',
-        nameNodeIds: this.group,
-        start,
-        end,
-      };
-      const service = feathersClient.service("data-management");
-      const opcuaValues = await service.create(data);
-      // debug("sessionReadHistoryValues.actionResult:", actionResult);
-
-      // const { OpcuaValue } = this.$FeathersVuex;
-      // const opcuaValues = OpcuaValue.findInStore({
-      //   query: { tagName: this.group, $sort: { updatedAt: 1 } },
-      // }).data;
 
       if (isDebug)
         debug("getTagHistValues.opcuaValues.length", opcuaValues.length);
@@ -345,12 +370,8 @@ export default {
       return this.tagHistValues;
     },
     getPanelsChartType() {
-      const { OpcuaTag } = this.$FeathersVuex;
-      const objectTags = OpcuaTag.findInStore({
-        query: { browseName: this.owner, type: "object" },
-      }).data;
-      if (objectTags.length) {
-        const objectTag = objectTags[0];
+      const objectTag = this.getOwnerObjectTag();
+      if (objectTag) {
         const isTab1 =
           objectTag.view && objectTag.view.tab1 && !!objectTag.view.tab1.length;
         const isTab2 =
@@ -365,11 +386,11 @@ export default {
         // this.isTab2PanelsChart = true;
 
         if (this.isTabPanelsChart) {
-          this.view.tab1 = objectTag.view.tab1;
+          this.tabs.tab1 = objectTag.view.tab1;
         }
         if (this.isTab2PanelsChart) {
-          this.view.tab1 = objectTag.view.tab1;
-          this.view.tab2 = objectTag.view.tab2;
+          this.tabs.tab1 = objectTag.view.tab1;
+          this.tabs.tab2 = objectTag.view.tab2;
         }
       } else {
         this.isNoPanels = true;

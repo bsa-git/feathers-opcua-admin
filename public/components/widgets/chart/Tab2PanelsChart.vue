@@ -187,11 +187,14 @@
                                         </v-btn>
                                       </v-card-actions>
                                     </v-card>
-                                    <span v-else
-                                      ><v-icon small :color="iconColor"
+                                    <div v-else>
+                                      <div class="subtitle-1 d-flex pa-2 justify-center">{{ $t('echartDemo.waitLoadingData') }}</div>
+                                      <div class="d-flex pa-2 justify-center"
+                                      ><v-icon dense :color="iconColor"
                                         >fas fa-circle-notch fa-spin</v-icon
-                                      ></span
-                                    >
+                                      ></div>
+                                    </div>
+                                    
                                     <div v-if="startHist">123456</div>
                                   </v-col>
                                 </v-row>

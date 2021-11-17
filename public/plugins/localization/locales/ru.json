@@ -594,7 +594,8 @@
     "connectDescription": "Подключаемые диаграммы",
     "flight": "Flight",
     "flightTitle": "Map (with large data)",
-    "flightDescription": "Авиа перелеты в мире"
+    "flightDescription": "Авиа перелеты в мире",
+    "waitLoadingData": "Ожидайте! Идет загрузка данных ..."    
   },
   "chartDemo": {
     "title": "Демо диаграммы",
