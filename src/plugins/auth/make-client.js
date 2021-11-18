@@ -57,9 +57,10 @@ module.exports = async function makeClient(options) {
     }
     return appClient;
   } catch (error) {
-    if (error.code !== 'ECONNREFUSED') {
-      console.log(chalk.red('error:'), 'feathers-client.serverUrl:', chalk.cyan(`${error.message}!`));
-    }
+    // if (error.code !== 'ECONNREFUSED') {
+    //   console.log(chalk.red('error:'), 'feathers-client.serverUrl:', chalk.cyan(`${error.message}!`));
+    // }
+    throw new Error(`Error while creating client (makeClient): ${error.message}.`);
   }
 
 

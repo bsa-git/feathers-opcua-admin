@@ -30,7 +30,7 @@ const doesUrlExist = async function (target) {
       if (isLog) inspector('http-operations.checkExistUrl.error.response.data:', error.response.data);
       if (isLog) inspector('http-operations.checkExistUrl.error.response.headers:', error.response.headers);
     }
-    throw error;
+    throw new Error(`This URL "${target}" does not exist`);
   }
 };
 

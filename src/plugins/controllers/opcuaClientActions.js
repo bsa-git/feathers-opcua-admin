@@ -14,7 +14,7 @@ const isLog = false;
 const isDebug = false;
 
 module.exports = async function (params) {
-  let data = {}, actionResult, serverUrl = params.opcuaURL;
+  let data = {}, actionResult = null, serverUrl = params.opcuaURL;
   let cb = params.opcuaCallback ? params.opcuaCallback : '';
   //----------------------------------------
   data.action = params.opcuaAction;
@@ -31,6 +31,7 @@ module.exports = async function (params) {
     return actionResult;
   } catch (ex) {
     if (isDebug) debug('Error on opcuaClientActions:', ex.message);
-    throw new errors.BadRequest('Service request error:', ex.message);
+    // throw new errors.BadRequest('Service request error:', ex.message);
+    return actionResult;
   }
 };

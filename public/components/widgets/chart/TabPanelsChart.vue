@@ -42,7 +42,7 @@
                       :key="`panel${tabIndex}_${panelIndex}`"
                       :ref="`panel${tabIndex}_${panelIndex}`"
                     >
-                      <v-expansion-panel-header>
+                      <v-expansion-panel-header v-if="currentValues[panelItem.browseName]">
                         <v-row no-gutters>
                           <v-col cols="7">
                             <v-icon class="mr-3">{{ panelItem.icon }}</v-icon>
@@ -83,17 +83,23 @@
                           </v-col>
                         </v-row>
                       </v-expansion-panel-header>
-                      <v-expansion-panel-content>
+                      <v-expansion-panel-content v-if="currentValues[panelItem.browseName]">
                         <!--  Box Chart  -->
                         <v-row justify="center">
                           <v-col cols="12" sm="12">
-                            <v-card color="primary" :dark="theme.dark" outlined>
+                            <v-card
+                              v-if="startHist"
+                              color="primary"
+                              :dark="theme.dark"
+                              outlined
+                            >
                               <box-chart
                                 v-if="numberChanges"
-                                :title="`${tabItem.tabName}`"
+                                :title="tabItem.tabName"
                                 :sub-title="`${
                                   currentValues[panelItem.browseName]
-                                    ? currentValues[panelItem.browseName].value
+                                    ? currentValues[panelItem.browseName]
+                                        .value
                                     : 0
                                 } ${panelItem.engineeringUnits}`"
                                 icon="mdi-chart-line-variant"
@@ -133,6 +139,18 @@
                                 </v-btn>
                               </v-card-actions>
                             </v-card>
+                            <div v-else>
+                              <div
+                                class="d-flex pa-2 justify-center subtitle-1"
+                              >
+                                {{ $t("echartDemo.waitLoadingData") }}
+                              </div>
+                              <div class="d-flex pa-2 justify-center">
+                                <v-icon dense :color="iconColor"
+                                  >fas fa-circle-notch fa-spin</v-icon
+                                >
+                              </div>
+                            </div>
                           </v-col>
                         </v-row>
                       </v-expansion-panel-content>
@@ -168,9 +186,10 @@ export default {
   },
   props: {
     tabItems: Array,
-    currentValues: Object,// e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
+    currentValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
     histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
+    startHist: Boolean,
   },
   data() {
     return {

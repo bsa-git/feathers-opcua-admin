@@ -71,7 +71,9 @@
                               :key="`panel${tab1Index}_${tab2Index}_${tab2PanelIndex}`"
                               :ref="`panel${tab1Index}_${tab2Index}_${tab2PanelIndex}`"
                             >
-                              <v-expansion-panel-header>
+                              <v-expansion-panel-header
+                                v-if="currentValues[tab2PanelItem.browseName]"
+                              >
                                 <v-row no-gutters>
                                   <v-col cols="6">
                                     <v-icon class="mr-3">{{
@@ -122,14 +124,14 @@
                                   </v-col>
                                 </v-row>
                               </v-expansion-panel-header>
-                              <v-expansion-panel-content>
+                              <v-expansion-panel-content
+                                v-if="currentValues[tab2PanelItem.browseName]"
+                              >
                                 <!--  Box Chart  -->
                                 <v-row justify="center">
                                   <v-col cols="12" sm="12">
                                     <v-card
-                                      v-if="filterHistValues[
-                                            tab2PanelItem.browseName
-                                          ]"
+                                      v-if="startHist"
                                       color="primary"
                                       :dark="theme.dark"
                                       outlined
@@ -188,14 +190,22 @@
                                       </v-card-actions>
                                     </v-card>
                                     <div v-else>
-                                      <div class="subtitle-1 d-flex pa-2 justify-center">{{ $t('echartDemo.waitLoadingData') }}</div>
-                                      <div class="d-flex pa-2 justify-center"
-                                      ><v-icon dense :color="iconColor"
-                                        >fas fa-circle-notch fa-spin</v-icon
-                                      ></div>
+                                      <div
+                                        class="
+                                          d-flex
+                                          pa-2
+                                          justify-center
+                                          subtitle-1
+                                        "
+                                      >
+                                        {{ $t("echartDemo.waitLoadingData") }}
+                                      </div>
+                                      <div class="d-flex pa-2 justify-center">
+                                        <v-icon dense :color="iconColor"
+                                          >fas fa-circle-notch fa-spin</v-icon
+                                        >
+                                      </div>
                                     </div>
-                                    
-                                    <div v-if="startHist">123456</div>
                                   </v-col>
                                 </v-row>
                               </v-expansion-panel-content>
@@ -264,21 +274,16 @@ export default {
     numberChanges: function (val) {
       if (val) {
         if (isDebug) debug("watch.numberChanges.val:", val);
-        // debug("watch.numberChanges.val:", val);
         if (isLog)
           debug("watch.numberChanges.currentValues:", this.currentValues);
-        if (isLog) debug("watch.numberChanges.histValues:", this.histValues);
       }
     },
     startHist: function (val) {
       if (val) {
         if (isDebug) debug("watch.numberChanges.val:", val);
-        debug("watch.startHist.val:", val);
-        if (isLog)
-          debug("watch.numberChanges.currentValues:", this.currentValues);
-        if (isLog) debug("watch.numberChanges.histValues:", this.histValues);
+        if (isLog) debug("watch.startHist.histValues:", this.histValues);
       }
-    }
+    },
   },
   computed: {
     ...mapGetters({
@@ -294,7 +299,7 @@ export default {
     },
 
     histValuesCount: function () {
-      return Object.keys(this.histValues).length; 
+      return Object.keys(this.histValues).length;
     },
 
     /**
