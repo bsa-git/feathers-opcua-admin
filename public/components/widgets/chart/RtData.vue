@@ -16,6 +16,7 @@
       :hist-values="tagHistValues"
       :number-changes="numberChanges"
       :start-hist="startHist"
+      :updated-at="updatedAt"
     ></panels-chart>
 
     <tab-panels-chart
@@ -25,6 +26,7 @@
       :hist-values="tagHistValues"
       :number-changes="numberChanges"
       :start-hist="startHist"
+      :updated-at="updatedAt"
     ></tab-panels-chart>
 
     <tab2-panels-chart
@@ -34,6 +36,8 @@
       :hist-values="tagHistValues"
       :number-changes="numberChanges"
       :start-hist="startHist"
+      :updated-at="updatedAt"
+      :is-updated-at="isUpdatedAt"
     ></tab2-panels-chart>
   </div>
 </template>
@@ -80,15 +84,15 @@ export default {
       isTab2PanelsChart: false,
       isNoPanels: false,
       numberChanges: 0,
-      startHist: false
+      startHist: false,
     };
   },
   created: async function () {
     this.getPanelsChartType();
-    if(isDebug) debug('created.dt1:', moment().inspect());
+    if (isDebug) debug("created.dt1:", moment().inspect());
     await this.getTagHistValues();
-    this.startHist = Object.keys(this.tagHistValues).length > 1;
-    if(isDebug) debug('created.dt2:', moment().inspect());
+    // this.startHist = Object.keys(this.tagHistValues).length > 1;
+    if (isDebug) debug("created.dt2:", moment().inspect());
   },
   mounted: function () {
     this.$nextTick(function () {});
@@ -99,6 +103,32 @@ export default {
     },
     isTablet: function () {
       return this.$vuetify.breakpoint.smAndDown;
+    },
+    updatedAt: function () {
+      let updatedAt = "";
+      //----------------------
+      if (this.numberChanges) {
+        updatedAt = moment(this.tagHistValues["updatedAt"]).format(
+          "YYYY-MM-DD HH:mm:ss"
+        );
+      }
+      return updatedAt;
+    },
+    isUpdatedAt: function () {
+      let isUpdatedAt = false;
+      //----------------------
+      if (this.numberChanges) {
+        const currentTime = moment().unix();
+        const lastUpdatedAt = moment(this.updatedAt).unix();
+        const groupTag = this.getOwnerGroupTag();
+        const interval = groupTag.getterParams.interval / 1000;
+        isUpdatedAt = currentTime - lastUpdatedAt;
+        isUpdatedAt = isUpdatedAt <= (1 * interval);
+        if(isUpdatedAt && Object.keys(this.tagHistValues).length === 1){
+          this.getTagHistValues();
+        }
+      }
+      return isUpdatedAt;
     },
     panels() {
       const panels = [];
@@ -140,8 +170,7 @@ export default {
      * e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
      */
     currentValues() {
-      
-      if(isDebug) debug('computed.currentValues.dt1:', moment().inspect());
+      if (isDebug) debug("computed.currentValues.dt1:", moment().inspect());
 
       const { OpcuaValue } = this.$FeathersVuex;
       const opcuaValues = OpcuaValue.findInStore({
@@ -187,7 +216,12 @@ export default {
             debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
           this.numberChanges++;
 
-          if(isDebug) debug('computed.currentValues.tagHistValues.length:', this.numberChanges, Object.keys(this.tagHistValues).length);
+          if (isDebug)
+            debug(
+              "computed.currentValues.tagHistValues.length:",
+              this.numberChanges,
+              Object.keys(this.tagHistValues).length
+            );
         }
       }
       return this.tagCurrentValues;
@@ -292,6 +326,19 @@ export default {
       return objectTag;
     },
 
+    getOwnerGroupTag() {
+      let groupTag = null;
+      //--------------------------
+      const { OpcuaTag } = this.$FeathersVuex;
+      const groupTags = OpcuaTag.findInStore({
+        query: { browseName: this.group, group: true },
+      }).data;
+      if (groupTags.length) {
+        groupTag = groupTags[0];
+      }
+      return groupTag;
+    },
+
     async getTagHistValues() {
       let histValues = [];
       //-------------------
@@ -319,9 +366,7 @@ export default {
             end,
           };
           const service = feathersClient.service("data-management");
-          if(service){
-            histValues = await service.create(data);
-          }
+          histValues = await service.create(data);
         }
 
         if (savingValuesMode === "add") {
@@ -345,7 +390,6 @@ export default {
       if (histValues && histValues.length) {
         histValues.forEach((item) => {
           if (item.values.length) {
-            // const updatedAt = moment(item["updatedAt"]).utc().format("YYYY-MM-DDTHH:mm:ss");
             const updatedAt = moment(item["updatedAt"]).format(
               "YYYY-MM-DDTHH:mm:ss"
             );
@@ -361,6 +405,7 @@ export default {
           }
         });
       }
+      this.startHist = Object.keys(this.tagHistValues).length > 1;
       return this.tagHistValues;
     },
     getPanelsChartType() {

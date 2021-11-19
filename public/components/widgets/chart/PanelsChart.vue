@@ -10,6 +10,9 @@
       :click-btn2="allClose"
     ></panels-top-bar>
 
+    <div class="d-flex pa-2 justify-center subtitle-2">
+      {{ updatedAt }}
+    </div>
     <!--=== Expansion panels ===-->
     <v-row justify="center" align="center">
       <v-col cols="10">
@@ -152,6 +155,7 @@ export default {
     histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
     startHist: Boolean,
+    updatedAt: String
   },
   data() {
     return {
@@ -180,6 +184,7 @@ export default {
       theme: "getTheme",
       primaryColor: "getPrimaryBaseColor",
     }),
+    
     iconColor: function () {
       return this.theme.dark ? "white" : "black";
     },
@@ -191,7 +196,7 @@ export default {
      */
     filterHistValues: function () {
       const _histValues = {};
-      const timeRange = this.timeRange;
+      const timeRange = this.timeRange ? this.timeRange : "0.1";
       //------------------------------------
       if (this.numberChanges) {
         loForEach(this.histValues, function (value, key) {

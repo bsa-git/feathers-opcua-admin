@@ -17,9 +17,13 @@
     </div>
     
     <div>
-      <span>numberChanges:</span> <span>{{ numberChanges }}</span>
+      <span>isUpdatedAt:</span> <span>{{ isUpdatedAt }}</span>
     </div>
     -->
+    <!--=== Show updatedAt ===-->
+    <div class="d-flex pa-2 justify-center subtitle-2" :class="{ 'red--text': !isUpdatedAt }">
+      {{ updatedAt }}
+    </div>
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="12" md="10">
@@ -119,6 +123,7 @@
                                           mdi-menu
                                         </v-icon>
                                       </template>
+                                      <!-- <div>{{ updatedAt }}</div> -->
                                       <span>{{ tab2PanelItem.range }}</span>
                                     </v-tooltip>
                                   </v-col>
@@ -246,9 +251,11 @@ export default {
   props: {
     tabItems: Array,
     currentValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
-    histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
+    histValues: Object, // e.g. { "updatedAt": "2021-11-19T05:45:57.820Z", "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
     startHist: Boolean,
+    updatedAt: String,
+    isUpdatedAt: Boolean
   },
   data() {
     return {
@@ -284,6 +291,7 @@ export default {
         if (isLog) debug("watch.startHist.histValues:", this.histValues);
       }
     },
+    
   },
   computed: {
     ...mapGetters({
@@ -298,10 +306,6 @@ export default {
       return this.theme.dark ? "white" : "black";
     },
 
-    histValuesCount: function () {
-      return Object.keys(this.histValues).length;
-    },
-
     /**
      * @method filterHistValues
      * @returns Object
@@ -309,7 +313,7 @@ export default {
      */
     filterHistValues: function () {
       const _histValues = {};
-      const timeRange = this.timeRange;
+      const timeRange = this.timeRange ? this.timeRange : "0.1";
       //------------------------------------
       if (this.numberChanges) {
         loForEach(this.histValues, function (value, key) {

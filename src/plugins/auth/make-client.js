@@ -31,23 +31,23 @@ module.exports = async function makeClient(options) {
   let socket;
 
   try {
-    
+
     await doesUrlExist(serverUrl);
 
     const appClient = feathersClient();
     switch (transport) {
-    case 'socketio':
-      socket = io(serverUrl, ioOptions);
-      appClient.configure(feathersClient.socketio(socket, { timeout }));
-      break;
-    case 'primus':
-      appClient.configure(primus(primusOptions));
-      break;
-    case 'rest':
-      appClient.configure(feathersClient.rest(serverUrl).axios(axios));
-      break;
-    default:
-      throw new Error(`Invalid transport ${transport}. (makeClient`);
+      case 'socketio':
+        socket = io(serverUrl, ioOptions);
+        appClient.configure(feathersClient.socketio(socket, { timeout }));
+        break;
+      case 'primus':
+        appClient.configure(primus(primusOptions));
+        break;
+      case 'rest':
+        appClient.configure(feathersClient.rest(serverUrl).axios(axios));
+        break;
+      default:
+        throw new Error(`Invalid transport ${transport}. (makeClient`);
     }
 
     if (!ifNoAuth) {
@@ -57,9 +57,6 @@ module.exports = async function makeClient(options) {
     }
     return appClient;
   } catch (error) {
-    // if (error.code !== 'ECONNREFUSED') {
-    //   console.log(chalk.red('error:'), 'feathers-client.serverUrl:', chalk.cyan(`${error.message}!`));
-    // }
     throw new Error(`Error while creating client (makeClient): ${error.message}.`);
   }
 

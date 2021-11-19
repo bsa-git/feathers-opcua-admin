@@ -31,7 +31,6 @@ module.exports = async function (params) {
     return actionResult;
   } catch (ex) {
     if (isDebug) debug('Error on opcuaClientActions:', ex.message);
-    // throw new errors.BadRequest('Service request error:', ex.message);
     return actionResult;
   }
 };

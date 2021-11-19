@@ -16,7 +16,9 @@
       <span>tabItems:</span> <span>{{ tabItems.length }}</span>
     </div>
     -->
-
+    <div class="d-flex pa-2 justify-center subtitle-2">
+      {{ updatedAt }}
+    </div>
     <!--=== Tabs ===-->
     <v-row justify="center" align="center">
       <v-col cols="10">
@@ -42,7 +44,9 @@
                       :key="`panel${tabIndex}_${panelIndex}`"
                       :ref="`panel${tabIndex}_${panelIndex}`"
                     >
-                      <v-expansion-panel-header v-if="currentValues[panelItem.browseName]">
+                      <v-expansion-panel-header
+                        v-if="currentValues[panelItem.browseName]"
+                      >
                         <v-row no-gutters>
                           <v-col cols="7">
                             <v-icon class="mr-3">{{ panelItem.icon }}</v-icon>
@@ -83,7 +87,9 @@
                           </v-col>
                         </v-row>
                       </v-expansion-panel-header>
-                      <v-expansion-panel-content v-if="currentValues[panelItem.browseName]">
+                      <v-expansion-panel-content
+                        v-if="currentValues[panelItem.browseName]"
+                      >
                         <!--  Box Chart  -->
                         <v-row justify="center">
                           <v-col cols="12" sm="12">
@@ -98,8 +104,7 @@
                                 :title="tabItem.tabName"
                                 :sub-title="`${
                                   currentValues[panelItem.browseName]
-                                    ? currentValues[panelItem.browseName]
-                                        .value
+                                    ? currentValues[panelItem.browseName].value
                                     : 0
                                 } ${panelItem.engineeringUnits}`"
                                 icon="mdi-chart-line-variant"
@@ -190,6 +195,7 @@ export default {
     histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
     startHist: Boolean,
+    updatedAt: String
   },
   data() {
     return {
@@ -228,7 +234,7 @@ export default {
      */
     filterHistValues: function () {
       const _histValues = {};
-      const timeRange = this.timeRange;
+      const timeRange = this.timeRange ? this.timeRange : "0.1";
       //------------------------------------
       if (this.numberChanges) {
         loForEach(this.histValues, function (value, key) {
