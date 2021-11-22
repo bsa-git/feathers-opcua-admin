@@ -14,7 +14,6 @@ module.exports = Object.assign({},
     isUrlExist,
     readJsonFileSync,
     writeJsonFileSync,
-    // HookHelper
   },
   util,
   typeOf,

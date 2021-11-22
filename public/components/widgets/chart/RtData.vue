@@ -33,16 +33,18 @@
       v-if="isTab2PanelsChart && !isTablet"
       :tab-items="tab2Items"
       :current-values="currentValues"
-      :hist-values="tagHistValues"
+      :hist-values="filterHistValues"
       :number-changes="numberChanges"
       :start-hist="startHist"
       :updated-at="updatedAt"
       :is-updated-at="isUpdatedAt"
+      v-on:onTimeRange="modelTimeRange"
     ></tab2-panels-chart>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapMutations } from "vuex";
 import MultiChart from "~/components/widgets/chart/MultiChart";
 import PanelsChart from "~/components/widgets/chart/PanelsChart";
 import TabPanelsChart from "~/components/widgets/chart/TabPanelsChart";
@@ -53,10 +55,13 @@ import feathersClient from "~/plugins/auth/feathers-client";
 
 const loRound = require("lodash/round");
 const loMerge = require("lodash/merge");
+const loForEach = require("lodash/forEach");
 
 const debug = require("debug")("app:comp.RtData");
 const isLog = false;
 const isDebug = false;
+
+let nIntervId = null;
 
 export default {
   components: {
@@ -85,17 +90,43 @@ export default {
       isNoPanels: false,
       numberChanges: 0,
       startHist: false,
+      isUpdatedAt: true,
+      timeRange: ''
     };
   },
+
   created: async function () {
     this.getPanelsChartType();
     if (isDebug) debug("created.dt1:", moment().inspect());
     await this.getTagHistValues();
     // this.startHist = Object.keys(this.tagHistValues).length > 1;
     if (isDebug) debug("created.dt2:", moment().inspect());
+    this.checkUpdatedAt();
+    this.timeRange = '0.1';
   },
   mounted: function () {
     this.$nextTick(function () {});
+  },
+  beforeDestroy: function () {
+    if(nIntervId) {
+      clearInterval(nIntervId);    
+      if (isDebug) debug("beforeDestroy.clearInterval: OK");
+    } 
+  },
+  watch: {
+    isUpdatedAt: function (val) {
+      if (isDebug) debug("watch.isUpdatedAt.val:", val);
+      if (!val) {
+        this.showError(this.$t("rtdata.errorConnect"));
+      }
+      if (val) {
+        this.showSuccess(this.$t("rtdata.successConnect"));
+      }
+    },
+    timeRange: function (val) {
+      if (isDebug) debug("watch.timeRange.val:", val);
+      // debug("watch.timeRange.val:", val);
+    }
   },
   computed: {
     isMobile: function () {
@@ -113,22 +144,6 @@ export default {
         );
       }
       return updatedAt;
-    },
-    isUpdatedAt: function () {
-      let isUpdatedAt = false;
-      //----------------------
-      if (this.numberChanges) {
-        const currentTime = moment().unix();
-        const lastUpdatedAt = moment(this.updatedAt).unix();
-        const groupTag = this.getOwnerGroupTag();
-        const interval = groupTag.getterParams.interval / 1000;
-        isUpdatedAt = currentTime - lastUpdatedAt;
-        isUpdatedAt = isUpdatedAt <= (1 * interval);
-        if(isUpdatedAt && Object.keys(this.tagHistValues).length === 1){
-          this.getTagHistValues();
-        }
-      }
-      return isUpdatedAt;
     },
     panels() {
       const panels = [];
@@ -162,69 +177,6 @@ export default {
         });
       });
       return panels;
-    },
-
-    /**
-     * @method  currentValues
-     * @returns Object[]
-     * e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
-     */
-    currentValues() {
-      if (isDebug) debug("computed.currentValues.dt1:", moment().inspect());
-
-      const { OpcuaValue } = this.$FeathersVuex;
-      const opcuaValues = OpcuaValue.findInStore({
-        query: { tagName: this.group, $sort: { updatedAt: -1 }, $limit: 1 },
-      }).data;
-
-      if (opcuaValues.length && opcuaValues[0].values.length) {
-        // Check new update values
-        if (this.tagHistValues["updatedAt"] !== opcuaValues[0]["updatedAt"]) {
-          // Update time
-          this.tagHistValues["updatedAt"] = opcuaValues[0]["updatedAt"];
-
-          //e.g. opcuaValues[0].values = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
-          opcuaValues[0].values.forEach((valueItem) => {
-            valueItem.value = loRound(valueItem.value, 3);
-
-            // --- Add values to tagHistValues ---
-            if (this.numberChanges > 0 && this.tagHistValues[valueItem.key]) {
-              this.tagHistValues[valueItem.key].push([
-                moment(opcuaValues[0]["updatedAt"]).format(
-                  "YYYY-MM-DDTHH:mm:ss"
-                ),
-                valueItem.value,
-              ]);
-            }
-
-            // --- Add values to tagCurrentValues ---
-            if (!this.tagCurrentValues[valueItem.key]) {
-              this.tagCurrentValues[valueItem.key] = {
-                isModified: true,
-                value: valueItem.value,
-              };
-            } else {
-              const oldValue = this.tagCurrentValues[valueItem.key].value;
-              this.tagCurrentValues[valueItem.key].isModified =
-                oldValue !== valueItem.value;
-              if (oldValue !== valueItem.value) {
-                this.tagCurrentValues[valueItem.key].value = valueItem.value;
-              }
-            }
-          });
-          if (isLog)
-            debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
-          this.numberChanges++;
-
-          if (isDebug)
-            debug(
-              "computed.currentValues.tagHistValues.length:",
-              this.numberChanges,
-              Object.keys(this.tagHistValues).length
-            );
-        }
-      }
-      return this.tagCurrentValues;
     },
 
     // Get tabItems for tab1
@@ -311,8 +263,110 @@ export default {
       });
       return tab1Items;
     },
+
+    /**
+     * @method  currentValues
+     * @returns Object[]
+     * e.g. { "CH_M51::01AMIAK:01T4": { isModified: true, value: 34.567 }, "CH_M51::01AMIAK:01P4_1": { isModified: false, value: 10.123 } }
+     */
+    currentValues() {
+      if (isDebug) debug("computed.currentValues.dt1:", moment().inspect());
+
+      const { OpcuaValue } = this.$FeathersVuex;
+      const opcuaValues = OpcuaValue.findInStore({
+        query: { tagName: this.group, $sort: { updatedAt: -1 }, $limit: 1 },
+      }).data;
+
+      if (opcuaValues.length && opcuaValues[0].values.length) {
+        // Check new update values
+        if (this.tagHistValues["updatedAt"] !== opcuaValues[0]["updatedAt"]) {
+          // Update time
+          this.tagHistValues["updatedAt"] = opcuaValues[0]["updatedAt"];
+
+          //e.g. opcuaValues[0].values = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
+          opcuaValues[0].values.forEach((valueItem) => {
+            valueItem.value = loRound(valueItem.value, 3);
+
+            // --- Add values to tagHistValues ---
+            if (this.numberChanges > 0 && this.tagHistValues[valueItem.key]) {
+              this.tagHistValues[valueItem.key].push([
+                moment(opcuaValues[0]["updatedAt"]).format(
+                  "YYYY-MM-DDTHH:mm:ss"
+                ),
+                valueItem.value,
+              ]);
+            }
+
+            // --- Add values to tagCurrentValues ---
+            if (!this.tagCurrentValues[valueItem.key]) {
+              this.tagCurrentValues[valueItem.key] = {
+                isModified: true,
+                value: valueItem.value,
+              };
+            } else {
+              const oldValue = this.tagCurrentValues[valueItem.key].value;
+              this.tagCurrentValues[valueItem.key].isModified =
+                oldValue !== valueItem.value;
+              if (oldValue !== valueItem.value) {
+                this.tagCurrentValues[valueItem.key].value = valueItem.value;
+              }
+            }
+          });
+          if (isLog)
+            debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
+          this.numberChanges++;
+
+          if (isDebug)
+            debug(
+              "computed.currentValues.tagHistValues.length:",
+              this.numberChanges,
+              Object.keys(this.tagHistValues).length
+            );
+        }
+      }
+      return this.tagCurrentValues;
+    },
+
+    /**
+     * @method filterHistValues
+     * @returns Object
+     * // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
+     */
+    filterHistValues: function () {
+      const _histValues = {};
+      const timeRange = this.timeRange ? this.timeRange : "0.1";
+      //------------------------------------
+      if (this.numberChanges) {
+        loForEach(this.tagHistValues, function (value, key) {
+          // Get filter hist values
+          if (Array.isArray(value)) {
+            const filterHistValues = value.filter((item) => {
+              // Get now timeRange
+              const dtTimeRange = moment()
+                .subtract(timeRange, "h")
+                .format("YYYY-MM-DDTHH:mm:ss");
+              // Get histValue date-time
+              const dtAt = item[0];
+              return dtAt >= dtTimeRange;
+            });
+            _histValues[key] = filterHistValues;
+          }
+        });
+      }
+      return _histValues;
+    },
   },
+
   methods: {
+    ...mapMutations({
+      showSuccess: "SHOW_SUCCESS",
+      showError: "SHOW_ERROR",
+    }),
+
+    modelTimeRange(newValue) {
+      this.timeRange = newValue;
+    },
+
     getOwnerObjectTag() {
       let objectTag = null;
       //--------------------------
@@ -337,6 +391,39 @@ export default {
         groupTag = groupTags[0];
       }
       return groupTag;
+    },
+
+    checkUpdatedAt: function () {
+      let _isUpdatedAt = false;
+      //----------------------
+      const currentTime = moment().unix();
+      const lastUpdatedAt = moment(this.updatedAt).unix();
+      const groupTag = this.getOwnerGroupTag();
+      const interval = groupTag.getterParams.interval / 1000;
+      _isUpdatedAt = currentTime - lastUpdatedAt;
+      _isUpdatedAt = _isUpdatedAt <= 1 * interval;
+      if (_isUpdatedAt && Object.keys(this.tagHistValues).length === 1) {
+        this.getTagHistValues();
+      }
+      this.isUpdatedAt = _isUpdatedAt;
+      this.startCheckUpdatedAt(interval);
+    },
+
+    startCheckUpdatedAt: function (interval) {
+      const self = this;
+      //---------------------------
+      nIntervId = setInterval(function () {
+        let _isUpdatedAt = false;
+        //----------------------
+        const currentTime = moment().unix();
+        const lastUpdatedAt = moment(self.updatedAt).unix();
+        _isUpdatedAt = currentTime - lastUpdatedAt;
+        _isUpdatedAt = _isUpdatedAt <= 1 * interval;
+        if (_isUpdatedAt && Object.keys(self.tagHistValues).length === 1) {
+          self.getTagHistValues();
+        }
+        self.isUpdatedAt = _isUpdatedAt;
+      }, interval);
     },
 
     async getTagHistValues() {

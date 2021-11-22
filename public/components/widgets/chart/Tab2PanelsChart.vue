@@ -161,10 +161,10 @@
                                           })
                                         "
                                         :data="
-                                          filterHistValues[
+                                          histValues[
                                             tab2PanelItem.browseName
                                           ]
-                                            ? filterHistValues[
+                                            ? histValues[
                                                 tab2PanelItem.browseName
                                               ]
                                             : []
@@ -176,7 +176,7 @@
                                       <v-divider />
                                       <v-card-actions>
                                         <v-btn-toggle
-                                          v-model="timeRange"
+                                          v-model="compTimeRange"
                                           color="primary"
                                           dense
                                         >
@@ -274,9 +274,6 @@ export default {
       });
     });
   },
-  mounted: function () {
-    this.$nextTick(function () {});
-  },
   watch: {
     numberChanges: function (val) {
       if (val) {
@@ -306,33 +303,16 @@ export default {
       return this.theme.dark ? "white" : "black";
     },
 
-    /**
-     * @method filterHistValues
-     * @returns Object
-     * // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
-     */
-    filterHistValues: function () {
-      const _histValues = {};
-      const timeRange = this.timeRange ? this.timeRange : "0.1";
-      //------------------------------------
-      if (this.numberChanges) {
-        loForEach(this.histValues, function (value, key) {
-          // Get filter hist values
-          if (Array.isArray(value)) {
-            const filterHistValues = value.filter((item) => {
-              // Get now timeRange
-              const dtTimeRange = moment()
-                .subtract(timeRange, "h")
-                .format("YYYY-MM-DDTHH:mm:ss");
-              // Get histValue date-time
-              const dtAt = item[0];
-              return dtAt >= dtTimeRange;
-            });
-            _histValues[key] = filterHistValues;
-          }
-        });
+    compTimeRange: {
+      // Getter:
+      get: function () {
+        return this.timeRange
+      },
+      // Setter:
+      set: function (newValue) {
+        this.timeRange = newValue;
+        this.$emit('onTimeRange', newValue)
       }
-      return _histValues;
     },
   },
   methods: {

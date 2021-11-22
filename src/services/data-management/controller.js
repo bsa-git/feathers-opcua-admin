@@ -1,10 +1,7 @@
-'use strict';
-
-/* eslint-env node */
-
+/* eslint-disable no-unused-vars */
 const errors = require('@feathersjs/errors');
 // const {readJsonFileSync, inspector, appRoot} = require('../../plugins/lib');
-const { readJsonFileAction, opcuaClientActions } = require('../../plugins/controllers');
+const { readJsonFileAction, opcuaClientActions, isURL_Action } = require('../../plugins/controllers');
 
 const debug = require('debug')('app:service.dataManagement.controller');
 // const isLog = false;
@@ -40,6 +37,8 @@ function dataManagement(options, app) {
         return await readJsonFileAction(data);
       case 'opcuaClient':
         return await opcuaClientActions(data);
+      case 'isURL':
+        return await isURL_Action(data);  
       case 'options':
         return Promise.resolve(options);
       default:

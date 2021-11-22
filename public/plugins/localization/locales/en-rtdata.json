@@ -14,7 +14,9 @@
   },
   "rtdata": {
     "title": "Real time data",
-    "description": "Real time data"
+    "description": "Real time data",
+    "successConnect": "Success connect to `opc-ua` server",
+    "errorConnect": "Error connect to `opc-ua` server"
   },
   "ch_m51": {
     "title": "Cherkassy `Azot` M5/1 workshop",
