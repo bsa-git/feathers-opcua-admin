@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-vars */
 const axios = require('axios');
 const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
