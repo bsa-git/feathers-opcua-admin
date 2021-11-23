@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 const errors = require('@feathersjs/errors');
 // const {readJsonFileSync, inspector, appRoot} = require('../../plugins/lib');
-const { readJsonFileAction, opcuaClientActions, isURL_Action } = require('../../plugins/controllers');
+const { 
+  opcuaClient_Actions, 
+  opcuaClientGet_Action,
+  readJsonFile_Action, 
+  isURL_Action 
+} = require('../../plugins/controllers');
 
 const debug = require('debug')('app:service.dataManagement.controller');
 // const isLog = false;
@@ -33,10 +38,12 @@ function dataManagement(options, app) {
       if (isDebug) debug('service called. action=' + data.action);
 
       switch (data.action) {
-      case 'readJsonFile':
-        return await readJsonFileAction(data);
       case 'opcuaClient':
-        return await opcuaClientActions(data);
+        return await opcuaClient_Actions(data);
+      case 'opcuaClientGet':
+        return await opcuaClientGet_Action(data);  
+      case 'readJsonFile':
+        return await readJsonFile_Action(data);  
       case 'isURL':
         return await isURL_Action(data);  
       case 'options':

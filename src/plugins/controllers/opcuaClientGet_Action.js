@@ -14,19 +14,18 @@ const isLog = false;
 const isDebug = false;
 
 module.exports = async function (params) {
-  let data = {}, actionResult = null, serverUrl = params.opcuaURL;
+  let actionResult = null, serverUrl = params.opcuaURL;
   let cb = params.opcuaCallback ? params.opcuaCallback : '';
   //----------------------------------------
-  data.action = params.opcuaAction;
-  Object.assign(data, loOmit(params, ['action', 'opcuaAction', 'opcuaURL', 'opcuaCallback']));
   try {
     const appClient = await makeClient({ serverUrl });
     const service = appClient.service('opcua-clients');
-    actionResult = await service.create(data);
-    if (isLog) inspector('controller.opcuaClientActions.result', actionResult);
+    actionResult = await service.get(params.id);
+    if (isLog) inspector('controller.opcuaClientGet_Action.result', actionResult);
+    // inspector('controller.opcuaClientGet_Action.result', actionResult);
     if(cb){
       cb = require(`./cbs/${cb}`);
-      actionResult = await cb(data, actionResult);
+      actionResult = await cb(params, actionResult);
     }
     return actionResult;
   } catch (ex) {

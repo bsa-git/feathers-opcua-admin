@@ -10,7 +10,7 @@ module.exports = async function (params) {
   try {
     const rootPath = `${appRoot}${path}`;
     const jsonData = readJsonFileSync(rootPath) || {};
-    if(isLog) inspector('controller.actionReadJsonFile:', jsonData);
+    if(isLog) inspector('controller.readJsonFile_Action.result:', jsonData);
     return jsonData;
   } catch (ex) {
     if (isDebug) debug('Error on read jsonFile:', ex);

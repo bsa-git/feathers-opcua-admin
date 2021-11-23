@@ -27,14 +27,14 @@ module.exports = async function (data, actionResult) {
           });
           histOpcuaValues.push({ tagName, updatedAt, values });
         } else {
-          logger.error(`dataValueStatusCode: ${chalk.yellow(dataValueStatusCode)}`);
+          logger.error(`controllers.cbSessionReadHistoryValues.dataValueStatusCode: ${chalk.yellow(dataValueStatusCode)}`);
         }
       });
     } else {
-      logger.error(`dataValuesLength: ${chalk.yellow(dataValuesLength)}`);
+      logger.error(`controllers.cbSessionReadHistoryValues.dataValuesLength: ${chalk.yellow(dataValuesLength)}`);
     }
   } else {
-    logger.error(`actionResultLength: ${chalk.yellow(actionResultLength)} && actionResultStatusCode: ${chalk.yellow(actionResultStatusCode)}`);
+    logger.error(`controllers.cbSessionReadHistoryValues.actionResultLength: ${chalk.yellow(actionResultLength)} && actionResultStatusCode: ${chalk.yellow(actionResultStatusCode)}`);
   }
   if(histOpcuaValues.length){
     accumulator = histOpcuaValues.length;

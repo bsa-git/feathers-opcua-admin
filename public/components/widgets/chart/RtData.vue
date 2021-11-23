@@ -13,20 +13,24 @@
       v-if="isPanelsChart"
       :items="panels"
       :current-values="currentValues"
-      :hist-values="tagHistValues"
+      :hist-values="filterHistValues"
       :number-changes="numberChanges"
       :start-hist="startHist"
       :updated-at="updatedAt"
+      :is-updated-at="isUpdatedAt"
+      v-on:onTimeRange="modelTimeRange"
     ></panels-chart>
 
     <tab-panels-chart
       v-if="isTabPanelsChart || (isTab2PanelsChart && isTablet)"
       :tab-items="tabItems"
       :current-values="currentValues"
-      :hist-values="tagHistValues"
+      :hist-values="filterHistValues"
       :number-changes="numberChanges"
       :start-hist="startHist"
       :updated-at="updatedAt"
+      :is-updated-at="isUpdatedAt"
+      v-on:onTimeRange="modelTimeRange"
     ></tab-panels-chart>
 
     <tab2-panels-chart
@@ -91,28 +95,32 @@ export default {
       numberChanges: 0,
       startHist: false,
       isUpdatedAt: true,
-      timeRange: ''
+      timeRange: "",
     };
   },
 
   created: async function () {
     this.getPanelsChartType();
     if (isDebug) debug("created.dt1:", moment().inspect());
-    await this.getTagHistValues();
-    // this.startHist = Object.keys(this.tagHistValues).length > 1;
+    const checkResult = await this.checkUpdatedAt();
+    if (checkResult) {
+      await this.getTagHistValues();
+    }
     if (isDebug) debug("created.dt2:", moment().inspect());
-    this.checkUpdatedAt();
-    this.timeRange = '0.1';
+    this.timeRange = "0.1";
   },
+
   mounted: function () {
     this.$nextTick(function () {});
   },
+
   beforeDestroy: function () {
-    if(nIntervId) {
-      clearInterval(nIntervId);    
+    if (nIntervId) {
+      clearInterval(nIntervId);
       if (isDebug) debug("beforeDestroy.clearInterval: OK");
-    } 
+    }
   },
+
   watch: {
     isUpdatedAt: function (val) {
       if (isDebug) debug("watch.isUpdatedAt.val:", val);
@@ -126,7 +134,7 @@ export default {
     timeRange: function (val) {
       if (isDebug) debug("watch.timeRange.val:", val);
       // debug("watch.timeRange.val:", val);
-    }
+    },
   },
   computed: {
     isMobile: function () {
@@ -393,37 +401,62 @@ export default {
       return groupTag;
     },
 
-    checkUpdatedAt: function () {
-      let _isUpdatedAt = false;
-      //----------------------
-      const currentTime = moment().unix();
-      const lastUpdatedAt = moment(this.updatedAt).unix();
-      const groupTag = this.getOwnerGroupTag();
-      const interval = groupTag.getterParams.interval / 1000;
-      _isUpdatedAt = currentTime - lastUpdatedAt;
-      _isUpdatedAt = _isUpdatedAt <= 1 * interval;
-      if (_isUpdatedAt && Object.keys(this.tagHistValues).length === 1) {
-        this.getTagHistValues();
-      }
-      this.isUpdatedAt = _isUpdatedAt;
-      this.startCheckUpdatedAt(interval);
+    checkIsURL: async function () {
+      const objectTag = this.getOwnerObjectTag();
+      if (!objectTag) return false;
+      const opcuaURL = objectTag.histParams.opcuaUrl;
+      const data = {
+        action: "isURL",
+        url: opcuaURL,
+      };
+      const service = feathersClient.service("data-management");
+      const result = await service.create(data);
+      return result;
     },
 
-    startCheckUpdatedAt: function (interval) {
+    checkIsOpcuaClient: async function () {
+      const objectTag = this.getOwnerObjectTag();
+      if (!objectTag) return false;
+      const opcuaURL = objectTag.histParams.opcuaUrl;
+      const id = objectTag.histParams.opcuaId;
+      const data = {
+        action: "opcuaClientGet",
+        opcuaURL,
+        id,
+      };
+      const service = feathersClient.service("data-management");
+      const result = await service.create(data);
+      return !!result;
+    },
+
+    checkUpdatedAt: async function () {
       const self = this;
-      //---------------------------
-      nIntervId = setInterval(function () {
-        let _isUpdatedAt = false;
-        //----------------------
-        const currentTime = moment().unix();
-        const lastUpdatedAt = moment(self.updatedAt).unix();
-        _isUpdatedAt = currentTime - lastUpdatedAt;
-        _isUpdatedAt = _isUpdatedAt <= 1 * interval;
-        if (_isUpdatedAt && Object.keys(self.tagHistValues).length === 1) {
-          self.getTagHistValues();
+      //----------------------
+      let checkResult = await this.checkIsOpcuaClient();
+      // this.isNoPanels = !checkResult;
+
+      this.isUpdatedAt = checkResult;
+
+      nIntervId = setInterval(async () => {
+        // Check is opcuaClient
+        let checkResult = await this.checkIsOpcuaClient();
+        // self.isNoPanels = !checkResult;
+
+        self.isUpdatedAt = checkResult;
+
+        if (!checkResult) {
+          // Set tagHistValues and startHist
+          self.tagHistValues = { updatedAt: moment().format() };
+          self.startHist = false;
         }
-        self.isUpdatedAt = _isUpdatedAt;
-      }, interval);
+
+        // Get TagHistValues
+        if (checkResult && Object.keys(self.tagHistValues).length === 1) {
+          await self.getTagHistValues();
+        }
+      }, 10000);
+
+      return checkResult;
     },
 
     async getTagHistValues() {
@@ -495,6 +528,7 @@ export default {
       this.startHist = Object.keys(this.tagHistValues).length > 1;
       return this.tagHistValues;
     },
+
     getPanelsChartType() {
       const objectTag = this.getOwnerObjectTag();
       if (objectTag) {

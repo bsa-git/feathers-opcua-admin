@@ -9,17 +9,7 @@
       :click-btn1="allOpen"
       :click-btn2="allClose"
     ></panels-top-bar>
-
-    <!--=== Debug ===-->
-    <!--  
-    <div>
-      <span>Tabs:</span> <span>{{ panels["tab0_0"] }}</span>
-    </div>
     
-    <div>
-      <span>isUpdatedAt:</span> <span>{{ isUpdatedAt }}</span>
-    </div>
-    -->
     <!--=== Show updatedAt ===-->
     <div class="d-flex pa-2 justify-center subtitle-2" :class="{ 'red--text': !isUpdatedAt }">
       {{ updatedAt }}
@@ -176,7 +166,7 @@
                                       <v-divider />
                                       <v-card-actions>
                                         <v-btn-toggle
-                                          v-model="compTimeRange"
+                                          v-model="computedTimeRange"
                                           color="primary"
                                           dense
                                         >
@@ -303,7 +293,7 @@ export default {
       return this.theme.dark ? "white" : "black";
     },
 
-    compTimeRange: {
+    computedTimeRange: {
       // Getter:
       get: function () {
         return this.timeRange

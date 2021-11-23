@@ -10,13 +10,8 @@
       :click-btn2="allClose"
     ></panels-top-bar>
 
-    <!--=== Debug ===-->
-    <!--  
-    <div>
-      <span>tabItems:</span> <span>{{ tabItems.length }}</span>
-    </div>
-    -->
-    <div class="d-flex pa-2 justify-center subtitle-2">
+    <!--=== Show updatedAt ===-->
+    <div class="d-flex pa-2 justify-center subtitle-2" :class="{ 'red--text': !isUpdatedAt }">
       {{ updatedAt }}
     </div>
     <!--=== Tabs ===-->
@@ -115,8 +110,8 @@
                                   })
                                 "
                                 :data="
-                                  filterHistValues[panelItem.browseName]
-                                    ? filterHistValues[panelItem.browseName]
+                                  histValues[panelItem.browseName]
+                                    ? histValues[panelItem.browseName]
                                     : []
                                 "
                                 :theme="theme.dark ? 'dark' : 'shine'"
@@ -126,7 +121,7 @@
                               <v-divider />
                               <v-card-actions>
                                 <v-btn-toggle
-                                  v-model="timeRange"
+                                  v-model="computedTimeRange"
                                   color="primary"
                                   dense
                                 >
@@ -195,7 +190,8 @@ export default {
     histValues: Object, // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
     numberChanges: Number,
     startHist: Boolean,
-    updatedAt: String
+    updatedAt: String,
+    isUpdatedAt: Boolean
   },
   data() {
     return {
@@ -227,34 +223,46 @@ export default {
       return this.theme.dark ? "white" : "black";
     },
 
+    computedTimeRange: {
+      // Getter:
+      get: function () {
+        return this.timeRange
+      },
+      // Setter:
+      set: function (newValue) {
+        this.timeRange = newValue;
+        this.$emit('onTimeRange', newValue)
+      }
+    },
+
     /**
      * @method filterHistValues
      * @returns Object
      * // e.g. { "CH_M51::01AMIAK:01T4": [["Time", "Value"], ... , ["2021-10-22T14:25:55", 34.567]] }
      */
-    filterHistValues: function () {
-      const _histValues = {};
-      const timeRange = this.timeRange ? this.timeRange : "0.1";
-      //------------------------------------
-      if (this.numberChanges) {
-        loForEach(this.histValues, function (value, key) {
-          // Get filter hist values
-          if (Array.isArray(value)) {
-            const filterHistValues = value.filter((item) => {
-              // Get now timeRange
-              const dtTimeRange = moment()
-                .subtract(timeRange, "h")
-                .format("YYYY-MM-DDTHH:mm:ss");
-              // Get histValue date-time
-              const dtAt = item[0];
-              return dtAt >= dtTimeRange;
-            });
-            _histValues[key] = filterHistValues;
-          }
-        });
-      }
-      return _histValues;
-    },
+    // filterHistValues: function () {
+    //   const _histValues = {};
+    //   const timeRange = this.timeRange ? this.timeRange : "0.1";
+    //   //------------------------------------
+    //   if (this.numberChanges) {
+    //     loForEach(this.histValues, function (value, key) {
+    //       // Get filter hist values
+    //       if (Array.isArray(value)) {
+    //         const filterHistValues = value.filter((item) => {
+    //           // Get now timeRange
+    //           const dtTimeRange = moment()
+    //             .subtract(timeRange, "h")
+    //             .format("YYYY-MM-DDTHH:mm:ss");
+    //           // Get histValue date-time
+    //           const dtAt = item[0];
+    //           return dtAt >= dtTimeRange;
+    //         });
+    //         _histValues[key] = filterHistValues;
+    //       }
+    //     });
+    //   }
+    //   return _histValues;
+    // },
   },
   methods: {
     // Open the panels
