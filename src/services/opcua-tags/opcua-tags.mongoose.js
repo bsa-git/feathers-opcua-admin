@@ -26,16 +26,7 @@ let moduleExports = merge({},
     ownerGroup: String,
     variableGetType: String,
     getter: String,
-    getterParams: {
-      path: String,
-      fromFile: String,
-      interval: Number,
-      dbEnv: String,
-      queryFunc: String,
-      queryParams: {
-        scanerName: String
-      }
-    },
+    getterParams: {},
     valueParams: {
       engineeringUnits: String,
       engineeringUnitsRange: {

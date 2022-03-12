@@ -16,7 +16,8 @@ let moduleExports = merge({},
       {
         tagId: mongoose.Schema.Types.ObjectId,
         key: String,
-        value: mongoose.Schema.Types.Mixed
+        value: mongoose.Schema.Types.Mixed,
+        items: [mongoose.Schema.Types.Mixed]
       }
     ]
   },

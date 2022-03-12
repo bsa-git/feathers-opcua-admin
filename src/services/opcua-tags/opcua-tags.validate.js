@@ -69,31 +69,7 @@ let base = merge({},
       },
       getterParams: {
         type: "object",
-        properties: {
-          path: {
-            type: "string"
-          },
-          fromFile: {
-            type: "string"
-          },
-          interval: {
-            type: "number"
-          },
-          dbEnv: {
-            type: "string"
-          },
-          queryFunc: {
-            type: "string"
-          },
-          queryParams: {
-            properties: {
-              scanerName: {
-                type: "string"
-              }
-            },
-            type: "object"
-          }
-        }
+        properties: {}
       },
       valueParams: {
         type: "object",

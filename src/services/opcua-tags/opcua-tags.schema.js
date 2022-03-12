@@ -71,18 +71,7 @@ let schema = {
     },
     getterParams: {
       type: 'object',
-      properties: {
-        path: {type: 'string'},
-        fromFile: {type: 'string'},
-        interval: {type: 'number'},
-        dbEnv: {type: 'string'},
-        queryFunc: {type: 'string'},
-        queryParams: {
-          properties: {
-            scanerName: {type: 'string'}
-          }
-        }
-      }
+      properties: {}
     },
     valueParams: {
       type: 'object',

@@ -59,33 +59,6 @@ let moduleExports = merge({},
         properties: {
           _id: {
             bsonType: "objectId"
-          },
-          path: {
-            bsonType: "string"
-          },
-          fromFile: {
-            bsonType: "string"
-          },
-          interval: {
-            bsonType: "number"
-          },
-          dbEnv: {
-            bsonType: "string"
-          },
-          queryFunc: {
-            bsonType: "string"
-          },
-          queryParams: {
-            bsonType: "object",
-            additionalProperties: false,
-            properties: {
-              _id: {
-                bsonType: "objectId"
-              },
-              scanerName: {
-                bsonType: "string"
-              }
-            }
           }
         }
       },
