@@ -35,7 +35,8 @@ let moduleExports = merge({},
                 "string",
                 "number",
                 "integer",
-                "boolean"
+                "boolean",
+                "object"
               ]
             },
             items: {

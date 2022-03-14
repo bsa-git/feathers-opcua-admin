@@ -58,6 +58,9 @@ let base = merge({},
       group: {
         type: "boolean"
       },
+      subscription: {
+        type: "string"
+      },
       ownerGroup: {
         type: "string"
       },

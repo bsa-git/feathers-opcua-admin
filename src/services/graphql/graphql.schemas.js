@@ -44,6 +44,7 @@ type OpcuaTag {
   dataType: String
   hist: Boolean
   group: Boolean
+  subscription: String
   ownerGroup: String
   variableGetType: String
   getter: String

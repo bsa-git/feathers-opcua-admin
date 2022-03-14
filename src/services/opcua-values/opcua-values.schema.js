@@ -35,7 +35,7 @@ let schema = {
         properties: {
           tagId: { type: 'ID' },
           key: { type: 'string' },
-          value: { type: ['string', 'number', 'integer', 'boolean'] },
+          value: { type: ['string', 'number', 'integer', 'boolean', 'object'] },
           items: { type: 'array', items: { type: ['string', 'number', 'integer', 'boolean', 'object', 'array'] } }
         }
       }

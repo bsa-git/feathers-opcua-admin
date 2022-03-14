@@ -95,6 +95,7 @@ const twoLevelsFields = {
     dataType: 1,
     hist: 1,
     group: 1,
+    subscription: 1,
     ownerGroup: 1,
     variableGetType: 1,
     getter: 1,

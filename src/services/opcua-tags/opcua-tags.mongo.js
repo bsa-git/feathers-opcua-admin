@@ -44,6 +44,9 @@ let moduleExports = merge({},
       group: {
         bsonType: "boolean"
       },
+      subscription: {
+        bsonType: "string"
+      },
       ownerGroup: {
         bsonType: "string"
       },

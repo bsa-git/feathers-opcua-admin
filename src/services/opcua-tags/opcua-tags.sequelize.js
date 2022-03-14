@@ -47,6 +47,9 @@ let moduleExports = merge({},
     group: {
       type: DataTypes.BOOLEAN
     },
+    subscription: {
+      type: DataTypes.TEXT
+    },
     ownerGroup: {
       type: DataTypes.TEXT
     },

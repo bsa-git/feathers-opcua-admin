@@ -60,6 +60,9 @@ let schema = {
     group: {
       type: 'boolean'
     },
+    subscription: {
+      type: 'string'
+    },
     ownerGroup: {
       type: 'string'
     },
