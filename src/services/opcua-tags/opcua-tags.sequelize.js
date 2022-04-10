@@ -53,6 +53,18 @@ let moduleExports = merge({},
     ownerGroup: {
       type: DataTypes.TEXT
     },
+    bindMethod: {
+      type: DataTypes.TEXT
+    },
+    inputArguments: {
+      type: DataTypes.JSONB
+    },
+    outputArguments: {
+      type: DataTypes.JSONB
+    },
+    userAccessLevel: {
+      type: DataTypes.JSONB
+    },
     variableGetType: {
       type: DataTypes.TEXT
     },

@@ -46,6 +46,10 @@ type OpcuaTag {
   group: Boolean
   subscription: String
   ownerGroup: String
+  bindMethod: String
+  inputArguments: [JSON]
+  outputArguments: [JSON]
+  userAccessLevel: JSON
   variableGetType: String
   getter: String
   getterParams: JSON

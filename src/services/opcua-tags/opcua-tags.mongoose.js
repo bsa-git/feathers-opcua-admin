@@ -25,6 +25,17 @@ let moduleExports = merge({},
     group: Boolean,
     subscription: String,
     ownerGroup: String,
+    bindMethod: String,
+    inputArguments: [
+      {}
+    ],
+    outputArguments: [
+      {}
+    ],
+    userAccessLevel: {
+      inputArguments: String,
+      outputArguments: String
+    },
     variableGetType: String,
     getter: String,
     getterParams: {},

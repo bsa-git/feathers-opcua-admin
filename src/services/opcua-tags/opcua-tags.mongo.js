@@ -50,6 +50,36 @@ let moduleExports = merge({},
       ownerGroup: {
         bsonType: "string"
       },
+      bindMethod: {
+        bsonType: "string"
+      },
+      inputArguments: {
+        items: {
+          type: "object"
+        },
+        bsonType: "array"
+      },
+      outputArguments: {
+        items: {
+          type: "object"
+        },
+        bsonType: "array"
+      },
+      userAccessLevel: {
+        bsonType: "object",
+        additionalProperties: false,
+        properties: {
+          _id: {
+            bsonType: "objectId"
+          },
+          inputArguments: {
+            bsonType: "string"
+          },
+          outputArguments: {
+            bsonType: "string"
+          }
+        }
+      },
       variableGetType: {
         bsonType: "string"
       },
