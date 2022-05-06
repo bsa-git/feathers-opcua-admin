@@ -39,7 +39,7 @@ let moduleExports = merge({},
         bsonType: "string"
       },
       hist: {
-        bsonType: "boolean"
+        bsonType: "int"
       },
       group: {
         bsonType: "boolean"

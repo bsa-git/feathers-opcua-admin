@@ -42,7 +42,7 @@ let moduleExports = merge({},
       type: DataTypes.TEXT
     },
     hist: {
-      type: DataTypes.BOOLEAN
+      type: DataTypes.INTEGER
     },
     group: {
       type: DataTypes.BOOLEAN

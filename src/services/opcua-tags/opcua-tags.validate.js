@@ -53,7 +53,7 @@ let base = merge({},
         type: "string"
       },
       hist: {
-        type: "boolean"
+        type: "integer"
       },
       group: {
         type: "boolean"

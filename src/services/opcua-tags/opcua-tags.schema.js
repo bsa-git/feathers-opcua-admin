@@ -54,8 +54,8 @@ let schema = {
     dataType: {
       type: 'string'
     },
-    hist: {
-      type: 'boolean'
+    hist:  { 
+      type: 'integer' 
     },
     group: {
       type: 'boolean'
