@@ -43,6 +43,7 @@ type OpcuaTag {
   ownerName: String
   dataType: String
   hist: Int
+  store: JSON
   group: Boolean
   subscription: String
   ownerGroup: String

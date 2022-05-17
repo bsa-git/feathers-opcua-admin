@@ -57,6 +57,10 @@ let schema = {
     hist:  { 
       type: 'integer' 
     },
+    store: {
+      type: 'object',
+      properties: {}
+    },
     group: {
       type: 'boolean'
     },

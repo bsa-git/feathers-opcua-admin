@@ -41,6 +41,15 @@ let moduleExports = merge({},
       hist: {
         bsonType: "int"
       },
+      store: {
+        bsonType: "object",
+        additionalProperties: false,
+        properties: {
+          _id: {
+            bsonType: "objectId"
+          }
+        }
+      },
       group: {
         bsonType: "boolean"
       },

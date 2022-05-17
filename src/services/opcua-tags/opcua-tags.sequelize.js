@@ -44,6 +44,9 @@ let moduleExports = merge({},
     hist: {
       type: DataTypes.INTEGER
     },
+    store: {
+      type: DataTypes.JSONB
+    },
     group: {
       type: DataTypes.BOOLEAN
     },

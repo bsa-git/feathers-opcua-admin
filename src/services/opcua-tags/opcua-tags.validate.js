@@ -55,6 +55,10 @@ let base = merge({},
       hist: {
         type: "integer"
       },
+      store: {
+        type: "object",
+        properties: {}
+      },
       group: {
         type: "boolean"
       },
