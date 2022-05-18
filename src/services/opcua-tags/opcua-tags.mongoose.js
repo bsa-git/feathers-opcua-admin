@@ -47,6 +47,10 @@ let moduleExports = merge({},
         high: Number
       }
     },
+    valueFromSourceParams: {
+      dataType: String,
+      arrayType: String
+    },
     histParams: {
       opcuaId: String,
       opcuaUrl: String,

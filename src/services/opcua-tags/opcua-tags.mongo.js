@@ -131,6 +131,21 @@ let moduleExports = merge({},
           }
         }
       },
+      valueFromSourceParams: {
+        bsonType: "object",
+        additionalProperties: false,
+        properties: {
+          _id: {
+            bsonType: "objectId"
+          },
+          dataType: {
+            bsonType: "string"
+          },
+          arrayType: {
+            bsonType: "string"
+          }
+        }
+      },
       histParams: {
         bsonType: "object",
         additionalProperties: false,

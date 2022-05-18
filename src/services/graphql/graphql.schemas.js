@@ -55,6 +55,7 @@ type OpcuaTag {
   getter: String
   getterParams: JSON
   valueParams: JSON
+  valueFromSourceParams: JSON
   histParams: JSON
   view: JSON
 }

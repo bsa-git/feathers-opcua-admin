@@ -123,6 +123,17 @@ let base = merge({},
           }
         }
       },
+      valueFromSourceParams: {
+        type: "object",
+        properties: {
+          dataType: {
+            type: "string"
+          },
+          arrayType: {
+            type: "string"
+          }
+        }
+      },
       histParams: {
         type: "object",
         properties: {

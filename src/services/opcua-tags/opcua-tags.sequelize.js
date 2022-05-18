@@ -80,6 +80,9 @@ let moduleExports = merge({},
     valueParams: {
       type: DataTypes.JSONB
     },
+    valueFromSourceParams: {
+      type: DataTypes.JSONB
+    },
     histParams: {
       type: DataTypes.JSONB
     },

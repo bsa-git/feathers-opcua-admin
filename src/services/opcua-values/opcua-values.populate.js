@@ -116,6 +116,7 @@ const twoLevelsFields = {
       getter: 1,
       getterParams: 1,
       valueParams: 1,
+      valueFromSourceParams: 1,
       histParams: 1,
       view: 1,
     },
