@@ -28,6 +28,8 @@ let schema = {
     _id: { type: 'ID' },
     tagId: { type: 'ID' },
     tagName: { type: 'string' },
+    storeBegin: { type: 'string' },
+    storeEnd: { type: 'string' },
     values: {
       type: 'array',
       items: {
@@ -68,7 +70,7 @@ let extensions = {
     ],
     add: {
       // !code: graphql_add
-      tag: {type: 'OpcuaTag', args: true, relation: {ourTable: 'tagId', otherTable: '_id'}},
+      tag: { type: 'OpcuaTag', args: true, relation: { ourTable: 'tagId', otherTable: '_id' } },
       // !end
     },
     // !code: graphql_more // !end

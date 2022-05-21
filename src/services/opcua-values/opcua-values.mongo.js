@@ -20,6 +20,12 @@ let moduleExports = merge({},
       tagName: {
         bsonType: "string"
       },
+      storeBegin: {
+        bsonType: "string"
+      },
+      storeEnd: {
+        bsonType: "string"
+      },
       values: {
         items: {
           type: "object",

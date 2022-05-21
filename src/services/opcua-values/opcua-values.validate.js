@@ -32,6 +32,12 @@ let base = merge({},
       tagName: {
         type: "string"
       },
+      storeBegin: {
+        type: "string"
+      },
+      storeEnd: {
+        type: "string"
+      },
       values: {
         type: "array",
         items: {

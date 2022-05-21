@@ -12,6 +12,8 @@ let moduleExports = merge({},
   {
     tagId: mongoose.Schema.Types.ObjectId,
     tagName: String,
+    storeBegin: String,
+    storeEnd: String,
     values: [
       {
         tagId: mongoose.Schema.Types.ObjectId,
