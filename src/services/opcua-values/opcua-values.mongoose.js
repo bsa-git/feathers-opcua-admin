@@ -12,7 +12,7 @@ let moduleExports = merge({},
   {
     tagId: mongoose.Schema.Types.ObjectId,
     tagName: String,
-    storeBegin: String,
+    storeStart: String,
     storeEnd: String,
     values: [
       {

@@ -22,7 +22,7 @@ let moduleExports = merge({},
     tagName: {
       type: DataTypes.TEXT
     },
-    storeBegin: {
+    storeStart: {
       type: DataTypes.TEXT
     },
     storeEnd: {

@@ -90,7 +90,7 @@ const twoLevelsFields = {
     _id: 1,
     tagId: 1,
     tagName: 1,
-    storeBegin: 1,
+    storeStart: 1,
     storeEnd: 1,
     values: 1,
     tag: {

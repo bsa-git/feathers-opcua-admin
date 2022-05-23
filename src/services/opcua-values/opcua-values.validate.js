@@ -32,7 +32,7 @@ let base = merge({},
       tagName: {
         type: "string"
       },
-      storeBegin: {
+      storeStart: {
         type: "string"
       },
       storeEnd: {

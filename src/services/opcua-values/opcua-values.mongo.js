@@ -20,7 +20,7 @@ let moduleExports = merge({},
       tagName: {
         bsonType: "string"
       },
-      storeBegin: {
+      storeStart: {
         bsonType: "string"
       },
       storeEnd: {
