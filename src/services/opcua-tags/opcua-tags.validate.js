@@ -107,6 +107,12 @@ let base = merge({},
       valueParams: {
         type: "object",
         properties: {
+          arrayDimensions: {
+            type: "array",
+            items: {
+              type: "integer"
+            }
+          },
           engineeringUnits: {
             type: "string"
           },
@@ -150,42 +156,7 @@ let base = merge({},
       },
       view: {
         type: "object",
-        properties: {
-          tab1: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string"
-                },
-                items: {
-                  type: "array",
-                  items: {
-                    type: "string"
-                  }
-                }
-              }
-            }
-          },
-          tab2: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string"
-                },
-                items: {
-                  type: "array",
-                  items: {
-                    type: "string"
-                  }
-                }
-              }
-            }
-          }
-        }
+        properties: {}
       }
     }
   },

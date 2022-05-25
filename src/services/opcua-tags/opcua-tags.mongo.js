@@ -111,6 +111,12 @@ let moduleExports = merge({},
           _id: {
             bsonType: "objectId"
           },
+          arrayDimensions: {
+            items: {
+              type: "integer"
+            },
+            bsonType: "array"
+          },
           engineeringUnits: {
             bsonType: "string"
           },
@@ -170,40 +176,6 @@ let moduleExports = merge({},
         properties: {
           _id: {
             bsonType: "objectId"
-          },
-          tab1: {
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string"
-                },
-                items: {
-                  type: "array",
-                  items: {
-                    type: "string"
-                  }
-                }
-              }
-            },
-            bsonType: "array"
-          },
-          tab2: {
-            items: {
-              type: "object",
-              properties: {
-                name: {
-                  type: "string"
-                },
-                items: {
-                  type: "array",
-                  items: {
-                    type: "string"
-                  }
-                }
-              }
-            },
-            bsonType: "array"
           }
         }
       }

@@ -41,6 +41,9 @@ let moduleExports = merge({},
     getter: String,
     getterParams: {},
     valueParams: {
+      arrayDimensions: [
+        Number
+      ],
       engineeringUnits: String,
       engineeringUnitsRange: {
         low: Number,
@@ -56,30 +59,18 @@ let moduleExports = merge({},
       opcuaUrl: String,
       savingValuesMode: String
     },
-    view: {
-      tab1: [
-        {
-          name: String,
-          items: [
-            String
-          ]
-        }
-      ],
-      tab2: [
-        {
-          name: String,
-          items: [
-            String
-          ]
-        }
-      ]
-    }
+    view: {}
   },
   // !end
   // !code: moduleExports // !end
 );
 
-// !code: exports // !end
+// !code: exports
+//--------------------------------
+moduleExports.inputArguments = {};
+moduleExports.outputArguments = {};
+//---------------------------------
+// !end
 module.exports = moduleExports;
 
 // !code: funcs // !end
