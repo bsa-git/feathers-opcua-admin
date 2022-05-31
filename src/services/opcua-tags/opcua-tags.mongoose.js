@@ -69,6 +69,7 @@ let moduleExports = merge({},
 //--------------------------------
 moduleExports.inputArguments = {};
 moduleExports.outputArguments = {};
+moduleExports.valueParams = {};
 //---------------------------------
 // !end
 module.exports = moduleExports;
