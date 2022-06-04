@@ -1,9 +1,15 @@
-
+/* eslint-disable no-unused-vars */
 // Hooks for service `opcuaValues`. (Can be re-generated.)
 const commonHooks = require('feathers-hooks-common');
 // eslint-disable-next-line no-unused-vars
 const opcuaValuesPopulate = require('./opcua-values.populate');
-// !code: imports // !end
+// !code: imports 
+//----------------
+const storeItems = require('./hooks/store-items');
+
+const loConcat = require('lodash/concat');
+//----------------
+// !end
 
 // !<DEFAULT> code: used
 // eslint-disable-next-line no-unused-vars
@@ -53,7 +59,14 @@ let moduleExports = {
   // !code: moduleExports // !end
 };
 
-// !code: exports // !end
+// !code: exports
+//---------------
+// Add schema validate
+// moduleExports.before.create = loConcat([validateCreate()], moduleExports.before.create);
+// moduleExports.before.update = loConcat([validateUpdate()], moduleExports.before.update);
+// moduleExports.before.patch = loConcat([validatePatch()], moduleExports.before.patch, storeItems());
+//---------------
+// !end
 module.exports = moduleExports;
 
 // !code: funcs // !end

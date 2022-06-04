@@ -83,7 +83,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
       path: '/public/api/demo/ui-elements/treeview-items4.json'
     };
     const flightData = await service.create(data);
-    if (true && flightData) inspector('data-management.flightData from "dataManagement" service:', flightData);
+    if (isDebug && flightData) inspector('data-management.flightData from "dataManagement" service:', flightData);
     assert.ok(Object.keys(flightData).length, 'OK - Read flight json data from "dataManagement" service');
   });
 

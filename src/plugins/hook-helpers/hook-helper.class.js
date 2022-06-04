@@ -1,4 +1,7 @@
-// const loMerge = require('lodash/merge');
+const loMerge = require('lodash/merge');
+const loIsBuffer = require('lodash/isBuffer');
+const loIsPlainObject = require('lodash/isPlainObject');
+
 const { checkContext, getItems, replaceItems } = require('feathers-hooks-common');
 const errors = require('@feathersjs/errors');
 // const {inspector, isObject} = require('../lib');
@@ -16,7 +19,7 @@ const {
   createItems
 } = require('../db-helpers');
 
-const loMerge = require('lodash/merge');
+
 const chalk = require('chalk');
 const debug = require('debug')('app:hook-helper.class');
 
@@ -201,14 +204,18 @@ class HookHelper {
    * @returns {String}
    */
   getContextId() {
-    let contextId;
-    if (isObject(this.contextId)) {
-      const idField = HookHelper.getIdField(this.contextId);
-      contextId = this.contextId[idField];
-    } else {
-      contextId = this.contextId;
+
+    if(loIsBuffer(this.contextId)){
+      return this.contextId.toString();
     }
-    return contextId;
+
+    if (loIsPlainObject(this.contextId)) {
+      const idField = HookHelper.getIdField(this.contextId);
+      return this.contextId[idField];
+    } 
+    
+    return this.contextId;
+
   }
 
   /**
