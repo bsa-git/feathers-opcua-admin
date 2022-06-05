@@ -12,12 +12,14 @@ module.exports = function (options = {}) {
   return async context => {
     // Create HookHelper object
     const hh = new HookHelper(context);
+    
     // Add items
     const addItems = async value => {
       let values;
       //----------------------
       
       if(!value.storeStart) return;
+      if(!value.values.length > 1) return;
       
       const contextId = hh.getContextId();
       if (contextId) {
