@@ -1,7 +1,7 @@
-const {appRoot, authenticationBase} = require('../src/plugins');
+const {appRoot, authenticationBase} = require('../../src/plugins');
 // const { join } = require('path');
 // const { authenticationBase } = require('@feathers-plus/test-utils');
-const config = require('../config/default.json');
+const config = require('../../config/default.json');
 
 // Determine if environment allows test to mutate existing DB data.
 const env = (config.tests || {}).environmentsAllowingSeedData || [];

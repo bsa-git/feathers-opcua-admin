@@ -2,7 +2,7 @@
 const assert = require('assert');
 const rp = require('request-promise');
 const url = require('url');
-const app = require('../src/app');
+const app = require('../../src/app');
 const debug = require('debug')('app:app.test');
 
 const isDebug = false;
