@@ -23,14 +23,14 @@ let moduleExports = {
   before: {
     // Your hooks should include:
     //   all   : authenticate('jwt')
-    // !<DEFAULT> code: before
-    all: [ authenticate('jwt') ],
-    find: [],
-    get: [],
+    // !code: before
+    all: [],
+    find: [authenticate('jwt')],
+    get: [authenticate('jwt')],
     create: [],
-    update: [],
-    patch: [],
-    remove: []
+    update: [authenticate('jwt')],
+    patch: [authenticate('jwt')],
+    remove: [authenticate('jwt')]
     // !end
   },
 
