@@ -10,6 +10,8 @@ const {
   sortByStringField
 } = require('../../../plugins');
 
+const loConcat = require('lodash/concat');
+
 // eslint-disable-next-line no-unused-vars
 module.exports = function (options = {}) {
 
@@ -29,12 +31,12 @@ module.exports = function (options = {}) {
     const hh = new HookHelper(context);
 
     // Add items
-    const addItems = async value => {
+    const addItems = async record => {
       let values;
       //----------------------
 
-      if (!value.storeStart) return;
-      if (!value.values.length > 1) return;
+      if (!record.storeStart) return;
+      if (!record.values.length > 1) return;
 
       const contextId = hh.getContextId();
       if (contextId) {
@@ -44,12 +46,12 @@ module.exports = function (options = {}) {
         const storeStart = storeValue.storeStart;
         // Get values
         values = storeValue.values.filter(v => v.key !== storeStart);
-        values = loConcat(values, value.values);
+        values = loConcat(values, record.values);
         values = sortByStringField(values, 'key', true);
         // Set range of stored values
-        value.storeStart = values[0].key;
-        value.storeEnd = values[values.length - 1].key;
-        value.values = sortByStringField(values, 'key', false);
+        record.storeStart = values[0].key;
+        record.storeEnd = values[values.length - 1].key;
+        record.values = sortByStringField(values, 'key', false);
       }
     };
     await hh.forEachRecords(addItems);

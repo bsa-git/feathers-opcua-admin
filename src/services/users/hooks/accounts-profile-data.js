@@ -6,7 +6,6 @@ const errors = require('@feathersjs/errors');
 const {inspector} = require('../../../plugins/lib');
 const debug = require('debug')('app:service.hook.accounts-profile-data');
 
-const isLog = false;
 const isDebug = false;
 
 // eslint-disable-next-line no-unused-vars
@@ -37,7 +36,7 @@ module.exports = function (options = {}) {
       let newRecord = {};
       let profile;
 
-      if (isLog) inspector('hook.accounts-profile-data.getProfileData.record:', record);
+      if (isDebug) inspector('hook.accounts-profile-data.getProfileData.record:', record);
 
       // Google account
       if(record.google){
@@ -116,11 +115,11 @@ module.exports = function (options = {}) {
       records.forEach(record => {
         newRecords.push(getProfileData(record));
       });
-      if (isLog && isAccount) inspector('hook.accounts-profile-data.newRecords:', newRecords);
+      if (isDebug && isAccount) inspector('hook.accounts-profile-data.newRecords:', newRecords);
       replaceItems(context, newRecords);
     } else {
       const newRecord = getProfileData(records);
-      if (isLog && isAccount) inspector('hook.accounts-profile-data.newRecord:', newRecord);
+      if (isDebug && isAccount) inspector('hook.accounts-profile-data.newRecord:', newRecord);
       replaceItems(context, newRecord);
     }
 
