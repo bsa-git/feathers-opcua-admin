@@ -12,6 +12,9 @@ const {
 
 const loConcat = require('lodash/concat');
 
+const debug = require('debug')('app:store-items.unit.test');
+const isDebug = false;
+
 // eslint-disable-next-line no-unused-vars
 module.exports = function (options = {}) {
 
@@ -37,13 +40,15 @@ module.exports = function (options = {}) {
 
       if (!record.storeStart) return;
       if (!record.values.length > 1) return;
+      if(isDebug && record) inspector('hook.store-items.addItems.record:', record);
 
       const contextId = hh.getContextId();
       if (contextId) {
         // Get store value
         const storeValue = await hh.getItem('opcua-values', contextId);
+        if(isDebug && storeValue) inspector('hook.store-items.addItems.storeValue:', storeValue);
         // Get storeStart 
-        const storeStart = storeValue.storeStart;
+        const storeStart = record.storeStart;
         // Get values
         values = storeValue.values.filter(v => v.key !== storeStart);
         values = loConcat(values, record.values);
@@ -52,13 +57,13 @@ module.exports = function (options = {}) {
         record.storeStart = values[0].key;
         record.storeEnd = values[values.length - 1].key;
         record.values = sortByStringField(values, 'key', false);
+        if(isDebug && record) inspector('hook.store-items.addItems.record:', record);
       }
     };
     await hh.forEachRecords(addItems);
     hh.showDebugInfo('opcua-values.patch', false);
     // Place the modified records back in the context.
-    hh.replaceRecordsForContext(context);
-    return hh.context;
+    return hh.replaceRecordsForContext(context);
   };
 };
 

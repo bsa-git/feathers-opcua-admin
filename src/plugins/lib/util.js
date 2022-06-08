@@ -317,6 +317,7 @@ const sortByStringField = function (items, name, isAscending = true) {
     if (isAscending) return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
     if (!isAscending) return (textA < textB) ? 1 : (textA > textB) ? -1 : 0;
   });
+  return items;
 };
 
 /**
@@ -330,6 +331,7 @@ const sortByNumberField = function (items, name, isAscending = true) {
     if (isAscending) return x[name] - y[name];
     if (!isAscending) return y[name] - x[name];
   });
+  return items;
 };
 
 /**
@@ -344,6 +346,7 @@ const sortByString = function (items, isAscending = true) {
     if (isAscending) return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
     if (!isAscending) return (textA < textB) ? 1 : (textA > textB) ? -1 : 0;
   });
+  return items;
 };
 
 /**
@@ -356,6 +359,7 @@ const sortByNumber = function (items, isAscending = true) {
     if (isAscending) return x - y;
     if (!isAscending) return y - x;
   });
+  return items;
 };
 
 

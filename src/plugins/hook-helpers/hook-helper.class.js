@@ -350,12 +350,18 @@ class HookHelper {
 
   /**
    * Replace records for context
-   * @return {HookHelper}
+   * @param {Object} context
+   * @return {HookHelper|Object}
    */
-  replaceRecordsForContext() {
+  replaceRecordsForContext(context = null) {
     // Place the modified records back in the context.
-    replaceItems(this.context, this.contextRecords);
-    return this;
+    if (context) {
+      replaceItems(context, this.contextRecords);
+      return context;
+    } else {
+      replaceItems(this.context, this.contextRecords);
+      return this;
+    }
   }
 
   /**

@@ -14,18 +14,11 @@ const app = require(`${appRoot}/src/app`);
 const debug = require('debug')('app:store-items.unit.test');
 
 const isDebug = false;
-const isTest = true;
-const isSeed = true;
 
 // Get generated fake data
 const fakes = readJsonFileSync(`${appRoot}/seeds/fake-data.json`) || {};
 
 describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
-
-  if (!isTest) {
-    debug('<< Test opcua-values/hooks/store-items.unit.test.js - NOT >>');
-    return;
-  }
 
   // eslint-disable-next-line no-unused-vars
   let contextBefore, contextAfterPaginated,
@@ -71,45 +64,33 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
   });
 
   describe('--- Save fake data to services ---', function () {
-    if (isSeed) {
-      it('#1: check registered "opcua-tags"  service', () => {
-        const errPath = checkServicesRegistered(app, 'opcua-tags');
-        assert.ok(errPath === '', `Service '${errPath}' not registered`);
-      });
+    it('#1: check registered "opcua-tags"  service', () => {
+      const errPath = checkServicesRegistered(app, 'opcua-tags');
+      assert.ok(errPath === '', `Service '${errPath}' not registered`);
+    });
 
-      it('#2: check registered "opcua-values"  service', () => {
-        const errPath = checkServicesRegistered(app, 'opcua-values');
-        assert.ok(errPath === '', `Service '${errPath}' not registered`);
-      });
+    it('#2: check registered "opcua-values"  service', () => {
+      const errPath = checkServicesRegistered(app, 'opcua-values');
+      assert.ok(errPath === '', `Service '${errPath}' not registered`);
+    });
 
-      it('#3: Save fakes to "opcua-tags" service', async () => {
-        const errPath = await saveFakesToServices(app, 'opcuaTags');
-        assert.ok(errPath === '', `Not save fakes to service - '${errPath}'`);
-      });
+    it('#3: Save fakes to "opcua-tags" service', async () => {
+      const errPath = await saveFakesToServices(app, 'opcuaTags');
+      assert.ok(errPath === '', `Not save fakes to service - '${errPath}'`);
+    });
 
-      it('#4: Save fakes to "opcua-values" service', async () => {
-        const errPath = await saveFakesToServices(app, 'opcuaValues');
-        assert.ok(errPath === '', `Not save fakes to service - '${errPath}'`);
-      });
-    }
+    it('#4: Save fakes to "opcua-values" service', async () => {
+      const errPath = await saveFakesToServices(app, 'opcuaValues');
+      assert.ok(errPath === '', `Not save fakes to service - '${errPath}'`);
+    });
   });
 
   describe('--- Run store-items.unit.test ---', function () {
-    it('Hook exists', () => {
+    it('#5: Hook exists', () => {
       assert(typeof storeItems === 'function', 'Hook is not a function.');
     });
 
-    it('???', async () => {
-      contextBefore.method = 'create';
-      assert(true);
-
-      /*
-      storeItems()(contextBefore);
-  
-      assert.deepEqual(contextBefore.data, {
-  
-      });
-      */
+    it('#6: Test "store-items" hook', async () => {
       // Get opcuaTag
       const index = fakes['opcuaTags'].length - 1;
       const opcuaTag = fakes['opcuaTags'][index];
@@ -129,7 +110,6 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
 
       contextBefore.id = opcuaValue[idField];
       contextBefore.data = {
-        // [idField]: opcuaValue[idField],
         tagId,
         tagName: opcuaTag.browseName,
         storeStart: '2022-01-03',
@@ -143,9 +123,8 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
       };
 
       await storeItems()(contextBefore);
-      if (isDebug && contextBefore.data) inspector('Get contextBefore.data:', contextBefore.data);
-      assert.ok(contextBefore.data.tagId === tagId, 'Protection did not work to write the data to service');
-
+      if (isDebug && contextBefore.data) inspector('Get contextBefore.data:', contextBefore);
+      assert.ok(contextBefore.data.values.length > opcuaValue.values.length, 'Protection did not work to write the data to service');
     });
   });
 });

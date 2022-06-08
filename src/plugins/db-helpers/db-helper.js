@@ -9,10 +9,7 @@ const loIsObject = require('lodash/isObject');
 const loConcat = require('lodash/concat');
 
 const debug = require('debug')('app:db-helper');
-const isLog = false;
 const isDebug = false;
-
-
 
 /**
  * Get dbNullIdValue
@@ -37,28 +34,6 @@ const getEnvTypeDB = function () {
   return process.env.TYPE_DB;
 };
 
-
-/**
- * @name getEnvTypeDB
- * Get DB adapter from env and host config
- * @returns {String}
- * e.g. 'feathers-nedb'|'feathers-mongoose'
- */
-const getEnvAdapterDB = function () {
-  let envAdapterDB = 'feathers-nedb';
-  const envTypeDB = getEnvTypeDB();
-  switch (envTypeDB) {
-  case 'nedb':
-    envAdapterDB = 'feathers-nedb';
-    break;
-  case 'mongodb':
-    envAdapterDB = 'feathers-mongoose';
-    break;
-  default:
-    break;
-  }
-  return envAdapterDB;
-};
 
 /**
    * Get id field
@@ -121,7 +96,7 @@ const getItem = async function (app, path = '', id = null) {
   const service = app.service(path);
   if (service) {
     const getResult = await service.get(id);
-    if (isLog) inspector(`getItem(path='${path}', id='${id}').getResult:`, getResult);
+    if (isDebug) inspector(`getItem(path='${path}', id='${id}').getResult:`, getResult);
     return getResult;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -148,8 +123,7 @@ const findItem = async function (app, path = '', query = {}) {
       newParams = loMerge({}, { query }, { query: { $limit: 1 } });
     }
     findResults = await service.find(newParams);
-    if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
-    inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
+    if (isDebug) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
     return findResults.data.length? findResults.data[0] : null;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -176,7 +150,7 @@ const findItems = async function (app, path = '', query = {}) {
       newParams = loMerge({}, { query });
     }
     findResults = await service.find(newParams);
-    if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
+    if (isDebug) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
     if (findResults.data.length) {
       const total = findResults.total;
       const limit = findResults.limit;
@@ -215,7 +189,7 @@ const findAllItems = async function (app, path = '', query = {}) {
       newParams = loMerge({}, { query }, { paginate: false });
     }
     findResults = await service.find(newParams);
-    if (isLog) inspector(`findItems(path='${path}', query=${JSON.stringify(newParams)}).findResults:`, findResults);
+    if (isDebug) inspector(`findItems(path='${path}', query=${JSON.stringify(newParams)}).findResults:`, findResults);
     if (!Array.isArray(findResults) && findResults.data.length) {
       const total = findResults.total;
       const limit = findResults.limit;
@@ -235,6 +209,56 @@ const findAllItems = async function (app, path = '', query = {}) {
 };
 
 /**
+ * Process found items
+ * @async
+ * 
+ * @param {Object} app
+ * @param {String} path
+ * @param {Object} query
+ * @param {Function} cb
+ * @return {Object[]}
+ */
+const handleFoundItems = async function (app, path = '', query = {}, cb = null) {
+  let newParams, findResults, findData = [], handledData = [], handledResult;
+  //----------------------------
+  const service = app.service(path);
+  if (service) {
+    if (query.query) {
+      newParams = loMerge({}, query);
+    } else {
+      newParams = loMerge({}, { query });
+    }
+    findResults = await service.find(newParams);
+    if (isDebug) inspector(`db-helper.findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
+    if (findResults.data.length) {
+      const total = findResults.total;
+      const limit = findResults.limit;
+      const cyclesNumber = Math.trunc(total / limit);
+      if (cb) {
+        handledResult = await cb(findResults.data, app);
+        if (handledResult !== undefined) handledData.push(handledResult);
+      } else {
+        findData = loConcat(findData, findResults.data);
+      }
+      for (let index = 1; index <= cyclesNumber; index++) {
+        const skip = index * limit;
+        newParams = loMerge({}, newParams, { query: { $skip: skip } });
+        findResults = await service.find(newParams);
+        if (cb) {
+          handledResult = await cb(findResults.data, app);
+          if (handledResult !== undefined) handledData.push(handledResult);
+        } else {
+          findData = loConcat(findData, findResults.data);
+        }
+      }
+    }
+    return cb ? handledData : findData;
+  } else {
+    throw new errors.BadRequest(`There is no service for the path - '${path}'`);
+  }
+};
+
+/**
  * Remove item
  * @async
  * 
@@ -248,7 +272,7 @@ const removeItem = async function (app, path = '', id = null) {
   const service = app.service(path);
   if (service) {
     const removeResult = await service.remove(id);
-    if (isLog) inspector(`removeItem(path='${path}', id=${id}).removeResult:`, removeResult);
+    if (isDebug) inspector(`removeItem(path='${path}', id=${id}).removeResult:`, removeResult);
     return removeResult;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -273,7 +297,7 @@ const removeItems = async function (app, path = '', query = {}) {
     } else {
       deleteResults = await service.remove(null, { query });
     }
-    if (isLog) inspector(`removeItems(path='${path}', query=${JSON.stringify(query)}).removeResults:`, deleteResults);
+    if (isDebug) inspector(`removeItems(path='${path}', query=${JSON.stringify(query)}).removeResults:`, deleteResults);
     return deleteResults;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -294,7 +318,7 @@ const patchItem = async function (app, path = '', id = '', data = {}) {
   const service = app.service(path);
   if (service) {
     const patchResults = await service.patch(id, data);
-    if (isLog) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, patchResults:`, patchResults);
+    if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, patchResults:`, patchResults);
     return patchResults;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -321,7 +345,7 @@ const patchItems = async function (app, path = '', data = {}, query = {}) {
     } else {
       patchResults = await service.patch(null, data, { query });
     }
-    if (isLog) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, query=${JSON.stringify(query)}).patchResults:`, patchResults);
+    if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, query=${JSON.stringify(query)}).patchResults:`, patchResults);
     return patchResults;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -341,7 +365,7 @@ const createItem = async function (app, path = '', data = {}) {
   const service = app.service(path);
   if (service) {
     const createResult = await service.create(data);
-    if (isLog) inspector(`createItem(path='${path}', createResults:`, createResult);
+    if (isDebug) inspector(`createItem(path='${path}', createResults:`, createResult);
     return createResult;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -366,7 +390,7 @@ const createItems = async function (app, path = '', data = []) {
       const createdItem = await service.create(item);
       createResults.push(createdItem);
     }
-    if (isLog) inspector(`createItems(path='${path}', createResults.length:`, createResults.length);
+    if (isDebug) inspector(`createItems(path='${path}', createResults.length:`, createResults.length);
     return createResults;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -376,13 +400,13 @@ const createItems = async function (app, path = '', data = []) {
 module.exports = {
   dbNullIdValue,
   getEnvTypeDB,
-  getEnvAdapterDB,
   getIdField,
   getCountItems,
   getItem,
   findItem,
   findItems,
   findAllItems,
+  handleFoundItems,
   removeItem,
   removeItems,
   patchItem,
