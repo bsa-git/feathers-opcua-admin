@@ -13,7 +13,6 @@ const {
 } = require('../../src/plugins');
 
 const {
-  dbNullIdValue,
   getIdField,
   getCountItems,
   getItem,
@@ -114,8 +113,6 @@ describe('<<=== DB-Helper Plugin Test (db-helper.test.js) ===>>', () => {
   });
 
   it('#7: Save store values for test "store-items" hook', async () => {
-
-    //--------------------------------------
 
     const fakes = loCloneDeep(fakeData);
     // Get opcua values 
