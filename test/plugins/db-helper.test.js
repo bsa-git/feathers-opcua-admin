@@ -161,7 +161,9 @@ describe('<<=== DB-Helper Plugin Test (db-helper.test.js) ===>>', () => {
 
         const opcuaValue = opcuaValues.find(v => v[idField] === id);
 
-        assert.ok(storeValue.values.length > opcuaValue.values.length, `storeValue.values.length must be greater than opcuaValue.values.length  - (${storeValue.values.length}) > (${opcuaValue.values.length})`);
+        const length1 = storeValue.values.length;
+        const length2 = opcuaValue.values.length;
+        assert.ok(length1 > length2, `length1 must be greater than length2  - (${length1}) > (${length2})`);
       }
     }
   });
