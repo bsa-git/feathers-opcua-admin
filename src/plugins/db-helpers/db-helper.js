@@ -359,12 +359,20 @@ const patchItems = async function (app, path = '', data = {}, query = {}) {
  * @param {Object} app
  * @param {String} path
  * @param {Object} data
+ * @param {Object} query
+ * e.g query -> { $select: ['userName', 'userType'] }
  * @return {Object}
  */
-const createItem = async function (app, path = '', data = {}) {
+const createItem = async function (app, path = '', data = {}, query = {}) {
+  let createResult;
+  //------------------------------
   const service = app.service(path);
   if (service) {
-    const createResult = await service.create(data);
+    if (query.query) {
+      createResult = await service.create(data, query);
+    } else {
+      createResult = await service.create(data, { query });
+    }
     if (isDebug) inspector(`createItem(path='${path}', createResults:`, createResult);
     return createResult;
   } else {
@@ -379,15 +387,22 @@ const createItem = async function (app, path = '', data = {}) {
  * @param {Object} app
  * @param {String} path
  * @param {Object[]} data
+ * @param {Object} query
+ * e.g query -> { $select: ['userName', 'userType'] }
  * @return {Object[]}
  */
-const createItems = async function (app, path = '', data = []) {
-  let createResults = [];
+const createItems = async function (app, path = '', data = [], query = {}) {
+  let createdItem, createResults = [];
+  //-------------------------
   const service = app.service(path);
   if (service) {
     for (let index = 0; index < data.length; index++) {
       const item = data[index];
-      const createdItem = await service.create(item);
+      if (query.query) {
+        createdItem = await service.create(item, query);
+      } else {
+        createdItem = await service.create(item, { query });
+      }
       createResults.push(createdItem);
     }
     if (isDebug) inspector(`createItems(path='${path}', createResults.length:`, createResults.length);

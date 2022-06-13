@@ -49,14 +49,14 @@ describe('<<=== DB-Helper Plugin Test (db-helper.test.js) ===>>', () => {
     const opcuaTags = fakes['opcuaTags'];
     if (isDebug && opcuaTags.length) inspector('fakes.opcuaTags.length', opcuaTags.length);
 
-    if (!opcuaTags.length) return;
+    assert.ok(opcuaTags.length, '"opcua-tags" array must not be empty');
 
     // Remove data from 'opcua-tags' services 
     const countItems = await getCountItems(app, 'opcua-tags');
     if (countItems) {
       const removedItems = await removeItems(app, 'opcua-tags');
       if (isDebug && removedItems.length) inspector('removeItems.removedItems.length', removedItems.length);
-      assert.ok(removedItems.length === opcuaTags.length, 'Not remove data from services \'opcua-tags\'');
+      assert.ok(removedItems.length === opcuaTags.length, `Not remove data from services "opcua-tags": removedItems.length(${removedItems.length}) = opcuaTags.length(${opcuaTags.length})`);
     }
 
     // Add tags
@@ -123,11 +123,11 @@ describe('<<=== DB-Helper Plugin Test (db-helper.test.js) ===>>', () => {
     await saveFakesToServices(app, 'opcuaTags');
     await saveFakesToServices(app, 'opcuaValues');
 
-    const storeTag = await findItem(app, 'opcua-tags', { store: { $ne: undefined } });
-    if (isDebug && storeTag) inspector('Save store values for test "store-items" hook.storeTag:', storeTag);
-    if (storeTag) {
-      const browseName = storeTag.browseName;
-      const storeTags = await findItems(app, 'opcua-tags', { ownerGroup: browseName });
+    const groupTag = await findItem(app, 'opcua-tags', { group: true, store: { $ne: undefined } });
+    if (isDebug && groupTag) inspector('Save store values for test "store-items" hook.groupTag:', groupTag);
+    if (groupTag) {
+      const groupBrowseName = groupTag.browseName;
+      const storeTags = await findItems(app, 'opcua-tags', { ownerGroup: groupBrowseName });
       if (isDebug && storeTags.length) inspector('Save store values for test "store-items" hook.storeTags:', storeTags);
       for (let index = 0; index < storeTags.length; index++) {
         const storeTag = storeTags[index];
@@ -163,7 +163,7 @@ describe('<<=== DB-Helper Plugin Test (db-helper.test.js) ===>>', () => {
 
         const length1 = storeValue.values.length;
         const length2 = opcuaValue.values.length;
-        assert.ok(length1 > length2, `length1 must be greater than length2  - (${length1}) > (${length2})`);
+        assert.ok((length1 - length2) === 1, `length1 must be greater than length2  - (${length1}) - (${length2}) = 1`);
       }
     }
   });

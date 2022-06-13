@@ -12,7 +12,7 @@ const {
 
 const loConcat = require('lodash/concat');
 
-const debug = require('debug')('app:store-items.unit.test');
+const debug = require('debug')('app:hook.store-items');
 const isDebug = false;
 
 // eslint-disable-next-line no-unused-vars
@@ -57,7 +57,7 @@ module.exports = function (options = {}) {
         record.storeStart = values[0].key;
         record.storeEnd = values[values.length - 1].key;
         record.values = sortByStringField(values, 'key', false);
-        if(isDebug && record) inspector('hook.store-items.addItems.record:', record);
+        if(isDebug && record) inspector('hook.store-items.addItems.UpdateRecord:', record);
       }
     };
     await hh.forEachRecords(addItems);
