@@ -84,18 +84,26 @@ const getCountItems = async function (app, path = '', query = {}) {
 };
 
 /**
-   * Get item
-   * @async
-   * 
-   * @param {Object} app
-   * @param {String} path
-   * @param {String} id
-   * @return {Object}
-   */
-const getItem = async function (app, path = '', id = null) {
+ * Get item
+ * @async
+ * 
+ * @param {Object} app
+ * @param {String} path
+ * @param {String} id
+ * @param {Object} query
+ * e.g query -> { $select: ['userName', 'userType'] }
+ * @return {Object}
+ */
+const getItem = async function (app, path = '', id = null, query = {}) {
+  let getResult;
+  //---------------------
   const service = app.service(path);
   if (service) {
-    const getResult = await service.get(id);
+    if (query.query) {
+      getResult = await service.get(id, query);
+    } else {
+      getResult = await service.get(id, { query });
+    }
     if (isDebug) inspector(`getItem(path='${path}', id='${id}').getResult:`, getResult);
     return getResult;
   } else {
@@ -265,13 +273,20 @@ const handleFoundItems = async function (app, path = '', query = {}, cb = null) 
  * @param {Object} app
  * @param {String} path
  * @param {String} id
+ * @param {Object} query
+ * e.g query -> { $select: ['userName', 'userType'] }
  * @return {Object}
  */
-const removeItem = async function (app, path = '', id = null) {
-  // id = id.toString();
+const removeItem = async function (app, path = '', id = null, query = {}) {
+  let removeResult;
+  //------------------------
   const service = app.service(path);
   if (service) {
-    const removeResult = await service.remove(id);
+    if (query.query) {
+      removeResult = await service.remove(id, query);
+    } else {
+      removeResult = await service.remove(id, { query });
+    }
     if (isDebug) inspector(`removeItem(path='${path}', id=${id}).removeResult:`, removeResult);
     return removeResult;
   } else {
@@ -312,12 +327,20 @@ const removeItems = async function (app, path = '', query = {}) {
  * @param {String} path
  * @param {String} id
  * @param {Object} data
+ * @param {Object} query
+ * e.g query -> { $select: ['userName', 'userType'] }
  * @return {Object}
  */
-const patchItem = async function (app, path = '', id = '', data = {}) {
+const patchItem = async function (app, path = '', id = '', data = {}, query = {}) {
+  let patchResults;
+  //-------------------------------
   const service = app.service(path);
   if (service) {
-    const patchResults = await service.patch(id, data);
+    if (query.query) {
+      patchResults = await service.patch(id, data, query);
+    } else {
+      patchResults = await service.patch(id, data, { query });
+    }
     if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, patchResults:`, patchResults);
     return patchResults;
   } else {
