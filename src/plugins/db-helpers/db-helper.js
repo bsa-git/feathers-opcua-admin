@@ -2,11 +2,14 @@
 const errors = require('@feathersjs/errors');
 const {
   inspector,
+  sortByStringField,
+  getEndOfPeriod
 } = require('../lib');
 
 const loMerge = require('lodash/merge');
 const loIsObject = require('lodash/isObject');
 const loConcat = require('lodash/concat');
+const loReduce = require('lodash/reduce');
 
 const debug = require('debug')('app:db-helper');
 const isDebug = false;
@@ -50,6 +53,70 @@ const getIdField = function (items) {
   }
   return idField ? idField : new Error('Items argument is not an array or object');
 };
+
+/**
+ * @method getMaxValuesStorage
+ * @param {Object} app 
+ * @param {String} tagId 
+ * e.g. valueId -> '60af3870270f24162c049c21'
+ * @returns {Number}
+ */
+ const getMaxValuesStorage = async function (app, tagId = '') {
+  let result = 0;
+  //----------------------
+  const tag = await getItem(app, 'opcua-tags', tagId);
+  if (isDebug && tag) inspector('getMaxValuesStorage.tag:', tag);
+  if (!tag) return result;
+  const tagBrowseName = tag.browseName;
+  
+  // This is group tag
+  //==============================
+  if (tag.group) {
+    if (!tag.hist) return result;
+    if (tag.hist > 1) return tag.hist;
+    return maxOpcuaValuesRows;
+  }
+  //==============================
+  // This is store tag
+  if (tag.ownerGroup) {
+    // Get group tag 
+    const groupTag = await findItem(app, 'opcua-tags', { browseName: tag.ownerGroup, $select: ['browseName', 'store'] });
+    if (isDebug && groupTag) inspector('getMaxValuesStorage.groupTag:', groupTag);
+    const numberOfDocsForTag = groupTag.store.numberOfDocsForTag;
+
+
+    // Find store values
+    let storeValues = await findItems(app, 'opcua-values', {
+      tagId,
+      storeStart: { $ne: undefined },
+      $select: ['tagName', 'storeStart', 'storeEnd']
+    });
+    // Sort by string field for isAscending = true
+    storeValues = sortByStringField(storeValues, 'storeStart', true);
+    if (isDebug && storeValues.length) debug(`getMaxValuesStorage.storeValues.length('${tagBrowseName}'):`, storeValues.length);
+    if (storeValues.length) {
+      // Get storeStart/storeEnd
+      let storeStart = storeValues[0]['storeStart'];
+      // Get startOfPeriod/endOfPeriod
+      const endOfPeriod = getEndOfPeriod(storeStart, numberOfDocsForTag);
+
+      // Sum results
+      const sumResults = loReduce(storeValues, function (sum, storeValue) {
+        let storeEnd = storeValue['storeEnd'];
+        storeEnd = moment.utc(storeEnd).format('YYYY-MM-DDTHH:mm:ss');
+        if(storeEnd <= endOfPeriod){
+          if (isDebug && storeValue) inspector(`getMaxValuesStorage.storeValue('${endOfPeriod}'):`, storeValue);
+          return sum + 1;  
+        }
+        return sum;
+      }, 0);
+      if (isDebug && sumResults) debug('getMaxValuesStorage.sumResults:', sumResults);
+      return sumResults;
+    }
+  }
+  return result;
+};
+
 
 
 //================================================================================
@@ -440,6 +507,8 @@ module.exports = {
   getEnvTypeDB,
   getIdField,
   getCountItems,
+  getMaxValuesStorage,
+  //----------------
   getItem,
   findItem,
   findItems,

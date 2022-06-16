@@ -45,6 +45,48 @@ const waitTimeout = function (fn, cb = null, delay = 0) {
 };
 
 /**
+ * Awaiting negative completion of a function
+ * @async
+ * @method waitTimeout
+ * @param {Function} fn
+ * @param {Array} args
+ * @param {Number} wait
+ * e.g. result = fn(...args); if(result === false) then -> return from cycle 
+ */
+ const waitTime = async (fn, args = [], wait = 1000) => {
+  while (fn(...args)) {
+    await pause(wait, true);
+  }
+};
+
+/**
+ * @method waitTill
+ * @param {Function} fn 
+ * @param {Array} args 
+ * @param {Function} thenDo 
+ * @param {Array} args2 
+ * @returns 
+ */
+const waitTill = (fn, args = [], thenDo, args2 = []) => {
+  const isWait = fn(...args);
+  if (!isWait) {
+    thenDo(...args2);
+    return;
+  }
+  setTimeout(() => { waitTill(fn, args = [], thenDo, args2 = []); }, 1000);
+};
+
+/**
+ * @method isValidDateTime
+ * e.g. dt='2013-02-08 09:30:26'|dt='2013-02-08T09:30:26'|dt='20130208T080910,123'|dt='20130208T080910.123'|dt='20130208T080910,123'|dt='20130208T08'
+ * @param {Number|String} dt 
+ * @returns {Boolean}
+ */
+const isValidDateTime = function (dt = '') {
+  return moment(dt).isValid();
+};
+
+/**
  * @method dtToObject
  * e.g. { year: 2020, month: 9, date: 22, hours: 13, minutes: 31, seconds: 10, milliseconds: 555 }
  * @param {Number|String} dt 
@@ -94,6 +136,120 @@ const getDateTime = function (dt = '', isUtc = true) {
   dt = dtToObject(dt, isUtc);
   return `${dt.years}-${dt.months}-${dt.date}T${dt.hours}:${dt.minutes}:${dt.seconds}.${dt.milliseconds}`;
 };
+
+/**
+ * @method getTimeDuration
+ * @param {Object|String|Array} startTime 
+ * @param {Object|String|Array} endTime 
+ * @param {String} unit 
+ * e.g. years, months, weeks, days, hours, minutes, seconds, and milliseconds 
+ * @returns {Number}
+ */
+ const getTimeDuration = function (startTime, endTime, unit) {
+  startTime = moment.utc(startTime);
+  endTime = moment.utc(endTime);
+  if (unit) {
+    return endTime.diff(startTime, unit);
+  } else {
+    return endTime.diff(startTime);// return -> milliseconds
+  }
+};
+
+/**
+ * @method getNextDateTime
+ * @param {Object|String|Array} startTime 
+ * @param {Array} period 
+ * e.g. [1, 'hours']
+ * @param {Boolean} isUtc 
+ * @returns {Number}
+ */
+const getNextDateTime = function (startDateTime, period, isUtc = true) {
+  startDateTime = moment.utc(startDateTime);
+  const nextDateTime = moment.utc(startDateTime).add(period[0], period[1]);
+  if (isUtc) {
+    return moment.utc(nextDateTime).format();
+  } else {
+    return moment(nextDateTime).format();
+  }
+};
+
+/**
+ * @method getStartOfPeriod
+ * @param {Object|String|Array} dateTime 
+ * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
+ * @param {Array} period
+ * e.g. [1, 'months'] 
+ * @returns {String} 
+ * e.g. '2022-05-01T00:00:00'
+ */
+const getStartOfPeriod = function (dateTime, period) {
+  let startList = [], startPeriod, condition;
+  //------------------------
+  if (!Array.isArray(period)) new Error('Argument error, argument "period" must be an array');
+  // Get start dateTime
+  dateTime = moment.utc(dateTime);
+  dateTime = dateTime.format('YYYY-MM-DDTHH:mm:ss');
+  startPeriod = moment.utc(dateTime).startOf('year');
+  startList.push(startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+
+  do {
+    startPeriod = startPeriod.add(...period);
+    condition = (dateTime >= startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+    if (condition) {
+      startList.push(startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+    }
+  } while (condition);
+
+  if (isDebug && startList.length) console.log('util.getStartOfPeriod.startList:', startList);
+  return startList[startList.length - 1];
+};
+
+/**
+ * @method getEndOfPeriod
+ * @param {Object|String|Array} dateTime 
+ * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
+ * @param {Array} period
+ * e.g. [1, 'months'] 
+ * @returns {String} 
+ * e.g. '2022-05-31T23:59:59'
+ */
+const getEndOfPeriod = function (dateTime, period) {
+  let startList = [], startPeriod, endPeriod, condition;
+  //------------------------
+  if (!Array.isArray(period)) new Error('Argument error, argument "period" must be an array');
+  // Get start dateTime
+  dateTime = moment.utc(dateTime);
+  dateTime = dateTime.format('YYYY-MM-DDTHH:mm:ss');
+  startPeriod = moment.utc(dateTime).startOf('year');
+  startPeriod = startPeriod.add(...period).format('YYYY-MM-DDTHH:mm:ss');
+  endPeriod = moment.utc(startPeriod).subtract(1, 'seconds');
+
+  do {
+    startList.push(endPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+    condition = (dateTime > endPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+    startPeriod = moment.utc(startPeriod).add(...period).format('YYYY-MM-DDTHH:mm:ss');
+    endPeriod = moment.utc(startPeriod).subtract(1, 'seconds');
+  } while (condition);
+
+  if (isDebug && startList.length) console.log('util.getStartOfPeriod.startList:', startList);
+  return startList[startList.length - 1];
+};
+
+/**
+ * @method getEndOfPeriod
+ * @param {Object|String|Array} dateTime 
+ * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
+ * @param {Array} period
+ * e.g. [1, 'months'] 
+ * @returns {String} 
+ * e.g. ['2022-05-01T00:00:00', '2022-05-31T23:59:59']
+ */
+const getStartEndOfPeriod = function (dateTime, period) {
+  const start = getStartOfPeriod(dateTime, period);
+  const end = getEndOfPeriod(dateTime, period);
+  return [start, end];
+};
+
 
 /**
  * Strip slashes
@@ -368,10 +524,18 @@ module.exports = {
   delayTime,
   pause,
   waitTimeout,
+  waitTime,
+  waitTill,
   dtToObject,
   getDate,
   getTime,
   getDateTime,
+  isValidDateTime,
+  getTimeDuration,
+  getNextDateTime,
+  getStartOfPeriod,
+  getEndOfPeriod,
+  getStartEndOfPeriod,
   stripSlashes,
   stripSpecific,
   getCapitalizeStr,
