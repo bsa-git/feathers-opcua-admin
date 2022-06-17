@@ -23,10 +23,6 @@ const isDebug = false;
 const isTest = true;
 const isSeed = true;
 
-// Get max rows for opcua-values service
-let maxOpcuaValuesRows = process.env.OPCUA_VALUES_MAXROWS;
-maxOpcuaValuesRows = Number.isInteger(maxOpcuaValuesRows) ? maxOpcuaValuesRows : Number.parseInt(maxOpcuaValuesRows);
-
 // Get generated fake data
 const fakes = readJsonFileSync(`${appRoot}/seeds/fake-data.json`) || {};
 const roleGuest = fakes['roles'].find(role => role.alias === 'isGuest');
@@ -508,12 +504,12 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
     });
 
     it('#19: Restrict max rows when add a group value to \'opcua-values\' service', async () => {
-      let opcuaValuesCount = 0, serviceName = '', serviceResult = {};
+      let opcuaValuesCount = 0, serviceName = '';
       //--------------------------------------------------------------
       // Get opcua tags
       const opcuaTags = fakes['opcuaTags'];
       // Get group tag 
-      const groupTag = opcuaTags.find(t => t.group && !!t.store);
+      const groupTag = opcuaTags.find(t => t.group);
       const idField = 'id' in groupTag ? 'id' : '_id';
       const tagId = groupTag[idField];
       const tagName = groupTag['browseName'];
@@ -568,7 +564,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
     });
 
     it('#20: Restrict max rows when add a store value to \'opcua-values\' service', async () => {
-      let opcuaValuesCount = 0, serviceName = '', serviceResult = {};
+      let opcuaValuesCount = 0, serviceName = '';
       //--------------------------------------------------------------
       // Get opcua tags
       const opcuaTags = fakes['opcuaTags'];

@@ -1,10 +1,16 @@
 /* eslint-disable no-unused-vars */
 const errors = require('@feathersjs/errors');
+const moment = require('moment');
+
 const {
   inspector,
   sortByStringField,
   getEndOfPeriod
 } = require('../lib');
+
+const {
+  AuthServer
+} = require('../auth');
 
 const loMerge = require('lodash/merge');
 const loIsObject = require('lodash/isObject');
@@ -13,6 +19,13 @@ const loReduce = require('lodash/reduce');
 
 const debug = require('debug')('app:db-helper');
 const isDebug = false;
+
+// Get max rows for opcua-values service
+let maxOpcuaValuesRows = process.env.OPCUA_VALUES_MAXROWS;
+maxOpcuaValuesRows = Number.isInteger(maxOpcuaValuesRows) ? maxOpcuaValuesRows : Number.parseInt(maxOpcuaValuesRows);
+if (AuthServer.isTest()) {
+  maxOpcuaValuesRows = 10;
+}
 
 /**
  * Get dbNullIdValue
@@ -61,7 +74,7 @@ const getIdField = function (items) {
  * e.g. valueId -> '60af3870270f24162c049c21'
  * @returns {Number}
  */
- const getMaxValuesStorage = async function (app, tagId = '') {
+const getMaxValuesStorage = async function (app, tagId = '') {
   let result = 0;
   //----------------------
   const tag = await getItem(app, 'opcua-tags', tagId);

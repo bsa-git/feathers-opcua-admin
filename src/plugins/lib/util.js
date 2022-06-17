@@ -1,8 +1,10 @@
 
 const { join } = require('path');
-const debug = require('debug')('app:util');
 const appRoot = join(__dirname, '../../../');
 const moment = require('moment');
+
+const debug = require('debug')('app:util');
+const isDebug = false;
 
 /**
  * Delay time
@@ -53,7 +55,7 @@ const waitTimeout = function (fn, cb = null, delay = 0) {
  * @param {Number} wait
  * e.g. result = fn(...args); if(result === false) then -> return from cycle 
  */
- const waitTime = async (fn, args = [], wait = 1000) => {
+const waitTime = async (fn, args = [], wait = 1000) => {
   while (fn(...args)) {
     await pause(wait, true);
   }
@@ -145,7 +147,7 @@ const getDateTime = function (dt = '', isUtc = true) {
  * e.g. years, months, weeks, days, hours, minutes, seconds, and milliseconds 
  * @returns {Number}
  */
- const getTimeDuration = function (startTime, endTime, unit) {
+const getTimeDuration = function (startTime, endTime, unit) {
   startTime = moment.utc(startTime);
   endTime = moment.utc(endTime);
   if (unit) {
