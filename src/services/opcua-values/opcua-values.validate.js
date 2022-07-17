@@ -38,12 +38,19 @@ let base = merge({},
       storeEnd: {
         type: "string"
       },
+      store: {
+        type: "object",
+        properties: {}
+      },
       values: {
         type: "array",
         items: {
           type: "object",
           properties: {
             key: {
+              type: "string"
+            },
+            hash: {
               type: "string"
             },
             value: {

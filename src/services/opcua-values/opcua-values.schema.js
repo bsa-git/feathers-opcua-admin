@@ -30,12 +30,14 @@ let schema = {
     tagName: { type: 'string' },
     storeStart: { type: 'string' },
     storeEnd: { type: 'string' },
+    store: { type: 'object', properties: {} },
     values: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
           key: { type: 'string' },
+          hash: {type: 'string'},
           value: { type: ['string', 'number', 'integer', 'boolean', 'object'] },
           items: { type: 'array', items: { type: ['string', 'number', 'integer', 'boolean', 'object', 'array'] } }
         }

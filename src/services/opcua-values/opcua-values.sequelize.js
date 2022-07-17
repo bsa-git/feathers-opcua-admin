@@ -28,6 +28,9 @@ let moduleExports = merge({},
     storeEnd: {
       type: DataTypes.TEXT
     },
+    store: {
+      type: DataTypes.JSONB
+    },
     values: {
       type: DataTypes.JSONB
     }

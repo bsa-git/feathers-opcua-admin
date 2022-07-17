@@ -26,11 +26,23 @@ let moduleExports = merge({},
       storeEnd: {
         bsonType: "string"
       },
+      store: {
+        bsonType: "object",
+        additionalProperties: false,
+        properties: {
+          _id: {
+            bsonType: "objectId"
+          }
+        }
+      },
       values: {
         items: {
           type: "object",
           properties: {
             key: {
+              type: "string"
+            },
+            hash: {
               type: "string"
             },
             value: {

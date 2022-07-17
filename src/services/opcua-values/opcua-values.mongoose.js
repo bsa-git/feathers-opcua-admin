@@ -14,9 +14,11 @@ let moduleExports = merge({},
     tagName: String,
     storeStart: String,
     storeEnd: String,
+    store: {},
     values: [
       {
         key: String,
+        hash: String,
         value: mongoose.Schema.Types.Mixed,
         items: [mongoose.Schema.Types.Mixed]
       }
