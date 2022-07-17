@@ -93,6 +93,7 @@
     "mongoose": "^5.12.11",
     "nodemailer-smtp-transport": "^2.7.4",
     "nuxt": "^2.10.0",
+    "object-hash": "^3.0.0",
     "passport-github": "^1.1.0",
     "passport-google-oauth20": "^1.0.0",
     "qs": "^6.9.1",
