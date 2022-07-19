@@ -77,6 +77,7 @@ const getIdField = function (items) {
 const getMaxValuesStorage = async function (app, tagId = '') {
   let result = 0;
   //----------------------
+  if(!tagId) return result;
   const tag = await getItem(app, 'opcua-tags', tagId);
   if (isDebug && tag) inspector('getMaxValuesStorage.tag:', tag);
   if (!tag) return result;

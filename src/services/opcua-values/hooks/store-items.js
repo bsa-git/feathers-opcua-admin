@@ -1,13 +1,14 @@
 /* eslint-disable no-unused-vars */
 // Use this hook to manipulate incoming or outgoing data.
 // For more information on hooks see: http://docs.feathersjs.com/api/hooks.html
-
+const errors = require('@feathersjs/errors');
 const { checkContext, getItems, replaceItems } = require('feathers-hooks-common');
 
 const {
   inspector,
   HookHelper,
-  sortByStringField
+  sortByStringField,
+  objectHash
 } = require('../../../plugins');
 
 const loConcat = require('lodash/concat');
@@ -35,15 +36,30 @@ module.exports = function (options = {}) {
 
     // Add items
     const addItems = async record => {
-      let values;
+      let values, valueHash = '';
       //----------------------
 
       if (!record.storeStart) return;
-      if (!record.values.length > 1) return;
+      if (!record.values.length) return;
+      if (record.values.length > 1) {
+        record.values = [record.values[0]];
+      }
       if(isDebug && record) inspector('hook.store-items.addItems.record:', record);
 
       const contextId = hh.getContextId();
       if (contextId) {
+        // Set hash value
+        if (record.values[0].items && record.values[0].items.length) {
+          valueHash = objectHash(record.values[0].items);
+        } else {
+          valueHash = objectHash(record.values[0].value);
+        }
+        if (record.values[0].hash && record.values[0].hash !== valueHash) {
+          throw new errors.BadRequest(`A "opcua-values" service have not a record with record.values#value.hash === ${valueHash}`);
+        } else {
+          if (!record.values[0].hash) record.values[0].hash = valueHash;
+        }
+
         // Get store value
         const storeValue = await hh.getItem('opcua-values', contextId);
         if(isDebug && storeValue) inspector('hook.store-items.addItems.storeValue:', storeValue);
@@ -52,11 +68,17 @@ module.exports = function (options = {}) {
         // Get values
         values = storeValue.values.filter(v => v.key !== storeStart);
         values = loConcat(values, record.values);
+        // Ascending sort by string field
         values = sortByStringField(values, 'key', true);
         // Set range of stored values
         record.storeStart = values[0].key;
         record.storeEnd = values[values.length - 1].key;
+        // Descending sort Ascending by string field 
         record.values = sortByStringField(values, 'key', false);
+        
+        // Set record.store.hash value
+        const valueHashes = record.values.map(v => v.hash);
+        record.store = { count: valueHashes.length, hash: objectHash(valueHashes) };
         if(isDebug && record) inspector('hook.store-items.addItems.UpdateRecord:', record);
       }
     };
