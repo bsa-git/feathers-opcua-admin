@@ -4,6 +4,8 @@ const appRoot = join(__dirname, '../../../');
 const moment = require('moment');
 const hash = require('object-hash');
 
+const loCloneDeep = require('lodash/cloneDeep');
+
 const debug = require('debug')('app:util');
 const isDebug = false;
 
@@ -177,27 +179,50 @@ const getNextDateTime = function (startDateTime, period, isUtc = true) {
 };
 
 /**
+ * @method getPreviousDateTime
+ * @param {Object|String|Array} startTime 
+ * @param {Array} period 
+ * e.g. [1, 'hours']
+ * @param {Boolean} isUtc 
+ * @returns {Number}
+ */
+const getPreviousDateTime = function (startDateTime, period, isUtc = true) {
+  startDateTime = moment.utc(startDateTime);
+  const nextDateTime = moment.utc(startDateTime).subtract(period[0], period[1]);
+  if (isUtc) {
+    return moment.utc(nextDateTime).format();
+  } else {
+    return moment(nextDateTime).format();
+  }
+};
+
+/**
  * @method getStartOfPeriod
  * @param {Object|String|Array} dateTime 
  * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
  * @param {Array} period
- * e.g. [1, 'months'] 
+ * e.g. [1, 'months'] | [-1, 'months']
  * @returns {String} 
- * e.g. '2022-05-01T00:00:00'
+ * e.g. '2022-05-01T00:00:00' | '2022-04-01T00:00:00'
  */
 const getStartOfPeriod = function (dateTime, period) {
   let startList = [], startPeriod, condition;
-  //------------------------
-  if (!Array.isArray(period)) new Error('Argument error, argument "period" must be an array');
+  let _dateTime = cloneObject(dateTime), _period = cloneObject(period);
+  //-----------------------------------------
+  if (!Array.isArray(_period)) new Error('Argument error, argument "period" must be an array');
   // Get start dateTime
-  dateTime = moment.utc(dateTime);
-  dateTime = dateTime.format('YYYY-MM-DDTHH:mm:ss');
-  startPeriod = moment.utc(dateTime).startOf('year');
+  if (_period[0] < 0) {
+    _dateTime = moment.utc(_dateTime).subtract(Math.abs(_period[0]) - 1, _period[1]).format('YYYY-MM-DDTHH:mm:ss');
+    _period[0] = Math.abs(_period[0]);
+  } else {
+    _dateTime = moment.utc(_dateTime).format('YYYY-MM-DDTHH:mm:ss');
+  }
+  startPeriod = moment.utc(_dateTime).startOf('year');
   startList.push(startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
 
   do {
-    startPeriod = startPeriod.add(...period);
-    condition = (dateTime >= startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+    startPeriod = startPeriod.add(..._period);
+    condition = (_dateTime >= startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
     if (condition) {
       startList.push(startPeriod.format('YYYY-MM-DDTHH:mm:ss'));
     }
@@ -212,25 +237,30 @@ const getStartOfPeriod = function (dateTime, period) {
  * @param {Object|String|Array} dateTime 
  * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
  * @param {Array} period
- * e.g. [1, 'months'] 
+ * e.g. [1, 'months'] | [-1, 'months']
  * @returns {String} 
- * e.g. '2022-05-31T23:59:59'
+ * e.g. '2022-05-31T23:59:59' | '2022-04-31T23:59:59'
  */
 const getEndOfPeriod = function (dateTime, period) {
   let startList = [], startPeriod, endPeriod, condition;
-  //------------------------
-  if (!Array.isArray(period)) new Error('Argument error, argument "period" must be an array');
+  let _dateTime = cloneObject(dateTime), _period = cloneObject(period);
+  //--------------------------------------------------------------------
+  if (!Array.isArray(_period)) new Error('Argument error, argument "period" must be an array');
   // Get start dateTime
-  dateTime = moment.utc(dateTime);
-  dateTime = dateTime.format('YYYY-MM-DDTHH:mm:ss');
-  startPeriod = moment.utc(dateTime).startOf('year');
-  startPeriod = startPeriod.add(...period).format('YYYY-MM-DDTHH:mm:ss');
+  if (_period[0] < 0) {
+    _dateTime = moment.utc(_dateTime).subtract(Math.abs(_period[0]) - 1, _period[1]).format('YYYY-MM-DDTHH:mm:ss');
+    _period[0] = Math.abs(_period[0]);
+  } else {
+    _dateTime = moment.utc(_dateTime).format('YYYY-MM-DDTHH:mm:ss');
+  }
+  startPeriod = moment.utc(_dateTime).startOf('year');
+  startPeriod = startPeriod.add(..._period).format('YYYY-MM-DDTHH:mm:ss');
   endPeriod = moment.utc(startPeriod).subtract(1, 'seconds');
 
   do {
     startList.push(endPeriod.format('YYYY-MM-DDTHH:mm:ss'));
-    condition = (dateTime > endPeriod.format('YYYY-MM-DDTHH:mm:ss'));
-    startPeriod = moment.utc(startPeriod).add(...period).format('YYYY-MM-DDTHH:mm:ss');
+    condition = (_dateTime > endPeriod.format('YYYY-MM-DDTHH:mm:ss'));
+    startPeriod = moment.utc(startPeriod).add(..._period).format('YYYY-MM-DDTHH:mm:ss');
     endPeriod = moment.utc(startPeriod).subtract(1, 'seconds');
   } while (condition);
 
@@ -239,18 +269,61 @@ const getEndOfPeriod = function (dateTime, period) {
 };
 
 /**
- * @method getEndOfPeriod
+ * @method getStartEndOfPeriod
  * @param {Object|String|Array} dateTime 
  * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
  * @param {Array} period
  * e.g. [1, 'months'] 
- * @returns {String} 
+ * @returns {String[]} 
  * e.g. ['2022-05-01T00:00:00', '2022-05-31T23:59:59']
  */
 const getStartEndOfPeriod = function (dateTime, period) {
   const start = getStartOfPeriod(dateTime, period);
   const end = getEndOfPeriod(dateTime, period);
   return [start, end];
+};
+
+/**
+ * @method getRangeStartEndOfPeriod
+ * @param {Object|String|Array} dateTime 
+ * e.g. moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
+ * @param {Array} period
+ * e.g. [5, 'years']|[-5, 'years']|moment()|'2022-05-15T10:55:11'|[2022, 4, 15, 10, 55, 11]
+ * @param {String} unit
+ * e.g. 'years'|'months'|'days'|'hours'|'minutes'|'seconds'
+ * @returns {Number[]} 
+ * e.g. ['2022', '2023', '2024', '2025', '2026'] | ['2017', '2018', '2019', '2020', '2021']
+ */
+const getRangeStartEndOfPeriod = function (dateTime, period, unit = 'years') {
+  let rangeList = [], condition, unitFormat;
+  let startPeriod, endPeriod;
+  //----------------------------
+  if (Array.isArray(period) && period.length === 2) {
+    startPeriod = getStartOfPeriod(dateTime, period);
+    endPeriod = getEndOfPeriod(dateTime, period);
+  } else {
+    startPeriod = moment.utc(dateTime).format('YYYY-MM-DDTHH:mm:ss');
+    endPeriod = moment.utc(period).format('YYYY-MM-DDTHH:mm:ss');
+  }
+
+  // Get unitFormat
+  if (unit === 'years') unitFormat = 'YYYY';
+  if (unit === 'months') unitFormat = 'YYYY-MM';
+  if (unit === 'days') unitFormat = 'YYYY-MM-DD';
+  if (unit === 'hours') unitFormat = 'YYYY-MM-DDTHH';
+  if (unit === 'minutes') unitFormat = 'YYYY-MM-DDTHH:mm';
+  if (unit === 'seconds') unitFormat = 'YYYY-MM-DDTHH:mm:ss';
+
+  rangeList.push(moment.utc(startPeriod).format(unitFormat));
+
+  do {
+    startPeriod = moment.utc(startPeriod).add(...[1, unit]).format(unitFormat);
+    condition = (endPeriod >= startPeriod);
+    if (condition) {
+      rangeList.push(startPeriod);
+    }
+  } while (condition);
+  return rangeList;
 };
 
 
@@ -438,28 +511,13 @@ const stringify = function (obj, spacer = ' ', separator = ', ', leader = '{', t
 };
 
 /**
- * Returns new object with values cloned from the original object. Some objects
- * (like Sequelize or MongoDB model instances) contain circular references
- * and cause TypeError when trying to JSON.stringify() them. They may contain
- * custom toJSON() or toObject() method which allows to serialize them safely.
- * Object.assign() does not clone these methods, so the purpose of this method
- * is to use result of custom toJSON() or toObject() (if accessible)
- * for Object.assign(), but only in case of serialization failure.
- *
+ * The value to recursively clone
+ * @method cloneObject
  * @param {Object?} obj - Object to clone
  * @returns {Object} Cloned object
  */
 const cloneObject = function (obj) {
-  let obj1 = obj;
-  if (typeof obj.toJSON === 'function' || typeof obj.toObject === 'function') {
-    try {
-      JSON.stringify(Object.assign({}, obj1));
-    } catch (e) {
-      debug('Object is not serializable');
-      obj1 = obj1.toJSON ? obj1.toJSON() : obj1.toObject();
-    }
-  }
-  return Object.assign({}, obj1);
+  return loCloneDeep(obj);
 };
 
 
@@ -623,9 +681,11 @@ module.exports = {
   isValidDateTime,
   getTimeDuration,
   getNextDateTime,
+  getPreviousDateTime,
   getStartOfPeriod,
   getEndOfPeriod,
   getStartEndOfPeriod,
+  getRangeStartEndOfPeriod,
   stripSlashes,
   stripSpecific,
   getCapitalizeStr,
