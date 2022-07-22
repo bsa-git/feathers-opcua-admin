@@ -1,10 +1,20 @@
 const errors = require('@feathersjs/errors');
-const { inspector, getCapitalizeStr, objectHash, getStartEndOfPeriod } = require('../lib');
-const { dbNullIdValue, getMaxValuesStorage } = require('../db-helpers');
 const AuthServer = require('../auth/auth-server.class');
 const HookHelper = require('./hook-helper.class');
-const debug = require('debug')('app:plugins.servicesConstraint');
 
+const { 
+  inspector, 
+  getCapitalizeStr, 
+  objectHash, 
+} = require('../lib');
+
+const { 
+  dbNullIdValue, 
+  getMaxValuesStorage, 
+  getStorePeriod 
+} = require('../db-helpers');
+
+const debug = require('debug')('app:plugins.servicesConstraint');
 const isDebug = false;
 
 /**
@@ -146,40 +156,30 @@ module.exports = async function servicesConstraint(context) {
             valueHash = objectHash(value.value);
           }
           if (value.hash && value.hash !== valueHash) {
-            throw new errors.BadRequest(`A "opcua-values" service have not a record with record.values#value.hash === ${valueHash}`);
+            throw new errors.BadRequest(`A "opcua-values" service have record.values[0].hash('${value.hash}') !== '${valueHash}'`);
           } else {
             if (!value.hash) value.hash = valueHash;
             valueHashes.push(value.hash);
           }
         }
 
-        // if (record.store && record.store.hash !== objectHash(valueHashes)) {
-        //   throw new errors.BadRequest(`A "opcua-values" service have not a record with record.store.hash === '${objectHash(valueHashes)}'`);
-        // } else {
-        //   if (!record.store) {
-        //     record.store = { count: valueHashes.length, hash: objectHash(valueHashes) };
-        //   }
-        // }
-
         if (record.store && record.store.hash !== objectHash(valueHashes)) {
-          throw new Error(`A "opcua-values" service have not a record with record.store.hash === '${objectHash(valueHashes)}'`);
+          throw new errors.BadRequest(`A "opcua-values" service have record.store.hash('${record.store.hash}') !== '${objectHash(valueHashes)}'`);
         } else {
           if ((record.store && !record.store.period) || !record.store) {
-            const servicePath = 'opcua-tags';
-            let tag = await hookHelper.getItem(servicePath, record.tagId);
-            if (!tag) {
-              throw new Error(`A "opcua-tags" service must have a record with 'tagId' = '${record.tagId}'`);
-            }
-            const tags = await hookHelper.findItems(servicePath, { browseName: tag.ownerGroup });
-            if (!tags.length) {
-              throw new Error(`A "opcua-tags" service must have a record with 'browseName' = '${tag.ownerGroup}'`);
-            }
-            tag = tags[0];
-            period = getStartEndOfPeriod(record.storeStart, tag.store.numberOfValuesInDoc);
+            period = await getStorePeriod(hookHelper.app, record.tagId, record.storeStart);
             if (!record.store) {
               record.store = { count: valueHashes.length, period, hash: objectHash(valueHashes) };
             } else {
               record.store.period = period;
+            }
+          }
+
+          if (record.store && record.store.period) {
+            period = await getStorePeriod(hookHelper.app, record.tagId, record.storeStart);
+            const periodHash = objectHash(period);
+            if(objectHash(record.store.period) !== periodHash){
+              throw new errors.BadRequest(`A "opcua-values" service have record.store.period([${record.store.period}]) !== [${period}]`);
             }
           }
         }

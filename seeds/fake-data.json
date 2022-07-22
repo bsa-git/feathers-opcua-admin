@@ -285,14 +285,8 @@
       "dataType": "String",
       "hist": 1,
       "store": {
-        "numberOfValuesInDoc": [
-          3,
-          "days"
-        ],
-        "numberOfDocsForTag": [
-          6,
-          "days"
-        ]
+        "numberOfValuesInDoc": [3, "days"],
+        "numberOfDocsForTag": [6, "days"]
       },
       "group": true,
       "variableGetType": "valueFromSource",

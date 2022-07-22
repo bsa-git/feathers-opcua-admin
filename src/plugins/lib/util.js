@@ -3,6 +3,7 @@ const { join } = require('path');
 const appRoot = join(__dirname, '../../../');
 const moment = require('moment');
 const hash = require('object-hash');
+const logger = require('../../logger');
 
 const loCloneDeep = require('lodash/cloneDeep');
 
@@ -669,6 +670,7 @@ const objectHashWriteToStream = function (value, stream, options = {}) {
 
 module.exports = {
   appRoot,
+  logger,
   delayTime,
   pause,
   waitTimeout,

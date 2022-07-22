@@ -204,18 +204,14 @@ class HookHelper {
    * @returns {String}
    */
   getContextId() {
-
     if (loIsBuffer(this.contextId)) {
       return this.contextId.toString();
     }
-
     if (loIsPlainObject(this.contextId)) {
       const idField = HookHelper.getIdField(this.contextId);
       return this.contextId[idField];
     }
-
     return this.contextId;
-
   }
 
   /**

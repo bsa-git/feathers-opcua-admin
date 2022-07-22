@@ -1,18 +1,21 @@
 const assert = require('assert');
 const {
-  inspector, 
-  appRoot, 
-  AuthServer, 
+  inspector,
+  appRoot,
+  logger,
+  AuthServer,
   checkServicesRegistered,
   saveFakesToServices,
-  readJsonFileSync 
+  readJsonFileSync,
+  objectHash
 } = require('../../src/plugins');
 
 const {
   dbNullIdValue,
   getCountItems,
   createItem,
-  getMaxValuesStorage
+  getMaxValuesStorage,
+  getStorePeriod
 } = require('../../src/plugins/db-helpers');
 
 const constraints = require(`${appRoot}/src/hooks/constraints`);
@@ -44,21 +47,21 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
     contextBefore = {
       app,
       type: 'before',
-      params: {provider: 'socketio'},
+      params: { provider: 'socketio' },
       data: {}
     };
 
     contextAfter = {
       app,
       type: 'after',
-      params: {provider: 'socketio'},
+      params: { provider: 'socketio' },
       result: {}
     };
 
     contextAfterMultiple = {
       app,
       type: 'after',
-      params: {provider: 'socketio'},
+      params: { provider: 'socketio' },
       result: []
     };
 
@@ -66,7 +69,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       app,
       type: 'after',
       method: 'find',
-      params: {provider: 'socketio'},
+      params: { provider: 'socketio' },
       result: {
         data: []
       }
@@ -357,10 +360,10 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       const roleId = rec[idFieldRole];
       const users = app.service('users');
       const chatMessages = app.service('chat-messages');
-      let findUserBefore = await users.find({query: {roleId: roleId}});
+      let findUserBefore = await users.find({ query: { roleId: roleId } });
       findUserBefore = findUserBefore.data;
       if (isDebug) inspector('Data integrity when removing a record from \'roles\' service.findResultsBefore:', findUserBefore);
-      let findChatMessagesBefore = await chatMessages.find({query: {roleId: roleId}});
+      let findChatMessagesBefore = await chatMessages.find({ query: { roleId: roleId } });
       findChatMessagesBefore = findChatMessagesBefore.data;
       if (isDebug) inspector('Data integrity when removing a record from \'roles\' service.findChatMessagesBefore:', findChatMessagesBefore);
 
@@ -374,13 +377,13 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       await constraints(true)(contextAfter);
 
       // Check constraints for 'users'
-      let findUserAfter = await users.find({query: {roleId: roleId}});
+      let findUserAfter = await users.find({ query: { roleId: roleId } });
       findUserAfter = findUserAfter.data;
       if (isDebug) inspector('Data integrity when removing a record from \'roles\' service.findResultsAfter:', findUserAfter);
       assert.ok(findUserBefore.length > findUserAfter.length, 'Protection did not work to removing the data from service');
 
       // Check constraints for 'chat-messages'
-      let findChatMessagesAfter = await chatMessages.find({query: {roleId: roleId}});
+      let findChatMessagesAfter = await chatMessages.find({ query: { roleId: roleId } });
       findChatMessagesAfter = findChatMessagesAfter.data;
       if (isDebug) inspector('Data integrity when removing a record from \'roles\' service.findChatMessagesAfter:', findChatMessagesAfter);
       assert.ok(findChatMessagesBefore.length > findChatMessagesAfter.length, 'Protection did not work to removing the data from service');
@@ -398,8 +401,8 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       // Team handle
       const _teamHandle = async team => {
         const _teamId = team[idFieldTeam];
-        const _findUserTeamsBefore = await userTeams.find({query: {teamId: _teamId}});
-        const _findChatMessagesBefore = await chatMessages.find({query: {teamId: _teamId}});
+        const _findUserTeamsBefore = await userTeams.find({ query: { teamId: _teamId } });
+        const _findChatMessagesBefore = await chatMessages.find({ query: { teamId: _teamId } });
         if (!teamId && _findUserTeamsBefore.data.length && _findChatMessagesBefore.data.length) {
           teamId = _teamId;
           findUserTeamsBefore = _findUserTeamsBefore;
@@ -418,10 +421,10 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
           await constraints(true)(contextAfter);
 
           // Check constraints
-          const findUserTeamsAfter = await userTeams.find({query: {teamId: teamId}});
+          const findUserTeamsAfter = await userTeams.find({ query: { teamId: teamId } });
           if (isDebug) inspector('Data integrity when removing a record from \'teams\' service.findResultsAfter:', findUserTeamsAfter.data);
           assert.ok(findUserTeamsBefore.data.length > findUserTeamsAfter.data.length, 'Protection did not work to removing the data from service');
-          const findChatMessagesAfter = await chatMessages.find({query: {teamId: teamId}});
+          const findChatMessagesAfter = await chatMessages.find({ query: { teamId: teamId } });
           if (isDebug) inspector('Data integrity when removing a record from \'teams\' service.findChatMessagesAfter:', findChatMessagesAfter.data);
           assert.ok(findChatMessagesBefore.data.length > findChatMessagesAfter.data.length, 'Protection did not work to removing the data from service');
         }
@@ -432,7 +435,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
         const team = fakes['teams'][i];
         await _teamHandle(team);
       }
-      if(!teamId) {
+      if (!teamId) {
         assert.ok(false, 'Was not found \'userTeams\' for any team');
       }
     });
@@ -448,11 +451,11 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       const chatMessages = app.service('chat-messages');
 
       // Get before services
-      const findUserTeamsBefore = await userTeams.find({query: {userId: userId}});
+      const findUserTeamsBefore = await userTeams.find({ query: { userId: userId } });
       if (isDebug) inspector('Data integrity for \'user-teams\' service, when removing a record from \'users\' service.findUserTeamsBefore:', findUserTeamsBefore.data);
-      const findUserProfilesBefore = await userProfiles.find({query: {[idFieldUser]: profileId}});
+      const findUserProfilesBefore = await userProfiles.find({ query: { [idFieldUser]: profileId } });
       if (isDebug) inspector('Data integrity for \'user-profiles\' service, when removing a record from \'users\' service.findUserProfilesBefore:', findUserProfilesBefore.data);
-      const findChatMessagesBefore = await chatMessages.find({query: {ownerId: userId}});
+      const findChatMessagesBefore = await chatMessages.find({ query: { ownerId: userId } });
       if (isDebug) inspector('Data integrity for \'chat-messages\' service, when removing a record from \'users\' service.findChatMessagesBefore:', findChatMessagesBefore.data);
 
       // Run constraints hook
@@ -467,40 +470,189 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       await constraints(true)(contextAfter);
 
       // Check constraints
-      const findUserTeamsAfter = await userTeams.find({query: {userId: userId}});
+      const findUserTeamsAfter = await userTeams.find({ query: { userId: userId } });
       if (isDebug) inspector('Data integrity for \'user-teams\' service, when removing a record from \'users\' service.findUserTeamsAfter:', findUserTeamsAfter.data);
       assert.ok(findUserTeamsBefore.data.length > findUserTeamsAfter.data.length, 'Protection did not work to removing the data from service');
-      const findUserProfilesAfter = await userProfiles.find({query: {[idFieldUser]: profileId}});
+      const findUserProfilesAfter = await userProfiles.find({ query: { [idFieldUser]: profileId } });
       if (isDebug) inspector('Data integrity for \'user-profiles\' service, when removing a record from \'users\' service.findUserProfilesAfter:', findUserProfilesAfter.data);
       assert.ok(findUserProfilesBefore.data.length > findUserProfilesAfter.data.length, 'Protection did not work to removing the data from service');
-      const findChatMessagesAfter = await chatMessages.find({query: {ownerId: userId}});
+      const findChatMessagesAfter = await chatMessages.find({ query: { ownerId: userId } });
       if (isDebug) inspector('Data integrity for \'chat-messages\' service, when removing a record from \'users\' service.findChatMessagesAfter:', findChatMessagesAfter.data);
       assert.ok(findChatMessagesBefore.data.length > findChatMessagesAfter.data.length, 'Protection did not work to removing the data from service');
     });
 
-    it('#18: Set contextBefore.tagId while creating record for \'opcua-values\' service', async () => {
+    it('#18.1: Set contextBefore.tagId while creating record for \'opcua-values\' service', async () => {
       // Get opcuaTag
-      const index = fakes['opcuaTags'].length - 1;
-      const opcuaTag = fakes['opcuaTags'][index];
-      const idField = 'id' in opcuaTag ? 'id' : '_id';
-      const tagId = opcuaTag[idField];
+      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+      const idField = 'id' in groupTag ? 'id' : '_id';
+      const tagId = groupTag[idField];
 
       const service = app.service('opcua-values');
       contextBefore.path = 'opcua-values';
       contextBefore.method = 'create';
       contextBefore.service = service;
       contextBefore.data = {
-        tagName: opcuaTag.browseName,
+        tagName: groupTag.browseName,
         values: [
           {
-            key: opcuaTag.browseName,
-            value: 'opcuaTagValue'
+            key: storeTag.browseName,
+            value: 123
           }
         ]
       };
       await constraints(true)(contextBefore);
-      if (isDebug) debug('Set contextBefore.tagId while creating record for \'opcua-values\' service.contextBefore:', contextBefore.data);
+      if (isDebug && contextBefore) debug('Set contextBefore.tagId while creating record for \'opcua-values\' service.contextBefore:', contextBefore.data);
       assert.ok(contextBefore.data.tagId === tagId, 'Protection did not work to write the data to service');
+    });
+
+    it('#18.2: Set contextBefore.store and contextBefore.values[0].hash while creating record for \'opcua-values\' service', async () => {
+      // Get opcuaTag
+      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+      const idField = 'id' in storeTag ? 'id' : '_id';
+      const tagId = storeTag[idField];
+
+      const service = app.service('opcua-values');
+      contextBefore.path = 'opcua-values';
+      contextBefore.method = 'create';
+      contextBefore.service = service;
+      contextBefore.data = {
+        tagName: storeTag.browseName,
+        storeStart: '2022-01-01',
+        values: [
+          {
+            key: '2022-01-01',
+            value: 123
+          }
+        ]
+      };
+
+      const period = await getStorePeriod(app, tagId, contextBefore.data.storeStart);
+      const periodHash = objectHash(period);
+      const valueHash = objectHash(contextBefore.data.values[0].value);
+      const storeHash = objectHash([valueHash]);
+      await constraints(true)(contextBefore);
+      if (isDebug && contextBefore) inspector(
+        'Set contextBefore.store and contextBefore.values[0].hash while creating record for \'opcua-values\' service.contextBefore:',
+        contextBefore.data
+      );
+      assert.ok(contextBefore.data.store.count === 1, 'Protection did not work to write the data to service');
+      assert.ok(objectHash(contextBefore.data.store.period) === periodHash, 'Protection did not work to write the data to service');
+      assert.ok(contextBefore.data.store.hash === storeHash, 'Protection did not work to write the data to service');
+      assert.ok(contextBefore.data.values[0].hash === valueHash, 'Protection did not work to write the data to service');
+    });
+
+    it('#18.3: Set ERROR contextBefore.values[0].hash while creating record for \'opcua-values\' service', async () => {
+      // Get opcuaTag
+      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+
+      const service = app.service('opcua-values');
+      contextBefore.path = 'opcua-values';
+      contextBefore.method = 'create';
+      contextBefore.service = service;
+      contextBefore.data = {
+        tagName: storeTag.browseName,
+        storeStart: '2022-01-01',
+        values: [
+          {
+            key: '2022-01-01',
+            value: 123,
+            hash: '7d37103e1c4d22de8f7b4096b4be8c2ddf_error'
+          }
+        ]
+      };
+      if (isDebug && contextBefore) inspector(
+        'Set ERROR contextBefore.values[0].hash while creating record for \'opcua-values\' service.contextBefore:',
+        contextBefore.data
+      );
+      try {
+        await constraints(true)(contextBefore);
+        assert.ok(false, 'Protection did not work to write the data to service');
+      } catch (error) {
+        // logger.error(`Set ERROR contextBefore.values[0].hash while creating record for "opcua-values" service.errorMessage: ${error.message}`);
+        logger.error(error.message);
+        assert.ok(true, 'Protection did not work to write the data to service');
+      }
+    });
+
+    it('#18.4: Set ERROR contextBefore.store.hash while creating record for \'opcua-values\' service', async () => {
+      // Get opcuaTag
+      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+
+      const service = app.service('opcua-values');
+      contextBefore.path = 'opcua-values';
+      contextBefore.method = 'create';
+      contextBefore.service = service;
+      contextBefore.data = {
+        tagName: storeTag.browseName,
+        storeStart: '2022-01-01',
+        store: {
+          count: 1,
+          period: ['2022-01-01T00:00:00', '2022-01-03T23:59:59'],
+          hash: 'e6123520ffc6e6b9962b3f1934926a0d55_error'
+        },
+        values: [
+          {
+            key: '2022-01-01',
+            value: 123,
+            hash: '7d37103e1c4d22de8f7b4096b4be8c2ddfa4caa0'
+          }
+        ]
+      };
+      if (isDebug && contextBefore) inspector(
+        'Set ERROR contextBefore.store.hash while creating record for \'opcua-values\' service.contextBefore:',
+        contextBefore.data
+      );
+      try {
+        await constraints(true)(contextBefore);
+        assert.ok(false, 'Protection did not work to write the data to service');
+      } catch (error) {
+        // logger.error(`Set ERROR contextBefore.store.hash while creating record for "opcua-values" service.errorMessage: ${error.message}`);
+        logger.error(error.message);
+        assert.ok(true, 'Protection did not work to write the data to service');
+      }
+    });
+
+    it('#18.5: Set ERROR contextBefore.store.period while creating record for \'opcua-values\' service', async () => {
+      // Get opcuaTag
+      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+
+      const service = app.service('opcua-values');
+      contextBefore.path = 'opcua-values';
+      contextBefore.method = 'create';
+      contextBefore.service = service;
+      contextBefore.data = {
+        tagName: storeTag.browseName,
+        storeStart: '2022-01-01',
+        store: {
+          count: 1,
+          period: ['2022-01-01T00:00:00', '2022-01-01T00:00:00'],// ERROR
+          hash: 'e6123520ffc6e6b9962b3f1934926a0d554cc28d'
+        },
+        values: [
+          {
+            key: '2022-01-01',
+            value: 123,
+            hash: '7d37103e1c4d22de8f7b4096b4be8c2ddfa4caa0'
+          }
+        ]
+      };
+      if (isDebug && contextBefore) inspector(
+        'Set ERROR contextBefore.store.period while creating record for \'opcua-values\' service.contextBefore:',
+        contextBefore.data
+      );
+      try {
+        await constraints(true)(contextBefore);
+        assert.ok(false, 'Protection did not work to write the data to service');
+      } catch (error) {
+        // logger.error(`Set ERROR contextBefore.store.period while creating record for "opcua-values" service.errorMessage: ${error.message}`);
+        logger.error(error.message);
+        assert.ok(true, 'Protection did not work to write the data to service');
+      }
     });
 
     it('#19: Restrict max rows when add a group value to \'opcua-values\' service', async () => {
@@ -603,7 +755,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
         // Create items
         let maxOpcuaValuesRows = 10;
         for (let index = 3; index < maxOpcuaValuesRows + 1; index++) {
-          const day = (index >= 10)? `${index}` : `0${index}`; 
+          const day = (index >= 10) ? `${index}` : `0${index}`;
           valueData.storeStart = `2022-01-${day}`;
           valueData.storeEnd = `2022-01-${day}`;
           valueData.values[0]['key'] = `2022-01-${day}`;
@@ -631,7 +783,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       }
     });
 
-    
+
     it('#21: Data integrity when removing a record from \'opcua-tags\' service', async () => {
       const index = fakes['opcuaTags'].length - 1;
       const rec = fakes['opcuaTags'][index];

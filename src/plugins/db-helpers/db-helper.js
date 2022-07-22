@@ -5,7 +5,8 @@ const moment = require('moment');
 const {
   inspector,
   sortByStringField,
-  getEndOfPeriod
+  getEndOfPeriod,
+  getStartEndOfPeriod
 } = require('../lib');
 
 const {
@@ -77,12 +78,12 @@ const getIdField = function (items) {
 const getMaxValuesStorage = async function (app, tagId = '') {
   let result = 0;
   //----------------------
-  if(!tagId) return result;
+  if (!tagId) return result;
   const tag = await getItem(app, 'opcua-tags', tagId);
   if (isDebug && tag) inspector('getMaxValuesStorage.tag:', tag);
   if (!tag) return result;
   const tagBrowseName = tag.browseName;
-  
+
   // This is group tag
   //==============================
   if (tag.group) {
@@ -118,9 +119,9 @@ const getMaxValuesStorage = async function (app, tagId = '') {
       const sumResults = loReduce(storeValues, function (sum, storeValue) {
         let storeEnd = storeValue['storeEnd'];
         storeEnd = moment.utc(storeEnd).format('YYYY-MM-DDTHH:mm:ss');
-        if(storeEnd <= endOfPeriod){
+        if (storeEnd <= endOfPeriod) {
           if (isDebug && storeValue) inspector(`getMaxValuesStorage.storeValue('${endOfPeriod}'):`, storeValue);
-          return sum + 1;  
+          return sum + 1;
         }
         return sum;
       }, 0);
@@ -129,6 +130,39 @@ const getMaxValuesStorage = async function (app, tagId = '') {
     }
   }
   return result;
+};
+
+/**
+ * @method getStorePeriod
+ * @param {Object} app 
+ * @param {String} tagId 
+ * e.g. tagId -> '60af3870270f24162c049c1f'
+ * @param {String|Array|Object} dateTime
+ * e.g. dateTime -> '2022-07-22T05:06:35'
+ * @returns {Array}
+ * e.g. ['2022-07-21T00:00:00', '2022-07-23T23:59:59']
+ */
+const getStorePeriod = async function (app, tagId = '', dateTime) {
+  let servicePath = 'opcua-tags', period = [];
+  //---------------------------------
+  const storeTag = await getItem(app, servicePath, tagId);
+  if (isDebug && storeTag) inspector(`getStorePeriod.storeTag(tagId='${tagId}'):`, storeTag);
+  if (!storeTag) {
+    throw new Error(`A "opcua-tags" service must have a record with 'tagId' = '${tagId}'`);
+  }
+
+  const groupTag = await findItem(app, servicePath, { browseName: storeTag.ownerGroup });
+  if (isDebug && groupTag) inspector(`getStorePeriod.groupTag(browseName='${storeTag.ownerGroup}'):`, groupTag);
+  if (!groupTag) {
+    throw new Error(`A "opcua-tags" service must have a record with 'browseName' = '${tagstoreTag.ownerGroupId}'`);
+  }
+
+  if(!groupTag.store || !groupTag.store.numberOfValuesInDoc){
+    throw new Error('A "opcua-tag" must have a property -> "groupTag.store.numberOfValuesInDoc"');
+  }
+  period = getStartEndOfPeriod(dateTime, groupTag.store.numberOfValuesInDoc);
+  if (isDebug && period.length) debug('getStorePeriod.period:', period);
+  return period;
 };
 
 
@@ -213,7 +247,7 @@ const findItem = async function (app, path = '', query = {}) {
     }
     findResults = await service.find(newParams);
     if (isDebug) inspector(`findItems(path='${path}', query=${JSON.stringify(query)}).findResults:`, findResults);
-    return findResults.data.length? findResults.data[0] : null;
+    return findResults.data.length ? findResults.data[0] : null;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
   }
@@ -522,6 +556,7 @@ module.exports = {
   getIdField,
   getCountItems,
   getMaxValuesStorage,
+  getStorePeriod,
   //----------------
   getItem,
   findItem,
