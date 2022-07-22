@@ -154,7 +154,7 @@ const getStorePeriod = async function (app, tagId = '', dateTime) {
   const groupTag = await findItem(app, servicePath, { browseName: storeTag.ownerGroup });
   if (isDebug && groupTag) inspector(`getStorePeriod.groupTag(browseName='${storeTag.ownerGroup}'):`, groupTag);
   if (!groupTag) {
-    throw new Error(`A "opcua-tags" service must have a record with 'browseName' = '${tagstoreTag.ownerGroupId}'`);
+    throw new Error(`A "opcua-tags" service must have a record with 'browseName' = '${storeTag.ownerGroup}'`);
   }
 
   if(!groupTag.store || !groupTag.store.numberOfValuesInDoc){
