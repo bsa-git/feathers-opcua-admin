@@ -213,7 +213,7 @@ const getStartOfPeriod = function (dateTime, period) {
   if (!Array.isArray(_period)) new Error('Argument error, argument "period" must be an array');
   // Get start dateTime
   if (_period[0] < 0) {
-    _dateTime = moment.utc(_dateTime).subtract(Math.abs(_period[0]) - 1, _period[1]).format('YYYY-MM-DDTHH:mm:ss');
+    _dateTime = moment.utc(_dateTime).subtract(Math.abs(_period[0]), _period[1]).format('YYYY-MM-DDTHH:mm:ss');
     _period[0] = Math.abs(_period[0]);
   } else {
     _dateTime = moment.utc(_dateTime).format('YYYY-MM-DDTHH:mm:ss');
@@ -249,7 +249,7 @@ const getEndOfPeriod = function (dateTime, period) {
   if (!Array.isArray(_period)) new Error('Argument error, argument "period" must be an array');
   // Get start dateTime
   if (_period[0] < 0) {
-    _dateTime = moment.utc(_dateTime).subtract(Math.abs(_period[0]) - 1, _period[1]).format('YYYY-MM-DDTHH:mm:ss');
+    _dateTime = moment.utc(_dateTime).subtract(Math.abs(_period[0]), _period[1]).format('YYYY-MM-DDTHH:mm:ss');
     _period[0] = Math.abs(_period[0]);
   } else {
     _dateTime = moment.utc(_dateTime).format('YYYY-MM-DDTHH:mm:ss');
