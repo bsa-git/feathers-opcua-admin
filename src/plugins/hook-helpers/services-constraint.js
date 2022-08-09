@@ -156,7 +156,7 @@ module.exports = async function servicesConstraint(context) {
             valueHash = objectHash(value.value);
           }
           if (value.hash && value.hash !== valueHash) {
-            throw new errors.BadRequest(`A "opcua-values" service have record.values[0].hash('${value.hash}') !== '${valueHash}'`);
+            throw new errors.BadRequest(`A "opcua-values" service have record.opcuaData[0].hash('${value.hash}') !== '${valueHash}'`);
           } else {
             if (!value.hash) value.hash = valueHash;
             valueHashes.push(value.hash);

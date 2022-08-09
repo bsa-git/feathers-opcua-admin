@@ -55,7 +55,7 @@ module.exports = function (options = {}) {
           valueHash = objectHash(record.opcuaData[0].value);
         }
         if (record.opcuaData[0].hash && record.opcuaData[0].hash !== valueHash) {
-          throw new errors.BadRequest(`A "opcua-values" service have not a record with record.values#value.hash === ${valueHash}`);
+          throw new errors.BadRequest(`A "opcua-values" service have not a record with record.opcuaData#value.hash === ${valueHash}`);
         } else {
           if (!record.opcuaData[0].hash) record.opcuaData[0].hash = valueHash;
         }

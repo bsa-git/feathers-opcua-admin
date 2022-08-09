@@ -25,7 +25,7 @@ module.exports = async function (data, actionResult) {
           loForEach(dataItems, function (value, key) {
             values.push({ key, value });
           });
-          histOpcuaValues.push({ tagName, updatedAt, values });
+          histOpcuaValues.push({ tagName, updatedAt, opcuaData: values });
         } else {
           logger.error(`controllers.cbSessionReadHistoryValues.dataValueStatusCode: ${chalk.yellow(dataValueStatusCode)}`);
         }

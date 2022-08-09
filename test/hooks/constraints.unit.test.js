@@ -506,7 +506,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.tagId === tagId, 'Protection did not work to write the data to service');
     });
 
-    it('#18.2: Set contextBefore.store and contextBefore.values[0].hash while creating record for \'opcua-values\' service', async () => {
+    it('#18.2: Set contextBefore.store and contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service', async () => {
       // Get opcuaTag
       const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
       const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
@@ -534,7 +534,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       const storeHash = objectHash([valueHash]);
       await constraints(true)(contextBefore);
       if (isDebug && contextBefore) inspector(
-        'Set contextBefore.store and contextBefore.values[0].hash while creating record for \'opcua-values\' service.contextBefore:',
+        'Set contextBefore.store and contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service.contextBefore:',
         contextBefore.data
       );
       assert.ok(contextBefore.data.store.count === 1, 'Protection did not work to write the data to service');
@@ -543,7 +543,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.opcuaData[0].hash === valueHash, 'Protection did not work to write the data to service');
     });
 
-    it('#18.3: Set ERROR contextBefore.values[0].hash while creating record for \'opcua-values\' service', async () => {
+    it('#18.3: Set ERROR contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service', async () => {
       // Get opcuaTag
       const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
       const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
@@ -564,14 +564,13 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
         ]
       };
       if (isDebug && contextBefore) inspector(
-        'Set ERROR contextBefore.values[0].hash while creating record for \'opcua-values\' service.contextBefore:',
+        'Set ERROR contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service.contextBefore:',
         contextBefore.data
       );
       try {
         await constraints(true)(contextBefore);
         assert.ok(false, 'Protection did not work to write the data to service');
       } catch (error) {
-        // logger.error(`Set ERROR contextBefore.values[0].hash while creating record for "opcua-values" service.errorMessage: ${error.message}`);
         logger.error(error.message);
         assert.ok(true, 'Protection did not work to write the data to service');
       }

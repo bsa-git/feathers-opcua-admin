@@ -62,7 +62,6 @@ const loMerge = require("lodash/merge");
 const loForEach = require("lodash/forEach");
 
 const debug = require("debug")("app:comp.RtData");
-const isLog = false;
 const isDebug = false;
 
 let nIntervId = null;
@@ -285,14 +284,14 @@ export default {
         query: { tagName: this.group, $sort: { updatedAt: -1 }, $limit: 1 },
       }).data;
 
-      if (opcuaValues.length && opcuaValues[0].values.length) {
+      if (opcuaValues.length && opcuaValues[0].opcuaData.length) {
         // Check new update values
         if (this.tagHistValues["updatedAt"] !== opcuaValues[0]["updatedAt"]) {
           // Update time
           this.tagHistValues["updatedAt"] = opcuaValues[0]["updatedAt"];
 
-          //e.g. opcuaValues[0].values = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
-          opcuaValues[0].values.forEach((valueItem) => {
+          //e.g. opcuaValues[0].opcuaData = [{key: 'CH_M51::01AMIAK:01T4', value: 55.789}, ... , {key: 'CH_M51::01AMIAK:01P4_1', value: 55.789}]
+          opcuaValues[0].opcuaData.forEach((valueItem) => {
             valueItem.value = loRound(valueItem.value, 3);
 
             // --- Add values to tagHistValues ---
@@ -320,7 +319,7 @@ export default {
               }
             }
           });
-          if (isLog)
+          if (isDebug)
             debug("currentValues.tagCurrentValues:", this.tagCurrentValues);
           this.numberChanges++;
 
@@ -495,25 +494,26 @@ export default {
             query: { tagName: this.group, $sort: { updatedAt: 1 } },
           }).data;
         }
+
+        if (isDebug && histValues) debug("getTagHistValues.histValues", savingValuesMode, histValues);
       }
 
       /* e.g. histValues = [{
        *  tagName: 'CH_M51::ValueFromFile',
        *  updatedAt: '2021-10-21T04:51:30.275+00:00',
-       *  values: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
+       *  opcuaData: [{ key: 'CH_M51::01AMIAK:01T4', value: 55.789 }, ...{ key: 'CH_M51::01AMIAK:01P4_1', value: 55.789 }]
        *  }, ...]
        */
 
-      if (isDebug)
-        debug("getTagHistValues.histValues.length", histValues.length);
+      if (isDebug && histValues.length) debug("getTagHistValues.histValues.length", histValues.length);
 
       if (histValues && histValues.length) {
         histValues.forEach((item) => {
-          if (item.values.length) {
+          if (item.opcuaData && item.opcuaData.length) {
             const updatedAt = moment(item["updatedAt"]).format(
               "YYYY-MM-DDTHH:mm:ss"
             );
-            item.values.forEach((valueItem) => {
+            item.opcuaData.forEach((valueItem) => {
               if (!this.tagHistValues[valueItem.key]) {
                 this.tagHistValues[valueItem.key] = [["Time", "Value"]];
               }
