@@ -35,7 +35,7 @@ let moduleExports = merge({},
           }
         }
       },
-      values: {
+      opcuaData: {
         items: {
           type: "object",
           properties: {
@@ -54,7 +54,7 @@ let moduleExports = merge({},
                 "object"
               ]
             },
-            items: {
+            values: {
               type: "array",
               items: {
                 type: [
@@ -66,6 +66,10 @@ let moduleExports = merge({},
                   "array"
                 ]
               }
+            },
+            params: {
+              type: "object",
+              properties: {}
             }
           }
         },

@@ -68,7 +68,7 @@ type OpcuaValue {
   storeStart: String
   storeEnd: String
   store: JSON
-  values: [JSON]
+  opcuaData: [JSON]
   tag(query: JSON, params: JSON, key: JSON): OpcuaTag
 }
  

@@ -42,7 +42,7 @@ let base = merge({},
         type: "object",
         properties: {}
       },
-      values: {
+      opcuaData: {
         type: "array",
         items: {
           type: "object",
@@ -62,7 +62,7 @@ let base = merge({},
                 "object"
               ]
             },
-            items: {
+            values: {
               type: "array",
               items: {
                 type: [
@@ -74,6 +74,10 @@ let base = merge({},
                   "array"
                 ]
               }
+            },
+            params: {
+              type: "object",
+              properties: {}
             }
           }
         }

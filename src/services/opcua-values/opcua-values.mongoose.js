@@ -15,12 +15,13 @@ let moduleExports = merge({},
     storeStart: String,
     storeEnd: String,
     store: {},
-    values: [
+    opcuaData: [
       {
         key: String,
         hash: String,
         value: mongoose.Schema.Types.Mixed,
-        items: [mongoose.Schema.Types.Mixed]
+        values: [mongoose.Schema.Types.Mixed],
+        params: {}
       }
     ]
   },

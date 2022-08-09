@@ -113,7 +113,7 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
           tagName: storeTag.browseName,
           storeStart: '2022-01-03',
           storeEnd: '2022-01-03',
-          values: [
+          opcuaData: [
             {
               key: '2022-01-03',
               value: storeTagValue
@@ -123,8 +123,8 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
         // Run "storeItems" hook  
         await storeItems()(contextBefore);
         if (isDebug && contextBefore.data) inspector('Get contextBefore.data:', contextBefore);
-        const length1 = contextBefore.data.values.length;
-        const length2 = storeValue.values.length;
+        const length1 = contextBefore.data.opcuaData.length;
+        const length2 = storeValue.opcuaData.length;
         assert.ok(length1 > length2, `Test "store-items" hook. Add new item. Length1 must be greater than Length2  - (${length1}) > (${length2})`);
       }
     }
@@ -148,7 +148,7 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
         // Get store value 
         const storeOpcuaValue = opcuaValues.find(v => (v.tagId === storeTag[idField]) && (v.storeStart !== undefined));
         if (isDebug && storeOpcuaValue) inspector('Test "store-items" hook.storeValue:', storeOpcuaValue);
-        const storeLastValue = storeOpcuaValue.values[0];
+        const storeLastValue = storeOpcuaValue.opcuaData[0];
         // Set contextBefore properties 
         const service = app.service('opcua-values');
         contextBefore.app = app;
@@ -161,7 +161,7 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
           tagName: storeTag.browseName,
           storeStart: storeLastValue.key,
           storeEnd: storeLastValue.key,
-          values: [
+          opcuaData: [
             {
               key: storeLastValue.key,
               value: storeTagValue
@@ -171,10 +171,10 @@ describe('Test opcua-values/hooks/store-items.unit.test.js', () => {
         // Run "storeItems" hook  
         await storeItems()(contextBefore);
         if (isDebug && contextBefore.data) inspector('Get contextBefore.data:', loOmit(contextBefore, ['app', 'service']));
-        const length1 = contextBefore.data.values.length;
-        const length2 = storeOpcuaValue.values.length;
-        const contextBeforeValue = contextBefore.data.values[0].value;
-        const storeOpcuaLastValue = storeOpcuaValue.values[0].value;
+        const length1 = contextBefore.data.opcuaData.length;
+        const length2 = storeOpcuaValue.opcuaData.length;
+        const contextBeforeValue = contextBefore.data.opcuaData[0].value;
+        const storeOpcuaLastValue = storeOpcuaValue.opcuaData[0].value;
         assert.ok(length1 === length2 && contextBeforeValue !== storeOpcuaLastValue, `Test "store-items" hook. Update existing item. Length1 must be greater than length2  - (${length1}) > (${length2})`);
       }
     } else {

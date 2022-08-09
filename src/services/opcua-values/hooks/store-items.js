@@ -40,24 +40,24 @@ module.exports = function (options = {}) {
       //----------------------
 
       if (!record.storeStart) return;
-      if (!record.values.length) return;
-      if (record.values.length > 1) {
-        record.values = [record.values[0]];
+      if (!record.opcuaData.length) return;
+      if (record.opcuaData.length > 1) {
+        record.opcuaData = [record.opcuaData[0]];
       }
       if(isDebug && record) inspector('hook.store-items.addItems.record:', record);
 
       const contextId = hh.getContextId();
       if (contextId) {
         // Set hash value
-        if (record.values[0].items && record.values[0].items.length) {
-          valueHash = objectHash(record.values[0].items);
+        if (record.opcuaData[0].values && record.opcuaData[0].values.length) {
+          valueHash = objectHash(record.opcuaData[0].values);
         } else {
-          valueHash = objectHash(record.values[0].value);
+          valueHash = objectHash(record.opcuaData[0].value);
         }
-        if (record.values[0].hash && record.values[0].hash !== valueHash) {
+        if (record.opcuaData[0].hash && record.opcuaData[0].hash !== valueHash) {
           throw new errors.BadRequest(`A "opcua-values" service have not a record with record.values#value.hash === ${valueHash}`);
         } else {
-          if (!record.values[0].hash) record.values[0].hash = valueHash;
+          if (!record.opcuaData[0].hash) record.opcuaData[0].hash = valueHash;
         }
 
         // Get store value
@@ -66,19 +66,19 @@ module.exports = function (options = {}) {
         // Get storeStart 
         const storeStart = record.storeStart;
         // Get values
-        values = storeValue.values.filter(v => v.key !== storeStart);
-        values = loConcat(values, record.values);
+        values = storeValue.opcuaData.filter(v => v.key !== storeStart);
+        values = loConcat(values, record.opcuaData);
         // Ascending sort by string field
         values = sortByStringField(values, 'key', true);
         // Set range of stored values
         record.storeStart = values[0].key;
         record.storeEnd = values[values.length - 1].key;
         // Descending sort Ascending by string field 
-        record.values = sortByStringField(values, 'key', false);
+        record.opcuaData = sortByStringField(values, 'key', false);
         
         // Set record.store.hash value
-        const valueHashes = record.values.map(v => v.hash);
-        record.store = { count: valueHashes.length, hash: objectHash(valueHashes) };
+        const valueHashes = record.opcuaData.map(v => v.hash);
+        record.store = Object.assign(storeValue.store, { count: valueHashes.length, hash: objectHash(valueHashes) });
         if(isDebug && record) inspector('hook.store-items.addItems.UpdateRecord:', record);
       }
     };

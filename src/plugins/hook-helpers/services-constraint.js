@@ -147,11 +147,11 @@ module.exports = async function servicesConstraint(context) {
       // Set hashes for store
       if (record.storeStart) {
         let valueHashes = [], period;
-        for (let index = 0; index < record.values.length; index++) {
-          const value = record.values[index];
+        for (let index = 0; index < record.opcuaData.length; index++) {
+          const value = record.opcuaData[index];
           let valueHash = '';
-          if (value.items && value.items.length) {
-            valueHash = objectHash(value.items);
+          if (value.values && value.values.length) {
+            valueHash = objectHash(value.values);
           } else {
             valueHash = objectHash(value.value);
           }

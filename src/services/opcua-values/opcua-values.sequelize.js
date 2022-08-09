@@ -31,7 +31,7 @@ let moduleExports = merge({},
     store: {
       type: DataTypes.JSONB
     },
-    values: {
+    opcuaData: {
       type: DataTypes.JSONB
     }
   },

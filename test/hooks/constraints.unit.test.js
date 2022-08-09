@@ -494,7 +494,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       contextBefore.service = service;
       contextBefore.data = {
         tagName: groupTag.browseName,
-        values: [
+        opcuaData: [
           {
             key: storeTag.browseName,
             value: 123
@@ -520,7 +520,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       contextBefore.data = {
         tagName: storeTag.browseName,
         storeStart: '2022-01-01',
-        values: [
+        opcuaData: [
           {
             key: '2022-01-01',
             value: 123
@@ -530,7 +530,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
 
       const period = await getStorePeriod(app, tagId, contextBefore.data.storeStart);
       const periodHash = objectHash(period);
-      const valueHash = objectHash(contextBefore.data.values[0].value);
+      const valueHash = objectHash(contextBefore.data.opcuaData[0].value);
       const storeHash = objectHash([valueHash]);
       await constraints(true)(contextBefore);
       if (isDebug && contextBefore) inspector(
@@ -540,7 +540,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.store.count === 1, 'Protection did not work to write the data to service');
       assert.ok(objectHash(contextBefore.data.store.period) === periodHash, 'Protection did not work to write the data to service');
       assert.ok(contextBefore.data.store.hash === storeHash, 'Protection did not work to write the data to service');
-      assert.ok(contextBefore.data.values[0].hash === valueHash, 'Protection did not work to write the data to service');
+      assert.ok(contextBefore.data.opcuaData[0].hash === valueHash, 'Protection did not work to write the data to service');
     });
 
     it('#18.3: Set ERROR contextBefore.values[0].hash while creating record for \'opcua-values\' service', async () => {
@@ -555,7 +555,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       contextBefore.data = {
         tagName: storeTag.browseName,
         storeStart: '2022-01-01',
-        values: [
+        opcuaData: [
           {
             key: '2022-01-01',
             value: 123,
@@ -594,7 +594,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
           period: ['2022-01-01T00:00:00', '2022-01-03T23:59:59'],
           hash: 'e6123520ffc6e6b9962b3f1934926a0d55_error'
         },
-        values: [
+        opcuaData: [
           {
             key: '2022-01-01',
             value: 123,
@@ -633,7 +633,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
           period: ['2022-01-01T00:00:00', '2022-01-01T00:00:00'],// ERROR
           hash: 'e6123520ffc6e6b9962b3f1934926a0d554cc28d'
         },
-        values: [
+        opcuaData: [
           {
             key: '2022-01-01',
             value: 123,
@@ -677,7 +677,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       const tagvalue2 = (unitRange2.high - unitRange2.low) / 2;
       // Get value data 
       const valueData = {
-        tagId, tagName, values: [
+        tagId, tagName, opcuaData: [
           {
             key: tagName1,
             value: tagvalue1
@@ -740,7 +740,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
           tagName,
           storeStart: '2022-01-01',
           storeEnd: '2022-01-01',
-          values: [
+          opcuaData: [
             {
               key: '2022-01-01',
               value: tagValue
@@ -758,7 +758,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
           const day = (index >= 10) ? `${index}` : `0${index}`;
           valueData.storeStart = `2022-01-${day}`;
           valueData.storeEnd = `2022-01-${day}`;
-          valueData.values[0]['key'] = `2022-01-${day}`;
+          valueData.opcuaData[0]['key'] = `2022-01-${day}`;
           const createdItem = await createItem(app, serviceName, valueData, { $select: ['tagName', 'storeStart', 'storeEnd'] });
           if (isDebug && createdItem) inspector('Restrict max rows when add a store value to \'opcua-values\' service.createdItem:', createdItem);
         }

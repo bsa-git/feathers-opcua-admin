@@ -216,7 +216,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
                 rec = ourSeedData[0];
                 callMethod = async () => await service.get(rec[ourSeedId]);
                 result = await runMethod(ifFail, callMethod);
-                if (isDebug && result) inspector('authentication.services.result:', result);
+                if (isDebug && result) inspector('authentication.services.get.result:', result);
                 if (!ifFail) assert.strictEqual(resultLen(result), 1, 'Unexpected result length.');
                 if (!ifFail) assert.strictEqual(result[ourSeedId], rec[ourSeedId], 'Unexpected record id');
                 break;
@@ -227,7 +227,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
                 // result = await runMethod(ifFail, () => service.patch(rec[ourSeedId], { [prop]: ourSeedData[1][prop] }));
                 //!!!!!!!!!!!!!!!! Update ourSeedData[1][prop] to rec[prop]
                 result = await runMethod(ifFail, callMethod);
-                if (isDebug && result) inspector('authentication.services.result:', result);
+                if (isDebug && result) inspector('authentication.services.patch.result:', result);
                 //!!!!!!!!!!!!!!!!
                 if (!ifFail) assert.strictEqual(resultLen(result), 1, 'Unexpected result length.');
                 break;
@@ -244,7 +244,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
                 rec = ourSeedData[isAuthEntity ? 1 : 0];
                 callMethod = async () => await service.remove(rec[ourSeedId]);
                 result = await runMethod(ifFail, callMethod);
-                if (isDebug && result) inspector('authentication.services.result:', result);
+                if (isDebug && result) inspector('authentication.services.remove.result:', result);
                 if (!ifFail) assert.strictEqual(resultLen(result), 1, 'Unexpected result length.');
                 if (!ifFail) assert.deepStrictEqual(result[ourSeedId], rec[ourSeedId], 'Unexpected record id');
                 break;

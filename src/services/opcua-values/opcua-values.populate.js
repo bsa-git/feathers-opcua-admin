@@ -93,7 +93,7 @@ const twoLevelsFields = {
     storeStart: 1,
     storeEnd: 1,
     store: 1,
-    values: 1,
+    opcuaData: 1,
     tag: {
       _args: {},
       id: 1,
