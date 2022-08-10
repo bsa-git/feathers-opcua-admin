@@ -62,7 +62,7 @@ let moduleExports = {
 // !code: exports
 //---------------
 // Add schema validate
-moduleExports.before.create = loConcat([validateCreate()], moduleExports.before.create);
+moduleExports.before.create = loConcat([validateCreate()], moduleExports.before.create, storeItems());
 moduleExports.before.update = loConcat([validateUpdate()], moduleExports.before.update);
 moduleExports.before.patch = loConcat([validatePatch()], moduleExports.before.patch, storeItems());
 //---------------
