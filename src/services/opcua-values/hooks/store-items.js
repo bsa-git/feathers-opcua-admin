@@ -39,9 +39,23 @@ module.exports = function (options = {}) {
     const addItems = async record => {
       let values, valueHash = '', valueHashes = [], period;
       //-----------------------------------------------
+      
+      // Set tagId
+      if (!record.tagId) {
+        const servicePath = 'opcua-tags';
+        const tags = await hh.findItems(servicePath, { browseName: record.tagName });
+        if (tags.length) {
+          const tag = tags[0];
+          const idField = 'id' in tag ? 'id' : '_id';
+          const tagId = tag[idField].toString();
+          record.tagId = tagId;
+        }
+        if (isDebug && record) inspector('"hook."opcua-values.create.before".record:', record);
+      }
+      
+      // Operation for "opcua-values" store data
       if (!record.storeStart) return;
       if (!record.opcuaData.length) return;
-
       if (isDebug && record) inspector('hook.store-items.addItems.record:', record);
 
       const contextId = hh.getContextId();
@@ -94,19 +108,6 @@ module.exports = function (options = {}) {
         record.store = Object.assign(storeValue.store, { count: valueHashes.length, hash: objectHash(valueHashes) });
         if (isDebug && record) inspector('hook.store-items.addItems.UpdateRecord:', record);
       } else {
-
-        // Set tagId
-        if (!record.tagId) {
-          const servicePath = 'opcua-tags';
-          const tags = await hh.findItems(servicePath, { browseName: record.tagName });
-          if (tags.length) {
-            const tag = tags[0];
-            const idField = hh.getIdField(tag);
-            const tagId = tag[idField].toString();
-            record.tagId = tagId;
-          }
-          if (isDebug && record) inspector('"hook."opcua-values.create.before".record:', record);
-        }
 
         // Set hash, record.store, record.store.count, record.store.period, record.store.hash
         for (let index = 0; index < record.opcuaData.length; index++) {

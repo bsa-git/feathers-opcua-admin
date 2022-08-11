@@ -2,12 +2,12 @@ const assert = require('assert');
 const {
   inspector,
   appRoot,
-  logger,
+  // logger,
   AuthServer,
   checkServicesRegistered,
   saveFakesToServices,
   readJsonFileSync,
-  objectHash
+  // objectHash
 } = require('../../src/plugins');
 
 const {
@@ -15,7 +15,7 @@ const {
   getCountItems,
   createItem,
   getMaxValuesStorage,
-  getStorePeriod
+  // getStorePeriod
 } = require('../../src/plugins/db-helpers');
 
 const constraints = require(`${appRoot}/src/hooks/constraints`);
@@ -486,14 +486,15 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
       const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
       const idField = 'id' in groupTag ? 'id' : '_id';
-      const tagId = groupTag[idField];
+      const tagId = storeTag[idField];
 
       const service = app.service('opcua-values');
+      contextBefore.app = app;
       contextBefore.path = 'opcua-values';
       contextBefore.method = 'create';
       contextBefore.service = service;
       contextBefore.data = {
-        tagName: groupTag.browseName,
+        tagName: storeTag.browseName,
         opcuaData: [
           {
             key: storeTag.browseName,
@@ -506,213 +507,213 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
       assert.ok(contextBefore.data.tagId === tagId, 'Protection did not work to write the data to service');
     });
 
-    it('#18.2: Set contextBefore.store and contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service', async () => {
-      // Get opcuaTag
-      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
-      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
-      const idField = 'id' in storeTag ? 'id' : '_id';
-      const tagId = storeTag[idField];
+    // it('#18.2: Set contextBefore.store and contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service', async () => {
+    //   // Get opcuaTag
+    //   const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+    //   const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+    //   const idField = 'id' in storeTag ? 'id' : '_id';
+    //   const tagId = storeTag[idField];
 
-      const service = app.service('opcua-values');
-      contextBefore.path = 'opcua-values';
-      contextBefore.method = 'create';
-      contextBefore.service = service;
-      contextBefore.data = {
-        tagName: storeTag.browseName,
-        storeStart: '2022-01-01',
-        opcuaData: [
-          {
-            key: '2022-01-01',
-            value: 123
-          }
-        ]
-      };
+    //   const service = app.service('opcua-values');
+    //   contextBefore.path = 'opcua-values';
+    //   contextBefore.method = 'create';
+    //   contextBefore.service = service;
+    //   contextBefore.data = {
+    //     tagName: storeTag.browseName,
+    //     storeStart: '2022-01-01',
+    //     opcuaData: [
+    //       {
+    //         key: '2022-01-01',
+    //         value: 123
+    //       }
+    //     ]
+    //   };
 
-      const period = await getStorePeriod(app, tagId, contextBefore.data.storeStart);
-      const periodHash = objectHash(period);
-      const valueHash = objectHash(contextBefore.data.opcuaData[0].value);
-      const storeHash = objectHash([valueHash]);
-      await constraints(true)(contextBefore);
-      if (isDebug && contextBefore) inspector(
-        'Set contextBefore.store and contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service.contextBefore:',
-        contextBefore.data
-      );
-      assert.ok(contextBefore.data.store.count === 1, 'Protection did not work to write the data to service');
-      assert.ok(objectHash(contextBefore.data.store.period) === periodHash, 'Protection did not work to write the data to service');
-      assert.ok(contextBefore.data.store.hash === storeHash, 'Protection did not work to write the data to service');
-      assert.ok(contextBefore.data.opcuaData[0].hash === valueHash, 'Protection did not work to write the data to service');
-    });
+    //   const period = await getStorePeriod(app, tagId, contextBefore.data.storeStart);
+    //   const periodHash = objectHash(period);
+    //   const valueHash = objectHash(contextBefore.data.opcuaData[0].value);
+    //   const storeHash = objectHash([valueHash]);
+    //   await constraints(true)(contextBefore);
+    //   if (isDebug && contextBefore) inspector(
+    //     'Set contextBefore.store and contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service.contextBefore:',
+    //     contextBefore.data
+    //   );
+    //   assert.ok(contextBefore.data.store.count === 1, 'Protection did not work to write the data to service');
+    //   assert.ok(objectHash(contextBefore.data.store.period) === periodHash, 'Protection did not work to write the data to service');
+    //   assert.ok(contextBefore.data.store.hash === storeHash, 'Protection did not work to write the data to service');
+    //   assert.ok(contextBefore.data.opcuaData[0].hash === valueHash, 'Protection did not work to write the data to service');
+    // });
 
-    it('#18.3: Set ERROR contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service', async () => {
-      // Get opcuaTag
-      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
-      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+    // it('#18.3: Set ERROR contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service', async () => {
+    //   // Get opcuaTag
+    //   const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+    //   const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
 
-      const service = app.service('opcua-values');
-      contextBefore.path = 'opcua-values';
-      contextBefore.method = 'create';
-      contextBefore.service = service;
-      contextBefore.data = {
-        tagName: storeTag.browseName,
-        storeStart: '2022-01-01',
-        opcuaData: [
-          {
-            key: '2022-01-01',
-            value: 123,
-            hash: '7d37103e1c4d22de8f7b4096b4be8c2ddf_error'
-          }
-        ]
-      };
-      if (isDebug && contextBefore) inspector(
-        'Set ERROR contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service.contextBefore:',
-        contextBefore.data
-      );
-      try {
-        await constraints(true)(contextBefore);
-        assert.ok(false, 'Protection did not work to write the data to service');
-      } catch (error) {
-        logger.error(error.message);
-        assert.ok(true, 'Protection did not work to write the data to service');
-      }
-    });
+    //   const service = app.service('opcua-values');
+    //   contextBefore.path = 'opcua-values';
+    //   contextBefore.method = 'create';
+    //   contextBefore.service = service;
+    //   contextBefore.data = {
+    //     tagName: storeTag.browseName,
+    //     storeStart: '2022-01-01',
+    //     opcuaData: [
+    //       {
+    //         key: '2022-01-01',
+    //         value: 123,
+    //         hash: '7d37103e1c4d22de8f7b4096b4be8c2ddf_error'
+    //       }
+    //     ]
+    //   };
+    //   if (isDebug && contextBefore) inspector(
+    //     'Set ERROR contextBefore.opcuaData[0].hash while creating record for \'opcua-values\' service.contextBefore:',
+    //     contextBefore.data
+    //   );
+    //   try {
+    //     await constraints(true)(contextBefore);
+    //     assert.ok(false, 'Protection did not work to write the data to service');
+    //   } catch (error) {
+    //     logger.error(error.message);
+    //     assert.ok(true, 'Protection did not work to write the data to service');
+    //   }
+    // });
 
-    it('#18.4: Set ERROR contextBefore.store.hash while creating record for \'opcua-values\' service', async () => {
-      // Get opcuaTag
-      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
-      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+    // it('#18.4: Set ERROR contextBefore.store.hash while creating record for \'opcua-values\' service', async () => {
+    //   // Get opcuaTag
+    //   const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+    //   const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
 
-      const service = app.service('opcua-values');
-      contextBefore.path = 'opcua-values';
-      contextBefore.method = 'create';
-      contextBefore.service = service;
-      contextBefore.data = {
-        tagName: storeTag.browseName,
-        storeStart: '2022-01-01',
-        store: {
-          count: 1,
-          period: ['2022-01-01T00:00:00', '2022-01-03T23:59:59'],
-          hash: 'e6123520ffc6e6b9962b3f1934926a0d55_error'
-        },
-        opcuaData: [
-          {
-            key: '2022-01-01',
-            value: 123,
-            hash: '7d37103e1c4d22de8f7b4096b4be8c2ddfa4caa0'
-          }
-        ]
-      };
-      if (isDebug && contextBefore) inspector(
-        'Set ERROR contextBefore.store.hash while creating record for \'opcua-values\' service.contextBefore:',
-        contextBefore.data
-      );
-      try {
-        await constraints(true)(contextBefore);
-        assert.ok(false, 'Protection did not work to write the data to service');
-      } catch (error) {
-        // logger.error(`Set ERROR contextBefore.store.hash while creating record for "opcua-values" service.errorMessage: ${error.message}`);
-        logger.error(error.message);
-        assert.ok(true, 'Protection did not work to write the data to service');
-      }
-    });
+    //   const service = app.service('opcua-values');
+    //   contextBefore.path = 'opcua-values';
+    //   contextBefore.method = 'create';
+    //   contextBefore.service = service;
+    //   contextBefore.data = {
+    //     tagName: storeTag.browseName,
+    //     storeStart: '2022-01-01',
+    //     store: {
+    //       count: 1,
+    //       period: ['2022-01-01T00:00:00', '2022-01-03T23:59:59'],
+    //       hash: 'e6123520ffc6e6b9962b3f1934926a0d55_error'
+    //     },
+    //     opcuaData: [
+    //       {
+    //         key: '2022-01-01',
+    //         value: 123,
+    //         hash: '7d37103e1c4d22de8f7b4096b4be8c2ddfa4caa0'
+    //       }
+    //     ]
+    //   };
+    //   if (isDebug && contextBefore) inspector(
+    //     'Set ERROR contextBefore.store.hash while creating record for \'opcua-values\' service.contextBefore:',
+    //     contextBefore.data
+    //   );
+    //   try {
+    //     await constraints(true)(contextBefore);
+    //     assert.ok(false, 'Protection did not work to write the data to service');
+    //   } catch (error) {
+    //     // logger.error(`Set ERROR contextBefore.store.hash while creating record for "opcua-values" service.errorMessage: ${error.message}`);
+    //     logger.error(error.message);
+    //     assert.ok(true, 'Protection did not work to write the data to service');
+    //   }
+    // });
 
-    it('#18.5: Set ERROR contextBefore.store.period while creating record for \'opcua-values\' service', async () => {
-      // Get opcuaTag
-      const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
-      const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
+    // it('#18.5: Set ERROR contextBefore.store.period while creating record for \'opcua-values\' service', async () => {
+    //   // Get opcuaTag
+    //   const groupTag = fakes['opcuaTags'].find(t => t.browseName === 'CH_M51::ValueFromFile');
+    //   const storeTag = fakes['opcuaTags'].find(t => t.ownerGroup === groupTag.browseName);
 
-      const service = app.service('opcua-values');
-      contextBefore.path = 'opcua-values';
-      contextBefore.method = 'create';
-      contextBefore.service = service;
-      contextBefore.data = {
-        tagName: storeTag.browseName,
-        storeStart: '2022-01-01',
-        store: {
-          count: 1,
-          period: ['2022-01-01T00:00:00', '2022-01-01T00:00:00'],// ERROR
-          hash: 'e6123520ffc6e6b9962b3f1934926a0d554cc28d'
-        },
-        opcuaData: [
-          {
-            key: '2022-01-01',
-            value: 123,
-            hash: '7d37103e1c4d22de8f7b4096b4be8c2ddfa4caa0'
-          }
-        ]
-      };
-      if (isDebug && contextBefore) inspector(
-        'Set ERROR contextBefore.store.period while creating record for \'opcua-values\' service.contextBefore:',
-        contextBefore.data
-      );
-      try {
-        await constraints(true)(contextBefore);
-        assert.ok(false, 'Protection did not work to write the data to service');
-      } catch (error) {
-        // logger.error(`Set ERROR contextBefore.store.period while creating record for "opcua-values" service.errorMessage: ${error.message}`);
-        logger.error(error.message);
-        assert.ok(true, 'Protection did not work to write the data to service');
-      }
-    });
+    //   const service = app.service('opcua-values');
+    //   contextBefore.path = 'opcua-values';
+    //   contextBefore.method = 'create';
+    //   contextBefore.service = service;
+    //   contextBefore.data = {
+    //     tagName: storeTag.browseName,
+    //     storeStart: '2022-01-01',
+    //     store: {
+    //       count: 1,
+    //       period: ['2022-01-01T00:00:00', '2022-01-01T00:00:00'],// ERROR
+    //       hash: 'e6123520ffc6e6b9962b3f1934926a0d554cc28d'
+    //     },
+    //     opcuaData: [
+    //       {
+    //         key: '2022-01-01',
+    //         value: 123,
+    //         hash: '7d37103e1c4d22de8f7b4096b4be8c2ddfa4caa0'
+    //       }
+    //     ]
+    //   };
+    //   if (isDebug && contextBefore) inspector(
+    //     'Set ERROR contextBefore.store.period while creating record for \'opcua-values\' service.contextBefore:',
+    //     contextBefore.data
+    //   );
+    //   try {
+    //     await constraints(true)(contextBefore);
+    //     assert.ok(false, 'Protection did not work to write the data to service');
+    //   } catch (error) {
+    //     // logger.error(`Set ERROR contextBefore.store.period while creating record for "opcua-values" service.errorMessage: ${error.message}`);
+    //     logger.error(error.message);
+    //     assert.ok(true, 'Protection did not work to write the data to service');
+    //   }
+    // });
 
-    it('#19: Restrict max rows when add a group value to \'opcua-values\' service', async () => {
-      let opcuaValuesCount = 0, serviceName = '';
-      //--------------------------------------------------------------
-      // Get opcua tags
-      const opcuaTags = fakes['opcuaTags'];
-      // Get group tag 
-      const groupTag = opcuaTags.find(t => t.group);
-      const idField = 'id' in groupTag ? 'id' : '_id';
-      const tagId = groupTag[idField];
-      const tagName = groupTag['browseName'];
-      // Get child group tags
-      const childGroupTags = opcuaTags.filter(t => t.ownerGroup === groupTag.browseName);
-      const childGroupTag1 = childGroupTags[0];
-      const tagName1 = childGroupTag1.browseName;
-      const unitRange1 = childGroupTag1.valueParams.engineeringUnitsRange;
-      const tagvalue1 = (unitRange1.high - unitRange1.low) / 2;
-      const childGroupTag2 = childGroupTags[1];
-      const tagName2 = childGroupTag2.browseName;
-      const unitRange2 = childGroupTag2.valueParams.engineeringUnitsRange;
-      const tagvalue2 = (unitRange2.high - unitRange2.low) / 2;
-      // Get value data 
-      const valueData = {
-        tagId, tagName, opcuaData: [
-          {
-            key: tagName1,
-            value: tagvalue1
-          },
-          {
-            key: tagName2,
-            value: tagvalue2
-          }
-        ]
-      };
-      // Get count items
-      serviceName = 'opcua-values';
-      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-      if (isDebug && opcuaValuesCount) debug('BeforeAdding.opcuaValuesCount:', opcuaValuesCount);
-      // Create items
-      const maxOpcuaValuesRows = await getMaxValuesStorage(app, tagId);
-      for (let index = 0; index < maxOpcuaValuesRows + 1; index++) {
-        await createItem(app, serviceName, valueData);
-      }
-      // Get count items
-      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-      if (isDebug && opcuaValuesCount) debug('AfterAdding.opcuaValuesCount:', opcuaValuesCount);
+    // it('#19: Restrict max rows when add a group value to \'opcua-values\' service', async () => {
+    //   let opcuaValuesCount = 0, serviceName = '';
+    //   //--------------------------------------------------------------
+    //   // Get opcua tags
+    //   const opcuaTags = fakes['opcuaTags'];
+    //   // Get group tag 
+    //   const groupTag = opcuaTags.find(t => t.group);
+    //   const idField = 'id' in groupTag ? 'id' : '_id';
+    //   const tagId = groupTag[idField];
+    //   const tagName = groupTag['browseName'];
+    //   // Get child group tags
+    //   const childGroupTags = opcuaTags.filter(t => t.ownerGroup === groupTag.browseName);
+    //   const childGroupTag1 = childGroupTags[0];
+    //   const tagName1 = childGroupTag1.browseName;
+    //   const unitRange1 = childGroupTag1.valueParams.engineeringUnitsRange;
+    //   const tagvalue1 = (unitRange1.high - unitRange1.low) / 2;
+    //   const childGroupTag2 = childGroupTags[1];
+    //   const tagName2 = childGroupTag2.browseName;
+    //   const unitRange2 = childGroupTag2.valueParams.engineeringUnitsRange;
+    //   const tagvalue2 = (unitRange2.high - unitRange2.low) / 2;
+    //   // Get value data 
+    //   const valueData = {
+    //     tagId, tagName, opcuaData: [
+    //       {
+    //         key: tagName1,
+    //         value: tagvalue1
+    //       },
+    //       {
+    //         key: tagName2,
+    //         value: tagvalue2
+    //       }
+    //     ]
+    //   };
+    //   // Get count items
+    //   serviceName = 'opcua-values';
+    //   opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+    //   if (isDebug && opcuaValuesCount) debug('BeforeAdding.opcuaValuesCount:', opcuaValuesCount);
+    //   // Create items
+    //   const maxOpcuaValuesRows = await getMaxValuesStorage(app, tagId);
+    //   for (let index = 0; index < maxOpcuaValuesRows + 1; index++) {
+    //     await createItem(app, serviceName, valueData);
+    //   }
+    //   // Get count items
+    //   opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+    //   if (isDebug && opcuaValuesCount) debug('AfterAdding.opcuaValuesCount:', opcuaValuesCount);
 
-      // Run constraints hook
-      contextAfter.path = serviceName;
-      contextAfter.method = 'create';
-      contextAfter.service = app.service(serviceName);
-      contextAfter.result = valueData;
-      await constraints(true)(contextAfter);
+    //   // Run constraints hook
+    //   contextAfter.path = serviceName;
+    //   contextAfter.method = 'create';
+    //   contextAfter.service = app.service(serviceName);
+    //   contextAfter.result = valueData;
+    //   await constraints(true)(contextAfter);
 
-      // Get count items
-      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-      if (isDebug && opcuaValuesCount) debug('AfterConstraintsHook.opcuaValuesCount:', opcuaValuesCount);
+    //   // Get count items
+    //   opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+    //   if (isDebug && opcuaValuesCount) debug('AfterConstraintsHook.opcuaValuesCount:', opcuaValuesCount);
 
-      assert.ok(opcuaValuesCount === maxOpcuaValuesRows, `Restrict max rows when add a group value to 'opcua-values' service:(${opcuaValuesCount}=${maxOpcuaValuesRows})`);
-    });
+    //   assert.ok(opcuaValuesCount === maxOpcuaValuesRows, `Restrict max rows when add a group value to 'opcua-values' service:(${opcuaValuesCount}=${maxOpcuaValuesRows})`);
+    // });
 
     it('#20: Restrict max rows when add a store value to \'opcua-values\' service', async () => {
       let opcuaValuesCount = 0, serviceName = '';
