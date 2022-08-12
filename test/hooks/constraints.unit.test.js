@@ -655,65 +655,65 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
     //   }
     // });
 
-    // it('#19: Restrict max rows when add a group value to \'opcua-values\' service', async () => {
-    //   let opcuaValuesCount = 0, serviceName = '';
-    //   //--------------------------------------------------------------
-    //   // Get opcua tags
-    //   const opcuaTags = fakes['opcuaTags'];
-    //   // Get group tag 
-    //   const groupTag = opcuaTags.find(t => t.group);
-    //   const idField = 'id' in groupTag ? 'id' : '_id';
-    //   const tagId = groupTag[idField];
-    //   const tagName = groupTag['browseName'];
-    //   // Get child group tags
-    //   const childGroupTags = opcuaTags.filter(t => t.ownerGroup === groupTag.browseName);
-    //   const childGroupTag1 = childGroupTags[0];
-    //   const tagName1 = childGroupTag1.browseName;
-    //   const unitRange1 = childGroupTag1.valueParams.engineeringUnitsRange;
-    //   const tagvalue1 = (unitRange1.high - unitRange1.low) / 2;
-    //   const childGroupTag2 = childGroupTags[1];
-    //   const tagName2 = childGroupTag2.browseName;
-    //   const unitRange2 = childGroupTag2.valueParams.engineeringUnitsRange;
-    //   const tagvalue2 = (unitRange2.high - unitRange2.low) / 2;
-    //   // Get value data 
-    //   const valueData = {
-    //     tagId, tagName, opcuaData: [
-    //       {
-    //         key: tagName1,
-    //         value: tagvalue1
-    //       },
-    //       {
-    //         key: tagName2,
-    //         value: tagvalue2
-    //       }
-    //     ]
-    //   };
-    //   // Get count items
-    //   serviceName = 'opcua-values';
-    //   opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-    //   if (isDebug && opcuaValuesCount) debug('BeforeAdding.opcuaValuesCount:', opcuaValuesCount);
-    //   // Create items
-    //   const maxOpcuaValuesRows = await getMaxValuesStorage(app, tagId);
-    //   for (let index = 0; index < maxOpcuaValuesRows + 1; index++) {
-    //     await createItem(app, serviceName, valueData);
-    //   }
-    //   // Get count items
-    //   opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-    //   if (isDebug && opcuaValuesCount) debug('AfterAdding.opcuaValuesCount:', opcuaValuesCount);
+    it('#19: Restrict max rows when add a group value to \'opcua-values\' service', async () => {
+      let opcuaValuesCount = 0, serviceName = '';
+      //--------------------------------------------------------------
+      // Get opcua tags
+      const opcuaTags = fakes['opcuaTags'];
+      // Get group tag 
+      const groupTag = opcuaTags.find(t => t.group);
+      const idField = 'id' in groupTag ? 'id' : '_id';
+      const tagId = groupTag[idField];
+      const tagName = groupTag['browseName'];
+      // Get child group tags
+      const childGroupTags = opcuaTags.filter(t => t.ownerGroup === groupTag.browseName);
+      const childGroupTag1 = childGroupTags[0];
+      const tagName1 = childGroupTag1.browseName;
+      const unitRange1 = childGroupTag1.valueParams.engineeringUnitsRange;
+      const tagvalue1 = (unitRange1.high - unitRange1.low) / 2;
+      const childGroupTag2 = childGroupTags[1];
+      const tagName2 = childGroupTag2.browseName;
+      const unitRange2 = childGroupTag2.valueParams.engineeringUnitsRange;
+      const tagvalue2 = (unitRange2.high - unitRange2.low) / 2;
+      // Get value data 
+      const valueData = {
+        tagId, tagName, opcuaData: [
+          {
+            key: tagName1,
+            value: tagvalue1
+          },
+          {
+            key: tagName2,
+            value: tagvalue2
+          }
+        ]
+      };
+      // Get count items
+      serviceName = 'opcua-values';
+      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+      if (isDebug && opcuaValuesCount) debug('BeforeAdding.opcuaValuesCount:', opcuaValuesCount);
+      // Create items
+      const maxOpcuaValuesRows = await getMaxValuesStorage(app, tagId);
+      for (let index = 0; index < maxOpcuaValuesRows + 1; index++) {
+        await createItem(app, serviceName, valueData);
+      }
+      // Get count items
+      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+      if (isDebug && opcuaValuesCount) debug('AfterAdding.opcuaValuesCount:', opcuaValuesCount);
 
-    //   // Run constraints hook
-    //   contextAfter.path = serviceName;
-    //   contextAfter.method = 'create';
-    //   contextAfter.service = app.service(serviceName);
-    //   contextAfter.result = valueData;
-    //   await constraints(true)(contextAfter);
+      // Run constraints hook
+      contextAfter.path = serviceName;
+      contextAfter.method = 'create';
+      contextAfter.service = app.service(serviceName);
+      contextAfter.result = valueData;
+      await constraints(true)(contextAfter);
 
-    //   // Get count items
-    //   opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
-    //   if (isDebug && opcuaValuesCount) debug('AfterConstraintsHook.opcuaValuesCount:', opcuaValuesCount);
+      // Get count items
+      opcuaValuesCount = await getCountItems(app, serviceName, { tagId });
+      if (isDebug && opcuaValuesCount) debug('AfterConstraintsHook.opcuaValuesCount:', opcuaValuesCount);
 
-    //   assert.ok(opcuaValuesCount === maxOpcuaValuesRows, `Restrict max rows when add a group value to 'opcua-values' service:(${opcuaValuesCount}=${maxOpcuaValuesRows})`);
-    // });
+      assert.ok(opcuaValuesCount === maxOpcuaValuesRows, `Restrict max rows when add a group value to 'opcua-values' service:(${opcuaValuesCount}=${maxOpcuaValuesRows})`);
+    });
 
     it('#20: Restrict max rows when add a store value to \'opcua-values\' service', async () => {
       let opcuaValuesCount = 0, serviceName = '';
@@ -759,7 +759,7 @@ describe('<<< Test /hooks/constraints.unit.test.js >>>', () => {
           valueData.storeStart = `2022-01-${day}`;
           valueData.storeEnd = `2022-01-${day}`;
           valueData.opcuaData[0]['key'] = `2022-01-${day}`;
-          const createdItem = await createItem(app, serviceName, valueData, { $select: ['tagName', 'storeStart', 'storeEnd'] });
+          const createdItem = await createItem(app, serviceName, valueData, { $select: ['tagName', 'storeStart', 'storeEnd', 'store'] });
           if (isDebug && createdItem) inspector('Restrict max rows when add a store value to \'opcua-values\' service.createdItem:', createdItem);
         }
         // Get count items

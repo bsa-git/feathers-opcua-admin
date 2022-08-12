@@ -4,6 +4,7 @@ const moment = require('moment');
 
 const {
   inspector,
+  cloneObject,
   sortByStringField,
   getEndOfPeriod,
   getStartEndOfPeriod
@@ -449,14 +450,15 @@ const removeItems = async function (app, path = '', query = {}) {
 const patchItem = async function (app, path = '', id = '', data = {}, query = {}) {
   let patchResults;
   //-------------------------------
+  const _data = cloneObject(data);
   const service = app.service(path);
   if (service) {
     if (query.query) {
-      patchResults = await service.patch(id, data, query);
+      patchResults = await service.patch(id, _data, query);
     } else {
-      patchResults = await service.patch(id, data, { query });
+      patchResults = await service.patch(id, _data, { query });
     }
-    if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, patchResults:`, patchResults);
+    if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(_data)}, patchResults:`, patchResults);
     return patchResults;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -476,14 +478,15 @@ const patchItem = async function (app, path = '', id = '', data = {}, query = {}
 const patchItems = async function (app, path = '', data = {}, query = {}) {
   let patchResults;
   //-------------------------------
+  const _data = cloneObject(data);
   const service = app.service(path);
   if (service) {
     if (query.query) {
-      patchResults = await service.patch(null, data, query);
+      patchResults = await service.patch(null, _data, query);
     } else {
-      patchResults = await service.patch(null, data, { query });
+      patchResults = await service.patch(null, _data, { query });
     }
-    if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(data)}, query=${JSON.stringify(query)}).patchResults:`, patchResults);
+    if (isDebug) inspector(`patchItems(path='${path}', data=${JSON.stringify(_data)}, query=${JSON.stringify(query)}).patchResults:`, patchResults);
     return patchResults;
   } else {
     throw new errors.BadRequest(`There is no service for the path - '${path}'`);
@@ -504,12 +507,13 @@ const patchItems = async function (app, path = '', data = {}, query = {}) {
 const createItem = async function (app, path = '', data = {}, query = {}) {
   let createResult;
   //------------------------------
+  const _data = cloneObject(data);
   const service = app.service(path);
   if (service) {
     if (query.query) {
-      createResult = await service.create(data, query);
+      createResult = await service.create(_data, query);
     } else {
-      createResult = await service.create(data, { query });
+      createResult = await service.create(_data, { query });
     }
     if (isDebug) inspector(`createItem(path='${path}', createResults:`, createResult);
     return createResult;
@@ -532,10 +536,11 @@ const createItem = async function (app, path = '', data = {}, query = {}) {
 const createItems = async function (app, path = '', data = [], query = {}) {
   let createdItem, createResults = [];
   //-------------------------
+  const _data = cloneObject(data);
   const service = app.service(path);
   if (service) {
-    for (let index = 0; index < data.length; index++) {
-      const item = data[index];
+    for (let index = 0; index < _data.length; index++) {
+      const item = _data[index];
       if (query.query) {
         createdItem = await service.create(item, query);
       } else {

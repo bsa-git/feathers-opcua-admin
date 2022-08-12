@@ -129,20 +129,20 @@ module.exports = function (options = {}) {
         if (record.store && record.store.hash !== objectHash(valueHashes)) {
           throw new errors.BadRequest(`A "opcua-values" service have record.store.hash('${record.store.hash}') !== '${objectHash(valueHashes)}'`);
         } else {
+          if (record.store && record.store.period) {
+            period = await getStorePeriod(hh.app, record.tagId, record.storeStart);
+            const periodHash = objectHash(period);
+            if (objectHash(record.store.period) !== periodHash) {
+              throw new errors.BadRequest(`A "opcua-values" service have record.store.period([${record.store.period}]) !== [${period}]`);
+            }
+          }
+          
           if ((record.store && !record.store.period) || !record.store) {
             period = await getStorePeriod(hh.app, record.tagId, record.storeStart);
             if (!record.store) {
               record.store = { count: valueHashes.length, period, hash: objectHash(valueHashes) };
             } else {
               record.store.period = period;
-            }
-          }
-
-          if (record.store && record.store.period) {
-            period = await getStorePeriod(hh.app, record.tagId, record.storeStart);
-            const periodHash = objectHash(period);
-            if (objectHash(record.store.period) !== periodHash) {
-              throw new errors.BadRequest(`A "opcua-values" service have record.store.period([${record.store.period}]) !== [${period}]`);
             }
           }
         }
