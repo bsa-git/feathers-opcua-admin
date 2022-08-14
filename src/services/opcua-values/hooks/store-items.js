@@ -59,7 +59,8 @@ module.exports = function (options = {}) {
       if (isDebug && record) inspector('hook.store-items.addItems.record:', record);
 
       const contextId = hh.getContextId();
-      if (contextId) {
+      
+      if (contextId) {// Patch service
 
         // Get store value
         const storeValue = await hh.getItem('opcua-values', contextId);
@@ -107,7 +108,8 @@ module.exports = function (options = {}) {
         valueHashes = record.opcuaData.map(v => v.hash);
         record.store = Object.assign(storeValue.store, { count: valueHashes.length, hash: objectHash(valueHashes) });
         if (isDebug && record) inspector('hook.store-items.addItems.UpdateRecord:', record);
-      } else {
+      
+      } else {// Create service
 
         // Set hash, record.store, record.store.count, record.store.period, record.store.hash
         for (let index = 0; index < record.opcuaData.length; index++) {
