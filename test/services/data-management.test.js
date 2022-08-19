@@ -77,7 +77,8 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
   });
 
   it('#2. feathersClient read json data from "dataManagement" service', async () => {
-    const service = feathersClient.service('data-management');
+    // const service = feathersClient.service('data-management');
+    const service = app.service('data-management');
     const data = {
       action: 'readJsonFile',
       path: '/public/api/demo/ui-elements/treeview-items4.json'
