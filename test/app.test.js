@@ -1,4 +1,3 @@
-
 const assert = require('assert');
 const rp = require('request-promise');
 const url = require('url');
