@@ -5,7 +5,6 @@ const {AuthServer} = require('../plugins/auth');
 
 const debug = require('debug')('app:hooks.auth');
 
-const isLog = false;
 const isDebug = false;
 
 /**
@@ -38,8 +37,8 @@ const loginCheck = function (isTest = false) {
     if(isTest || (!AuthServer.isTest() && authServer.contextProvider)){
       if (isDebug) debug('loginCheck: Start');
       if(authServer.isMask('authentication.create.after')){
-        const isLogin = await authServer.isLogin();
-        if(!isLogin){
+        const isDebugin = await authServer.isDebugin();
+        if(!isDebugin){
           throw new errors.Forbidden('Access to the login is denied because your account is not activated. Contact your administrator.');
         }
       }
@@ -80,7 +79,7 @@ const payloadExtension = function (isTest = false) {
       const roleId = authServer.contextUser.roleId;
       if (roleId) {
         role = await authServer.app.service('roles').get(roleId);
-        if (isLog) inspector('Role for authorized user:', role);
+        if (isDebug) inspector('Role for authorized user:', role);
       }
       // make sure params.payload exists
       context.params.payload = authServer.contextPayload || {};
