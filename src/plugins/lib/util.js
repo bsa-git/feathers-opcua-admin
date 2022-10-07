@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-vars */
 const { join } = require('path');
 const appRoot = join(__dirname, '../../../');
 const moment = require('moment');
@@ -6,9 +6,37 @@ const hash = require('object-hash');
 const logger = require('../../logger');
 
 const loCloneDeep = require('lodash/cloneDeep');
+const loReplace = require('lodash/replace');
 
 const debug = require('debug')('app:util');
 const isDebug = false;
+
+//=======================================================
+
+/**
+ * Set my "localhost" to my IP
+ * @method setLocalhostToIP
+ * e.g. "localhost" -> "10.60.5.128"
+ * e.g. "http://localhost:3030" -> "http://10.60.5.128:3030"
+ */
+const setLocalhostToIP = function () {
+  const { getMyIp } = require('./net-operations');
+  
+  // Loads environment variables from .env file.
+  const dotEnv = require('dotenv');
+  dotEnv.load();
+  
+  const isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
+  const isLocalhost = process.env.HOST === 'localhost';
+  if (isMyLocalhostToIP && isLocalhost && getMyIp()) {
+    process.env.HOST = getMyIp();
+    process.env.BASE_URL = `http://${process.env.HOST}:${process.env.PORT}`;
+    if (true && process.env.HOST) {
+      console.log('process.env.HOST', process.env.HOST);
+      console.log('process.env.BASE_URL', process.env.BASE_URL);
+    }
+  }
+};
 
 /**
  * Delay time
@@ -350,6 +378,37 @@ const stripSpecific = function (value, symbol = '') {
 };
 
 /**
+ * Replace string
+ * @param {String} value 
+ * @param {String} substr 
+ * @param {String} newSubstr 
+ * @returns 
+ */
+const strReplace = function (value, substr, newSubstr = '') {
+  const regEx = new RegExp(substr, 'gi');
+  const replacedValue = value.replace(regEx, newSubstr);
+  return replacedValue;
+};
+
+/**
+ * Replace string extended
+ * @param {String} value 
+ * e.g. 'c:\\temp\\lib'
+ * @param {String|RegExp} substr 
+ * e.g. String -> '\\'
+ * e.g. RegExp -> /\\/gi
+ * @param {String} newSubstr 
+ * e.g. '/'
+ * @returns {String} 
+ * e.g. 'c:/temp\\lib'
+ * e.g. 'c:/temp/lib'
+ */
+const strReplaceEx = function (value, substr, newSubstr = '') {
+  const replacedValue = loReplace(value, substr, newSubstr);
+  return replacedValue;
+};
+
+/**
  * Get capitalize string
  * @param value
  * @param prefix
@@ -671,6 +730,7 @@ const objectHashWriteToStream = function (value, stream, options = {}) {
 module.exports = {
   appRoot,
   logger,
+  setLocalhostToIP,
   delayTime,
   pause,
   waitTimeout,
@@ -690,6 +750,8 @@ module.exports = {
   getRangeStartEndOfPeriod,
   stripSlashes,
   stripSpecific,
+  strReplace,
+  strReplaceEx,
   getCapitalizeStr,
   isTrue,
   getNumber,

@@ -17,7 +17,13 @@ const doesUrlExist = async function (target) {
   }
 
   try {
-    await axios.get(uri);
+    // await axios.get(uri);
+    await axios({
+      method: 'get',
+      url: uri,
+      timeout: 2000 // only wait for 2s
+    });
+
     return true;
   } catch (error) {
     logger.error(`This URL "${target}" does not exist`);

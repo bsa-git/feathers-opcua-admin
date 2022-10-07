@@ -7,7 +7,8 @@ const localStorage = require('./local-storage');
 const chalk = require('chalk');
 
 const {
-  doesUrlExist
+  doesUrlExist,
+  isUrlExist
 } = require('../lib');
 
 const defaultIoOptions = {

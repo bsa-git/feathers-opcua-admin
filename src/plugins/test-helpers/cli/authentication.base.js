@@ -1,4 +1,4 @@
-
+/* eslint-disable no-unused-vars */
 const assert = require('assert');
 const { cwd } = require('process');
 const { join } = require('path');
@@ -34,8 +34,12 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
     extraHeaders: {},
   };
   const primusOptions = configClient.primusOptions || { transformer: 'ws' };
-  const serverUrl =  !configClient.restOptions? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL')? 'http://localhost:3030' : configClient.restOptions.url;
-  if(isDebug) debug('serverUrl:', serverUrl);
+
+  // Set my "localhost" to my IP
+  // setBaseUrlEnv();
+
+  // const serverUrl =  !configClient.restOptions? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL')? 'http://localhost:3030' : configClient.restOptions.url;
+  // if(isDebug && serverUrl) debug('serverUrl:', serverUrl);
   let genSpecs;
 
   // Check if we can seed data.
@@ -82,10 +86,11 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         let server;
         let appClient;
         let jwt;
+        let serverUrl;
 
         before(function (done) {
 
-          if(isDebug)debug('<-- BeforeTest - Start! -->');
+          if(true && done) debug('<-- BeforeTest - Start! -->');
 
           this.timeout(timeoutForStartingServerAndClient);
           localStorage.clear();
@@ -98,13 +103,18 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           // Restarting app.*s is required if the last mocha test did REST calls on its server.
           delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
           app = require(`${appRoot}/${genSpecs.app.src}/app`);
+          
+          serverUrl =  !configClient.restOptions? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL')? process.env.BASE_URL : configClient.restOptions.url;
+          if(true && serverUrl) console.log('serverUrl:', serverUrl);
+          
           server = app.listen(port);
           server.once('listening', () => {
             setTimeout(async () => {
               const usersService = app.service(usersPath);
               await usersService.remove(null);
               const user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
-              await usersService.create(user);
+              const createdUser = await usersService.create(user);
+              if(true && createdUser) console.log('createdUser:', createdUser);
               appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
 
               done();

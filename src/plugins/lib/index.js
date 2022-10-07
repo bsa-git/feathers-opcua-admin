@@ -6,6 +6,7 @@ const writeJsonFileSync = require('./write-json-file-sync');
 const util = require('./util');
 const typeOf = require('./type-of');
 const langHelpers = require('./lang-helpers');
+const netOperations = require('./net-operations');
 
 module.exports = Object.assign({},
   {
@@ -17,5 +18,6 @@ module.exports = Object.assign({},
   },
   util,
   typeOf,
-  langHelpers
+  langHelpers,
+  netOperations
 );
