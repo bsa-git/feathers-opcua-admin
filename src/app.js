@@ -2,9 +2,15 @@
 // Configure Feathers app. (Can be re-generated.)
 // !code: preface
 //---------------
-const { setLocalhostToIP } = require('./plugins/lib');
+// Loads environment variables from .env file.
+const dotEnv = require('dotenv');
+dotEnv.load();
+
 // Set my "localhost" to my IP
-setLocalhostToIP();
+// e.g. "localhost" -> "10.60.5.128"
+// e.g. "http://localhost:3030" -> "http://10.60.5.128:3030"
+const { setLocalhostToMyIP } = require('./plugins/lib');
+setLocalhostToMyIP();
 
 //---------------
 // !end
