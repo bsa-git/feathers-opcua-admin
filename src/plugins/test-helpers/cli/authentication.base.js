@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+
 const assert = require('assert');
 const { cwd } = require('process');
 const { join } = require('path');
@@ -25,8 +25,8 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   const defaultJson = require(`${appRoot}/config/default.json`);
   const configClient = (defaultJson.tests || {}).client;
-  const port = !configClient.port? 3030 : (configClient.port === 'PORT')? 3030 : configClient.port;
-  if(isDebug) debug('port:', port);
+  const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? 3030 : configClient.port;
+  if (isDebug) debug('port:', port);
   const ioOptions = configClient.ioOptions || {
     transports: ['websocket'],
     forceNew: true,
@@ -34,12 +34,8 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
     extraHeaders: {},
   };
   const primusOptions = configClient.primusOptions || { transformer: 'ws' };
-
-  // Set my "localhost" to my IP
-  // setBaseUrlEnv();
-
-  // const serverUrl =  !configClient.restOptions? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL')? 'http://localhost:3030' : configClient.restOptions.url;
-  // if(isDebug && serverUrl) debug('serverUrl:', serverUrl);
+  const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? 'http://localhost:3030' : configClient.restOptions.url;
+  if (isDebug) debug('serverUrl:', serverUrl);
   let genSpecs;
 
   // Check if we can seed data.
@@ -55,12 +51,12 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   // Check we can run this test.
   describe(`<<< Test "${__filename.substring(__dirname.length + 1)}" >>>`, () => {
 
-    if(!isTest) {
+    if (!isTest) {
       debug(`<<< Test "${__filename.substring(__dirname.length + 1)}" - NOT >>>`);
       return;
     }
 
-    it('Check this test may not seed data', () => {
+    it('#1: Check this test may not seed data', () => {
       // assert.equal(cannotRunTest, '', cannotRunTest);
       assert.strictEqual(cannotRunTest, '', cannotRunTest);
     });
@@ -79,18 +75,17 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   // Run the tests.
   function tests(seedData, { transports, usersName, usersPath }) {
-    transports.forEach(transport => {
+    transports.forEach((transport, index) => {
 
       describe(`<<< Test "${transport}" transport >>>`, function () {
         let app;
         let server;
         let appClient;
         let jwt;
-        let serverUrl;
 
         before(function (done) {
 
-          if(true && done) debug('<-- BeforeTest - Start! -->');
+          if (isDebug) debug('<-- BeforeTest - Start! -->');
 
           this.timeout(timeoutForStartingServerAndClient);
           localStorage.clear();
@@ -103,18 +98,13 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           // Restarting app.*s is required if the last mocha test did REST calls on its server.
           delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
           app = require(`${appRoot}/${genSpecs.app.src}/app`);
-          
-          serverUrl =  !configClient.restOptions? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL')? process.env.BASE_URL : configClient.restOptions.url;
-          if(true && serverUrl) console.log('serverUrl:', serverUrl);
-          
           server = app.listen(port);
           server.once('listening', () => {
             setTimeout(async () => {
               const usersService = app.service(usersPath);
               await usersService.remove(null);
               const user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
-              const createdUser = await usersService.create(user);
-              if(true && createdUser) console.log('createdUser:', createdUser);
+              await usersService.create(user);
               appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
 
               done();
@@ -129,7 +119,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         });
 
         // Run several tests together to reduce their runtime.
-        it(`Can make local authenticated call on ${usersPath} service`, async function () {
+        it(`#2.${index + 1}: Can make local authenticated call on ${usersPath} service`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
 
           await loginLocal(appClient, loginEmail, loginPassword);
@@ -139,13 +129,13 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           assert(jwt.length > 100, 'jwt too short');
 
           const usersClient = appClient.service(usersPath);
-          const result = await usersClient.find({ query: { email: loginEmail }});
+          const result = await usersClient.find({ query: { email: loginEmail } });
           const rec = result.data[0] || result;
 
           assert.strictEqual(rec.email, loginEmail, 'wrong email');
         });
 
-        it(`Can make jwt authenticated call on ${usersPath} service`, async function () {
+        it(`#3.${index + 1}: Can make jwt authenticated call on ${usersPath} service`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
 
           await loginJwt(appClient, jwt);
@@ -156,19 +146,19 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           assert.notStrictEqual(jwt1, jwt, 'new token unexpectedly same as authentication token.');
 
           const usersClient = appClient.service(usersPath);
-          const result = await usersClient.find({ query: { email: loginEmail }});
+          const result = await usersClient.find({ query: { email: loginEmail } });
           const rec = result.data[0] || result;
 
           assert.strictEqual(rec.email, loginEmail, 'wrong email');
         });
 
-        it('throws on no authentication, incorrect email or password', async function () {
+        it(`#4.${index + 1}: throws on no authentication, incorrect email or password`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
           const usersClient = appClient.service(usersPath);
 
           try {
             // eslint-disable-next-line no-console
-            await usersClient.find({ query: { email: loginEmail }});
+            await usersClient.find({ query: { email: loginEmail } });
 
             assert(false, 'call unexpectedly succeeded');
           } catch (err) {
@@ -194,7 +184,6 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           }
         });
       });
-
     });
   }
 };
