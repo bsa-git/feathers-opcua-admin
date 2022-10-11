@@ -3,16 +3,14 @@ const errors = require('@feathersjs/errors');
 const moment = require('moment');
 
 const {
+  appRoot,
   inspector,
   cloneObject,
   sortByStringField,
   getEndOfPeriod,
-  getStartEndOfPeriod
+  getStartEndOfPeriod,
+  readJsonFileSync
 } = require('../lib');
-
-const {
-  AuthServer
-} = require('../auth');
 
 const loMerge = require('lodash/merge');
 const loIsObject = require('lodash/isObject');
@@ -25,9 +23,17 @@ const isDebug = false;
 // Get max rows for opcua-values service
 let maxOpcuaValuesRows = process.env.OPCUA_VALUES_MAXROWS;
 maxOpcuaValuesRows = Number.isInteger(maxOpcuaValuesRows) ? maxOpcuaValuesRows : Number.parseInt(maxOpcuaValuesRows);
-if (AuthServer.isTest()) {
-  maxOpcuaValuesRows = 10;
-}
+
+/**
+   * Determine if environment allows test
+   * @return {boolean}
+   */
+const isTest = function () {
+  const config = readJsonFileSync(`${appRoot}/config/default.json`) || {};
+  // Determine if environment allows test
+  let env = (config.tests || {}).environmentsAllowingSeedData || [];
+  return env.includes(process.env.NODE_ENV);
+};
 
 /**
  * Get dbNullIdValue
@@ -90,6 +96,10 @@ const getMaxValuesStorage = async function (app, tagId = '') {
   if (tag.group) {
     if (!tag.hist) return result;
     if (tag.hist > 1) return tag.hist;
+    if (isTest()) {
+      maxOpcuaValuesRows = 10;
+    }
+    
     return maxOpcuaValuesRows;
   }
   //==============================
@@ -556,6 +566,7 @@ const createItems = async function (app, path = '', data = [], query = {}) {
 };
 
 module.exports = {
+  isTest,
   dbNullIdValue,
   getEnvTypeDB,
   getIdField,

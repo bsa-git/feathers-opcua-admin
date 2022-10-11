@@ -8,7 +8,6 @@ const localStorage = require('../../auth/local-storage');
 const loginLocal = require('../../auth/login-local');
 const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
-const { getIdField } = require('../../db-helpers');
 
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
@@ -25,8 +24,8 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   const defaultJson = require(`${appRoot}/config/default.json`);
   const configClient = (defaultJson.tests || {}).client;
-  // const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? 3030 : configClient.port;
-  // if (isDebug) debug('port:', port);
+  const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? 3030 : configClient.port;
+  if (isDebug) debug('port:', port);
   const ioOptions = configClient.ioOptions || {
     transports: ['websocket'],
     forceNew: true,
@@ -34,8 +33,8 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
     extraHeaders: {},
   };
   const primusOptions = configClient.primusOptions || { transformer: 'ws' };
-  // const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? 'http://localhost:3030' : configClient.restOptions.url;
-  // if (isDebug) debug('serverUrl:', serverUrl);
+  const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? 'http://localhost:3030' : configClient.restOptions.url;
+  if (isDebug) debug('serverUrl:', serverUrl);
   let genSpecs;
 
   // Check if we can seed data.
@@ -66,7 +65,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
       tests(seedData, {
         genSpecs,
-        transports: genSpecs.app.providers.filter(provider => provider === 'rest'),
+        transports: genSpecs.app.providers, //.filter(provider => provider === 'rest'),
         usersName: genSpecs.authentication.entity,
         usersPath: genSpecs.authentication._entityPath
       });
@@ -82,7 +81,6 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         let server;
         let appClient;
         let jwt;
-        let user, userId;
 
         before(function (done) {
 
@@ -99,22 +97,14 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           // Restarting app.*s is required if the last mocha test did REST calls on its server.
           delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
           app = require(`${appRoot}/${genSpecs.app.src}/app`);
-          // Get PORT
-          const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;
-          if (isDebug) debug('port:', port);
-          // Get serverUrl 
-          const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? process.env.BASE_URL : configClient.restOptions.url;
-          if (isDebug) debug('serverUrl:', serverUrl);
-
           server = app.listen(port);
+
           server.once('listening', () => {
             setTimeout(async () => {
               const usersService = app.service(usersPath);
               await usersService.remove(null);
-              user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
-              user = await usersService.create(user);
-              const idField = getIdField(user);
-              userId = user[idField].toString();
+              const user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
+              await usersService.create(user);
               appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
 
               done();
@@ -139,11 +129,10 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           assert(jwt.length > 100, 'jwt too short');
 
           const usersClient = appClient.service(usersPath);
-          // const result = await usersClient.find({ query: { email: loginEmail } });
-          const result = await usersClient.get(userId);
-          // const rec = result.data[0] || result;
+          const result = await usersClient.find({ query: { email: loginEmail } });
+          const rec = result.data[0] || result;
 
-          assert.strictEqual(result.email, loginEmail, 'wrong email');
+          assert.strictEqual(rec.email, loginEmail, 'wrong email');
         });
 
         it(`#3.${index + 1}: Can make jwt authenticated call on ${usersPath} service`, async function () {
@@ -157,11 +146,10 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           assert.notStrictEqual(jwt1, jwt, 'new token unexpectedly same as authentication token.');
 
           const usersClient = appClient.service(usersPath);
-          // const result = await usersClient.find({ query: { email: loginEmail } });
-          const result = await usersClient.get(userId);
-          // const rec = result.data[0] || result;
+          const result = await usersClient.find({ query: { email: loginEmail } });
+          const rec = result.data[0] || result;
 
-          assert.strictEqual(result.email, loginEmail, 'wrong email');
+          assert.strictEqual(rec.email, loginEmail, 'wrong email');
         });
 
         it(`#4.${index + 1}: throws on no authentication, incorrect email or password`, async function () {
