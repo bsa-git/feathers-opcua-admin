@@ -1,13 +1,7 @@
 const assert = require('assert');
 const rp = require('request-promise');
 const url = require('url');
-// const { cwd } = require('process');
-// const appRoot = cwd();
-// const genSpecs = require('../../feathers-gen-specs.json');
-// delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
 const app = require('../../src/app');
-
-// console.log('appRoot:', appRoot);
 
 const port = app.get('port') || 3030;
 const getUrl = pathname => url.format({
@@ -17,7 +11,7 @@ const getUrl = pathname => url.format({
   pathname
 });
 
-describe('Feathers application tests', () => {
+describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
   let server;
 
   before(function (done) {
@@ -29,11 +23,7 @@ describe('Feathers application tests', () => {
 
   after(function (done) {
     server.close();
-    setTimeout(() => {
-      // Restarting app.*s is required if the last mocha test did REST calls on its server.
-      // delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
-      done();
-    }, 500);
+    setTimeout(() => { done(); }, 500);
   });
 
   it('starts and shows the index page', () => {

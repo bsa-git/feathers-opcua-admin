@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
-const { join } = require('path');
-const appRoot = join(__dirname, '../../../');
+// const { join } = require('path');
+const { cwd } = require('process');
+const appRoot = cwd(); //join(__dirname, '../../../');
 const moment = require('moment');
 const hash = require('object-hash');
 const logger = require('../../logger');

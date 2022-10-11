@@ -9,7 +9,9 @@ const loginLocal = require('../../auth/login-local');
 const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
 const { getIdField } = require('../../db-helpers');
+const { isTrue } = require('../../lib');
 
+const isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
 
@@ -25,8 +27,6 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   const defaultJson = require(`${appRoot}/config/default.json`);
   const configClient = (defaultJson.tests || {}).client;
-  // const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? 3030 : configClient.port;
-  // if (isDebug) debug('port:', port);
   const ioOptions = configClient.ioOptions || {
     transports: ['websocket'],
     forceNew: true,
@@ -34,8 +34,6 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
     extraHeaders: {},
   };
   const primusOptions = configClient.primusOptions || { transformer: 'ws' };
-  // const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? 'http://localhost:3030' : configClient.restOptions.url;
-  // if (isDebug) debug('serverUrl:', serverUrl);
   let genSpecs;
 
   // Check if we can seed data.
@@ -57,7 +55,6 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
     }
 
     it('#1: Check this test may not seed data', () => {
-      // assert.equal(cannotRunTest, '', cannotRunTest);
       assert.strictEqual(cannotRunTest, '', cannotRunTest);
     });
 
@@ -66,7 +63,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
       tests(seedData, {
         genSpecs,
-        transports: genSpecs.app.providers.filter(provider => provider === 'rest'),
+        transports: genSpecs.app.providers.filter(provider => isMyLocalhostToIP? provider === 'rest' : true),
         usersName: genSpecs.authentication.entity,
         usersPath: genSpecs.authentication._entityPath
       });

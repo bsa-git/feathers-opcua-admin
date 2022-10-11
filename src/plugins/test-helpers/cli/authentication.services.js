@@ -9,16 +9,17 @@ const localStorage = require('../../auth/local-storage');
 const loginLocal = require('../../auth/login-local');
 // const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
+// const { getIdField } = require('../../db-helpers');
+const { isTrue, inspector } = require('../../lib');
 
-const { inspector } = require('../../lib');
 const debug = require('debug')('app:authentication.services.test');
-
 const isDebug = false;
 const isTest = true;
 const testConfig = {
   service: '*', // '*' | 'users' | 'roles' | 'teams' | 'userTeams' | 'userProfiles' | 'logMessages'
   metod: '*' // '*' | 'create' | 'find' | 'get' |'update' | 'patch' | 'remove'
 };
+const isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
 
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
@@ -31,20 +32,16 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   const defaultJson = require(`${appRoot}/config/default.json`);
 
-  // let password = defaultJson.tests && defaultJson.tests.local ? defaultJson.tests.local.password : null;
-  // password = password || 'password';
   const configClient = defaultJson.tests ? defaultJson.tests.client : {};
-  // const port = configClient.port || 3030;
-  const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? 3030 : configClient.port;
+
   const ioOptions = configClient.ioOptions || {
     transports: ['websocket'],
     forceNew: true,
     reconnection: false,
     extraHeaders: {},
   };
+
   const primusOptions = configClient.primusOptions || { transformer: 'ws' };
-  // const serverUrl = (configClient.restOptions || {}).url || 'http://localhost:3030';
-  const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? 'http://localhost:3030' : configClient.restOptions.url;
   // Authentication is assumed active on each method for services generated with authentication.
   // No authentication is assumed active on each method for services generated without authentication.
   // Of course you could change this by removing or adding authenticate(strategy) hooks.
@@ -71,14 +68,14 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   }
 
   // Check we can run this test.
-  describe(`<<< Test "${__filename.substring(__dirname.length + 1)}" >>>`, () => {
+  describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
 
     if (!isTest) {
       debug(`<<< Test "${__filename.substring(__dirname.length + 1)}" - NOT >>>`);
       return;
     }
 
-    it('Check this test may not seed data', () => {
+    it('#1: Check this test may not seed data', () => {
       assert.strictEqual(cannotRunTest, '', cannotRunTest);
     });
 
@@ -90,7 +87,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       const seedData = require(join(appRoot, 'seeds', 'fake-data.json'));
       tests(seedData, {
         genSpecs,
-        transports: genSpecs.app.providers,
+        transports: genSpecs.app.providers.filter(provider => isMyLocalhostToIP? provider === 'rest' : true),
         usersName: genSpecs.authentication.entity,
         usersPath: genSpecs.authentication._entityPath
       });
@@ -114,6 +111,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       let app;
       let server;
       let appClient;
+      // let user, userId;
 
       before(function (done) {
         if (isDebug) debug('<-- BeforeTest - Start! -->');
@@ -128,6 +126,14 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         // Restarting app.*s is required if the last mocha test did REST calls on its server.
         delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
         app = require(`${appRoot}/${genSpecs.app.src}/app`);
+
+        // Get PORT
+        const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;
+        if (isDebug) debug('port:', port);
+        // Get serverUrl 
+        const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? process.env.BASE_URL : configClient.restOptions.url;
+        if (isDebug) debug('serverUrl:', serverUrl);
+
         server = app.listen(port);
         server.once('listening', () => {
           setTimeout(async () => {
@@ -138,6 +144,8 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
               await usersService.remove(null);
               const user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
               await usersService.create(user);
+              // const idField = getIdField(user);
+              // userId = user[idField].toString();
 
               await loginLocal(appClient, loginEmail, loginPassword);
             }
@@ -156,9 +164,9 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       const genServices = Object.assign({}, loPick(genSpecs.services, testConfig.service === '*' ? Object.keys(genSpecs.services) : testConfig.service));
       // if(isDebug) inspector('authentication.services.genServices:', genServices);
 
-      Object.keys(genServices).forEach(name => {
+      Object.keys(genServices).forEach((name, index) => {
 
-        describe(`<<< Service "${name}" >>>`, () => {
+        describe(`<<<--- Service "${name}" --->>>`, () => {
           const genService = genServices[name];
           const isAuthEntity = genService.isAuthEntity;
           const _authByMethod = genSpecs._authByMethod[name];
@@ -177,7 +185,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
           const ourSeedId = 'id' in ourSeedData[0] ? 'id' : '_id';
 
-          Object.keys(authByMethod).forEach(method => {
+          Object.keys(authByMethod).forEach((method, index2) => {
             const authThisMethod = authByMethod[method];
 
             let ifFail = authThisMethod === 'disallow' ?
@@ -188,7 +196,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
             if (isDebug && method) debug(`<-- method: ${method}; displayCode: ${displayCode(ifFail, authThisMethod)} -->`);
 
-            it(`${method} ${displayCode(ifFail, authThisMethod)}.`, async () => {
+            it(`#${index + 1}.${index2 + 1} ${method} ${displayCode(ifFail, authThisMethod)}.`, async () => {
               const service = appClient.service(genService.path);
               let prop;
               let rec, rec1;
