@@ -10,7 +10,7 @@ const loginLocal = require('../../auth/login-local');
 // const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
 // const { getIdField } = require('../../db-helpers');
-const { isTrue, inspector } = require('../../lib');
+const { isTrue, inspector, logger } = require('../../lib');
 
 const debug = require('debug')('app:authentication.services.test');
 const isDebug = false;
@@ -19,10 +19,10 @@ const testConfig = {
   service: '*', // '*' | 'users' | 'roles' | 'teams' | 'userTeams' | 'userProfiles' | 'logMessages'
   metod: '*' // '*' | 'create' | 'find' | 'get' |'update' | 'patch' | 'remove'
 };
-const isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
 
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
+let isMyLocalhostToIP = false;
 
 module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   const delayAfterServerOnce = options.delayAfterServerOnce || 500;
@@ -69,25 +69,30 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   // Check we can run this test.
   describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
-
+    
     if (!isTest) {
       debug(`<<< Test "${__filename.substring(__dirname.length + 1)}" - NOT >>>`);
       return;
     }
 
     it('#1: Check this test may not seed data', () => {
-      assert.strictEqual(cannotRunTest, '', cannotRunTest);
+      try {
+        if (cannotRunTest) logger.error(cannotRunTest);
+        assert.strictEqual(cannotRunTest, '', cannotRunTest);
+      } catch (error) {
+        logger.error(error.message);
+        assert.ok(false, 'Check this test may not seed data');
+      }
     });
 
     if (!cannotRunTest) {
-
-      if (isDebug) debug('port:', port);
-      if (isDebug) debug('serverUrl:', serverUrl);
-
       const seedData = require(join(appRoot, 'seeds', 'fake-data.json'));
+
+      isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
+
       tests(seedData, {
         genSpecs,
-        transports: genSpecs.app.providers.filter(provider => isMyLocalhostToIP? provider === 'rest' : true),
+        transports: genSpecs.app.providers.filter(provider => isMyLocalhostToIP ? provider === 'rest' : true),
         usersName: genSpecs.authentication.entity,
         usersPath: genSpecs.authentication._entityPath
       });
@@ -96,9 +101,10 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
   // Run the tests.
   function tests(seedData, { genSpecs, transports, usersName, usersPath }) {
+    if(isDebug && transports.length) console.log(`isMyLocalhostToIP: ${isMyLocalhostToIP}, transports: [${transports}]`);
     transports.forEach(transport => {
 
-      describe(`<<< Test "${transport}" transport >>>`, () => {
+      describe(`<<<--- Test "${transport}" transport --->>>`, () => {
         testServices(true, transport, seedData, genSpecs, transports, usersName, usersPath);
         testServices(false, transport, seedData, genSpecs, transports, usersName, usersPath);
       });
@@ -107,7 +113,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   }
 
   function testServices(ifAuth, transport, seedData, genSpecs, transports, usersName, usersPath) {
-    describe(ifAuth ? '<<< With authentication >>>' : '<<< Without authentication >>>', function () {
+    describe(ifAuth ? '<<<--- With authentication --->>>' : '<<<--- Without authentication --->>>', function () {
       let app;
       let server;
       let appClient;
@@ -129,10 +135,10 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
         // Get PORT
         const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;
-        if (isDebug) debug('port:', port);
+        if (isDebug && port) debug('port:', port);
         // Get serverUrl 
         const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? process.env.BASE_URL : configClient.restOptions.url;
-        if (isDebug) debug('serverUrl:', serverUrl);
+        if (isDebug && serverUrl) debug('serverUrl:', serverUrl);
 
         server = app.listen(port);
         server.once('listening', () => {
@@ -144,9 +150,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
               await usersService.remove(null);
               const user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
               await usersService.create(user);
-              // const idField = getIdField(user);
-              // userId = user[idField].toString();
-
+              // Run login local 
               await loginLocal(appClient, loginEmail, loginPassword);
             }
 
@@ -162,7 +166,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       });
 
       const genServices = Object.assign({}, loPick(genSpecs.services, testConfig.service === '*' ? Object.keys(genSpecs.services) : testConfig.service));
-      // if(isDebug) inspector('authentication.services.genServices:', genServices);
+      if(isDebug && genServices) inspector('authentication.services.genServices:', genServices);
 
       Object.keys(genServices).forEach((name, index) => {
 

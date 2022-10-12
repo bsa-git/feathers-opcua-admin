@@ -1,4 +1,3 @@
-
 const { join } = require('path');
 const doesFileExist = require('../../lib/does-file-exist');
 

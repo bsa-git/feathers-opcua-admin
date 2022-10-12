@@ -13,7 +13,7 @@ if (!env.includes(process.env.NODE_ENV) || process.argv.includes('--noclient')) 
   authenticationServices(appRoot, {
     delayAfterServerOnce: 500,
     delayAfterServerClose: 500,
-    timeoutForStartingServerAndClient: 30000,
+    timeoutForStartingServerAndClient: 50000,
     timeoutForClosingingServerAndClient: 30000
   });
 }
