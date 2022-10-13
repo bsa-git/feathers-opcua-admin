@@ -2,6 +2,8 @@
 // Configure Feathers app. (Can be re-generated.)
 // !code: preface
 //---------------
+const isDebug = false;
+
 // Loads environment variables from .env file.
 const dotEnv = require('dotenv');
 dotEnv.load();
@@ -107,6 +109,8 @@ app.configure(services);
 app.configure(channels);
 // !code: config_middle
 //---------------------
+const authConfig = app.get('authentication');
+if(isDebug && authConfig) console.log('app.get("authentication").authConfig:', authConfig);
 // Configure nuxt middleware
 app.configure(nuxt);
 //---------------------

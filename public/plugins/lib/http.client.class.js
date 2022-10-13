@@ -4,7 +4,6 @@ import LocationHelper from './location-helper.class';
 import axios from 'axios';
 const debug = require('debug')('app:plugin.HttpBox');
 
-const isLog = true;
 const isDebug = true;
 
 /**
@@ -215,7 +214,7 @@ class HttpBox extends LocationHelper {
       const _config = Object.assign(configDefault, config);
       if(isDebug) debug(`get.url: "${url}"; get.config: ${_config}`);
       const response = await axios.get(url, _config);
-      if(isLog) debug('get.response:', response);
+      if(isDebug) debug('get.response:', response);
       if (response.statusText !== 'OK') {
         throw new Error(`HttpBox.get Error: Network response was not OK; url: '${url}'; config: `, _config);
       }
@@ -243,7 +242,7 @@ class HttpBox extends LocationHelper {
       const _config = Object.assign(configDefault, config);
       if(isDebug) debug(`post.url: "${url}"; post.config: ${_config}; post.data: ${data}`);
       const response = await axios.post(url, data, _config);
-      if(isLog) debug('post.response:', response);
+      if(isDebug) debug('post.response:', response);
       if (response.statusText !== 'Created') {
         throw new Error(`HttpBox.post Error: Network response was not OK; url: '${url}'; config: `, _config);
       }
@@ -271,7 +270,7 @@ class HttpBox extends LocationHelper {
       const _config = Object.assign(configDefault, config);
       if(isDebug) debug(`put.url: "${url}"; put.config: ${_config}; put.data: ${data}`);
       const response = await axios.put(url, data, _config);
-      if(isLog) debug('put.response:', response);
+      if(isDebug) debug('put.response:', response);
       if (response.statusText !== 'OK') {
         throw new Error(`HttpBox.put Error: Network response was not OK; url: '${url}'; config: `, _config);
       }
@@ -299,7 +298,7 @@ class HttpBox extends LocationHelper {
       const _config = Object.assign(configDefault, config);
       if(isDebug) debug(`patch.url: "${url}"; patch.config: ${_config}; patch.data: ${data}`);
       const response = await axios.patch(url, data, _config);
-      if(isLog) debug('patch.response:', response);
+      if(isDebug) debug('patch.response:', response);
       if (response.statusText !== 'OK') {
         throw new Error(`HttpBox.patch Error: Network response was not OK; url: '${url}'; config: `, _config);
       }
@@ -326,7 +325,7 @@ class HttpBox extends LocationHelper {
       const _config = Object.assign(configDefault, config);
       if(isDebug) debug(`delete.url: "${url}"; delete.config: ${_config}`);
       const response = await axios.delete(url, _config);
-      if(isLog) debug('delete.response:', response);
+      if(isDebug) debug('delete.response:', response);
       if (response.statusText !== 'OK') {
         throw new Error(`HttpBox.delete Error: Network response was not OK; url: '${url}'; config: `, _config);
       }

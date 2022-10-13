@@ -118,7 +118,6 @@
   import createLogMessage from '~/plugins/service-helpers/create-log-message';
 
   const debug = require('debug')('app:user.login');
-  const isLog = false;
   const isDebug = false;
 
   export default {
@@ -188,10 +187,11 @@
         this.model.password = userEmail ? '' : fakePassword;
       },
       async onSubmit() {
-        if (isDebug) debug('<<onSubmit>> Start onSubmit');
+        if (isDebug) debug('<<--- Start onSubmit --->>');
         this.dismissError();
         await this.$validator.validateAll();
         if (this.$validator.errors.any()) {
+          if (true && email) debug('onSubmit.Validator.errors:', this.model.email, this.model.password);
           this.showError({text: this.$t('form.validationError'), timeout: 10000});
         } else {
           this.loadingSubmit = true;
@@ -200,7 +200,6 @@
             if (!this.model.avatar) {
               this.model.avatar = this.user.avatar;
             }
-            if (isLog) debug('loginResponse:', loginResponse);
             this.showSuccess(`${this.$t('login.success')}!`);
             setTimeout(() => {
               this.$router.push(this.$i18n.path(this.config.homePath));
@@ -210,10 +209,12 @@
       },
       async login(email, password) {
         try {
-          if (isDebug) debug('<<login>> Start authenticate');
-          return await this.authenticate({strategy: 'local', email, password});
+          if (isDebug && email) debug('<<--- Login --->> Start authenticate:', email, password);
+          const loginResponse = await this.authenticate({strategy: 'local', email, password});
+          if (true && loginResponse) debug('authenticate.loginResponse:', loginResponse);
+          return loginResponse;
         } catch (error) {
-          if (isLog) debug('authenticate.error:', error);
+          if (true && error) debug('authenticate.error:', error.message);
           this.loadingSubmit = false;
           this.error = error;
           if (error.message === 'User\'s email is not yet verified.') {
@@ -241,7 +242,7 @@
             this.inputCodeDialog = true;
           }
         } catch (error) {
-          if (isLog) debug('resendVerifySignup.error:', error);
+          if (isDebug) debug('resendVerifySignup.error:', error);
           this.error = error;
           this.showError({text: error.message, timeout: 10000});
           this.saveLogMessage('ERROR-CLIENT', {error});
@@ -265,7 +266,7 @@
             this.showSuccess(this.$t('authManagement.successfulUserVerification'));
             const loginResponse = await this.login(this.model.email, this.model.password);
             if (loginResponse && loginResponse.accessToken) {
-              if (isLog) debug('loginResponse:', loginResponse);
+              if (isDebug) debug('loginResponse:', loginResponse);
               setTimeout(() => {
                 this.showSuccess(`${this.$t('signup.successSignUpAndLogin')}!`);
                 this.$router.push(this.$i18n.path(this.config.homePath));
@@ -276,7 +277,7 @@
             this.$redirect(this.config.homePath);
           }
         } catch (error) {
-          if (isLog) debug('verifySignupShort.error:', error);
+          if (isDebug) debug('verifySignupShort.error:', error);
           this.error = error;
           if (error.message === 'User not found.') {
             this.showError({text: this.$t('authManagement.msgForErrorUserNotFind'), timeout: 10000});
@@ -310,13 +311,13 @@
                 this.$router.push(this.$i18n.path(this.config.homePath));
               }, 1000);
             } catch (error) {
-              if (isLog) debug('sendResetPwd.error:', error);
+              if (isDebug) debug('sendResetPwd.error:', error);
               this.error = error;
               this.showError({text: error.message, timeout: 10000});
               this.saveLogMessage('ERROR-CLIENT', {error});
             }
           } else {// Unexpected error
-            if (isLog) debug('sendResetPwd.checkUniqueError:', checkUniqueError);
+            if (isDebug) debug('sendResetPwd.checkUniqueError:', checkUniqueError);
             this.error = checkUniqueError;
             this.showError({text: checkUniqueError.message, timeout: 10000});
           }

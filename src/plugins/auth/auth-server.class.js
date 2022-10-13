@@ -269,7 +269,8 @@ class AuthServer {
     if (service) {
       const user = await service.get(payload.userId);
       if (isDebug) inspector('plugins::auth-server.class::isDebugin.user:', user);
-      return Promise.resolve(user.active);
+      // return Promise.resolve(user.active);
+      return user.active;
     } else {
       throw new errors.BadRequest('There is no service for the path - "users"');
     }

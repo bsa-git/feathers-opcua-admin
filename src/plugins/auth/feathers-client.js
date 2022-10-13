@@ -7,7 +7,7 @@ const { CookieStorage } = require('cookie-storage');
 const localStorage = require('./local-storage');
 
 const socket = io(`${process.env.BASE_URL}`, {transports: ['websocket']});
-const timeout = 5000;
+const timeout = 20000;
 
 const feathersClient = feathers()
   .configure(socketio(socket, { timeout }))
