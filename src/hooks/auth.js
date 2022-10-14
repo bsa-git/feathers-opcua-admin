@@ -35,8 +35,14 @@ const loginCheck = function (isTest = false) {
   return async context => {
     const authServer = new AuthServer(context);
     if(isTest || (!AuthServer.isTest() && authServer.contextProvider)){
-      if (isDebug) debug('loginCheck: Start');
+      
+      if(authServer.isMask('authentication.create.before')){
+        if (isDebug && authServer) console.log('authentication.create.before.loginCheck: Start');
+        if (isDebug && authServer) inspector('authentication.create.before.getHookContext', authServer.getHookContext()) ;
+      }
+      
       if(authServer.isMask('authentication.create.after')){
+        if (isDebug && authServer) console.log('authentication.create.after.loginCheck: Start');
         const isDebugin = await authServer.isDebugin();
         if(!isDebugin){
           throw new errors.Forbidden('Access to the login is denied because your account is not activated. Contact your administrator.');

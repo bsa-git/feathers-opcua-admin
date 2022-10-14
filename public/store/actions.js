@@ -75,7 +75,7 @@ const actions = {
 
     // authenticate
     let response = await service.authenticate(credentials);
-    if(isDebug) debug('service.authenticate.response:', response);
+    if(isDebug && response) debug('service.authenticate.response:', response);
     if (response && response.accessToken) {
       const isAuth = store.getters.isAuth;
       const isAdmin = store.getters.isAdmin;

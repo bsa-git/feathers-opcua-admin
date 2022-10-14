@@ -71,21 +71,29 @@ let moduleExports = function (app) {
     before: {
       create: [
         // !code: before_create
+        //---------------------
+        // Login check
+        // auth.loginCheck(),
         authentication.hooks.authenticate(config.strategies),
         // Add data to payload
         // auth.payloadExtension(),
         // Add isVerified for verify user`s email
-        verifyHooks.isVerified()
+        verifyHooks.isVerified(),
+        // auth.loginCheck(),
+        //----------------------
         // !end
       ],
       remove: [
         // !<DEFAULT> code: before_remove
+        //-------------------------------
         authentication.hooks.authenticate('jwt'),
+        //-------------------------------
         // !end
       ],
       // !code: before // !end
     },
     // !code: after
+    //---------------------------
     after: {
       create: [
         // Login check
@@ -94,6 +102,7 @@ let moduleExports = function (app) {
         auth.setLoginAt()
       ]
     }
+    //---------------------------
     // !end
   });
   // !code: func_return // !end

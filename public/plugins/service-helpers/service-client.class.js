@@ -78,7 +78,7 @@ class Service {
     } else {
       result = await this.dispatch('auth/authenticate');
     }
-    if (isDebug) debug('authenticate: OK', 'result:', result);
+    if (isDebug && result) debug('authenticate: OK', 'result:', result);
     return result;
   }
 

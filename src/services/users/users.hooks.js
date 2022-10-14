@@ -93,7 +93,7 @@ let moduleExports = {
     //--------------
     all: [],
     find: [authenticate('jwt')],
-    get: [authenticate('jwt')],
+    get: [authenticate('jwt')], 
     create: [hashPassword()],
     // update: [ hashPassword(), authenticate('jwt') ],
     update: [authenticate('jwt')],

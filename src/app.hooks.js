@@ -62,7 +62,7 @@ let moduleExports = {
 //---------------
 const loConcat = require('lodash/concat');
 // Add hooks
-moduleExports.before.all = loConcat([myLog(), normalize(), auth.authCheck(), constraints()]);
+moduleExports.before.all = loConcat([myLog(), normalize(), /**auth.authCheck(),*/ constraints()]);
 moduleExports.after.all = loConcat([normalize(), constraints(), myLog()]);
 moduleExports.error.all = loConcat([myLog()]);
 //---------------
