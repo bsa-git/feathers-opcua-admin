@@ -1170,7 +1170,7 @@
     primus-emitter "^3.1.1"
     uberproto "^2.0.1"
 
-"@feathersjs/rest-client@1.4.7", "@feathersjs/rest-client@^1.4.2":
+"@feathersjs/rest-client@1.4.7", "@feathersjs/rest-client@^1.4.2", "@feathersjs/rest-client@^1.4.7":
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/@feathersjs/rest-client/-/rest-client-1.4.7.tgz#6fb556721b661f7aa73f27173925b17274fae164"
   integrity sha512-Eybe9iTMz2r1J8ITRZH4/WGfIhwSIzP9kiTpwAVESo6NGE6rgwvN95FmtI5AtCABV5v4C2Cy/tVDsMMa9Dgs+A==
