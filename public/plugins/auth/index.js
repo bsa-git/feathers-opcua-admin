@@ -1,11 +1,11 @@
 import AuthClient from './auth-client.class';
 import feathersClient from './feathers-client';
-import feathersClientEs5 from './feathers-client-es5';
+import getFeathersClient from './get-feathers-client';
 
 export default Object.assign({},
   {
     AuthClient,
     feathersClient,
-    feathersClientEs5,
+    getFeathersClient,
   }
 );

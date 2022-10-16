@@ -7,9 +7,7 @@ const ensureCanSeedData = require('./ensure-can-seed-data');
 const expandSpecsForTest = require('./expand-specs-for-test');
 const localStorage = require('../../auth/local-storage');
 const loginLocal = require('../../auth/login-local');
-// const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
-// const { getIdField } = require('../../db-helpers');
 const { isTrue, inspector, logger } = require('../../lib');
 
 const debug = require('debug')('app:authentication.services.test');

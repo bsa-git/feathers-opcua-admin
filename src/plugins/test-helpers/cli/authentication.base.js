@@ -50,7 +50,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
 
     if (!isTest) {
-      debug(`<<< Test "${__filename.substring(__dirname.length + 1)}" - NOT >>>`);
+      debug(`<<<--- Test "${__filename.substring(__dirname.length + 1)}" - NOT --->>>`);
       return;
     }
 
@@ -74,7 +74,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   function tests(seedData, { transports, usersName, usersPath }) {
     transports.forEach((transport, index) => {
 
-      describe(`<<< Test "${transport}" transport >>>`, function () {
+      describe(`<<<--- Test "${transport}" transport --->>>`, function () {
         let app;
         let server;
         let appClient;
