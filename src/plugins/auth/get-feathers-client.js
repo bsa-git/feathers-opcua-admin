@@ -13,7 +13,7 @@ const isDebug = false;
  * e.g. transport -> "socketio" | "rest"
  * @returns {Object}
  */
-export default function (transport) {
+module.exports = function (transport) {
   const _transport = transport ? transport : process.env.FEATHERS_CLIENT_TRANSPORT || 'socketio';
   const baseURL = process.env.BASE_URL || 'http://localhost:3131';
   const ioOptions = { transports: ['websocket'] };
@@ -29,6 +29,4 @@ export default function (transport) {
   }
   appClient.configure(feathersClient.authentication({ storage }));
   if (isDebug && appClient) console.log(`Create feathersClient for transport: "${transport}", baseURL: "${baseURL}"`);
-}
-
-module.exports = appClient;
+};

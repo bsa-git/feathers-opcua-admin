@@ -11,7 +11,6 @@ const makeClient = require('../../auth/make-client');
 const { getIdField } = require('../../db-helpers');
 const { isTrue } = require('../../lib');
 
-const isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
 
@@ -25,6 +24,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   const timeoutForStartingServerAndClient = options.timeoutForStartingServerAndClient || 30000;
   const timeoutForClosingingServerAndClient = options.timeoutForClosingingServerAndClient || 30000;
 
+  const isMyLocalhostToIP = isTrue(process.env.MY_LOCALHOST_TO_IP);
   const defaultJson = require(`${appRoot}/config/default.json`);
   const configClient = (defaultJson.tests || {}).client;
   const ioOptions = configClient.ioOptions || {

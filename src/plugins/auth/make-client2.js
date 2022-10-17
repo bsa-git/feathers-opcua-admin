@@ -41,7 +41,7 @@ module.exports = async function makeClient(options) {
       appClient.configure(restClient.axios(axios));
       break;
     default:
-      throw new Error(`Invalid transport ${transport}. (makeClient`);
+      throw new Error(`Invalid transport ${transport}. (makeClient)`);
     }
 
     if (!ifNoAuth) {

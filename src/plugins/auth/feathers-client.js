@@ -2,7 +2,8 @@
 const axios = require('axios');
 const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
-const storage = require('./local-storage');
+const { CookieStorage } = require('cookie-storage');
+const storage = new CookieStorage();
 
 const transport = process.env.FEATHERS_CLIENT_TRANSPORT || 'socketio';
 const baseURL = process.env.BASE_URL || 'http://localhost:3131';

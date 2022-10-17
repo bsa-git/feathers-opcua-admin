@@ -13,7 +13,9 @@ const {
 const {
   localStorage,
   loginLocal,
-  feathersClient,
+  // feathersClient,
+  feathersRestClient,
+  feathersSocketioClient,
   makeClient
 } = require('../../src/plugins/auth');
 
@@ -72,15 +74,23 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
   it('#1. Registered the service', () => {
     let service = app.service('data-management');
     assert.ok(service, 'Registered the service');
-    service = feathersClient.service('data-management');
+    service = feathersRestClient.service('data-management');
     assert.ok(service, 'Registered the service');
   });
 
-  it('#2. feathersClient read json data from "dataManagement" service', async () => {
-    // const appClient = await makeClient({ serverUrl: baseUrl });
-    const service = feathersClient.service('data-management');
-    // const service = app.service('data-management');
-    // const service = appClient.service('data-management');
+  it('#2.1 feathersClient ("rest") read json data from "dataManagement" service', async () => {
+    const service = feathersRestClient.service('data-management');
+    const data = {
+      action: 'readJsonFile',
+      path: '/public/api/demo/ui-elements/treeview-items4.json'
+    };
+    const flightData = await service.create(data);
+    if (isDebug && flightData) inspector('data-management.flightData from "dataManagement" service:', flightData);
+    assert.ok(Object.keys(flightData).length, 'OK - Read flight json data from "dataManagement" service');
+  });
+
+  it('#2.2 feathersClient ("socketio") read json data from "dataManagement" service', async () => {
+    const service = feathersSocketioClient.service('data-management');
     const data = {
       action: 'readJsonFile',
       path: '/public/api/demo/ui-elements/treeview-items4.json'

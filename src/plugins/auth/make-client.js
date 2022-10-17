@@ -23,10 +23,11 @@ const defaultPrimusOptions = {
 };
 
 module.exports = async function makeClient(options) {
-  let { transport, timeout, serverUrl, ioOptions, primusOptions, ifNoAuth } = options;
+  let { transport, timeout, serverUrl, ioOptions, primusOptions, storage, ifNoAuth } = options;
   transport = transport || 'socketio';
   timeout = timeout || 5000;
   serverUrl = serverUrl || 'http://localhost:3131';
+  storage = storage ? storage : localStorage;
   ioOptions = ioOptions || defaultIoOptions;
   primusOptions = primusOptions || defaultPrimusOptions;
   let socket;
@@ -48,13 +49,11 @@ module.exports = async function makeClient(options) {
       appClient.configure(feathersClient.rest(serverUrl).axios(axios));
       break;
     default:
-      throw new Error(`Invalid transport ${transport}. (makeClient`);
+      throw new Error(`Invalid transport ${transport}. (makeClient)`);
     }
 
     if (!ifNoAuth) {
-      appClient.configure(feathersClient.authentication({
-        storage: localStorage
-      }));
+      appClient.configure(feathersClient.authentication({ storage }));
     }
     return appClient;
   } catch (error) {
