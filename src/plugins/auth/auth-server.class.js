@@ -2,7 +2,13 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const { checkContext, getItems } = require('feathers-hooks-common');
 const errors = require('@feathersjs/errors');
 const crypto = require('crypto');
-const { inspector, readJsonFileSync, stripSpecific, isTrue, appRoot } = require('../lib');
+const { 
+  inspector, 
+  readJsonFileSync, 
+  stripSpecific, 
+  isTrue, 
+  appRoot 
+} = require('../lib');
 const typeOf = require('../lib/type-of');
 const debug = require('debug')('app:plugins.auth-server.class');
 
@@ -417,6 +423,14 @@ class AuthServer {
    */
   static isAuthManager() {
     return (process.env.IS_AUTH_MANAGER === undefined) ? true : isTrue(process.env.IS_AUTH_MANAGER);
+  }
+
+  /**
+   * Is user authorization
+   * @return {boolean}
+   */
+   static isUserAuthorization() {
+    return (process.env.IS_USER_AUTHORIZATION === undefined) ? true : isTrue(process.env.IS_USER_AUTHORIZATION);
   }
 
   /**

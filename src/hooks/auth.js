@@ -15,8 +15,13 @@ const isDebug = false;
 const authCheck = function (isTest = false) {
   return async context => {
     const authServer = new AuthServer(context);
-    if(isTest || (!AuthServer.isTest() && authServer.contextProvider)){
-      if (isDebug) debug('authCheck: Start');
+    const isUserAuthorization = AuthServer.isUserAuthorization();
+    const isContextProvider = authServer.contextProvider? authServer.contextProvider : 'No';
+    const isArgTest = isTest;
+    const isEnvTest = AuthServer.isTest();
+    if (isDebug && AuthServer) console.log(`hook.authCheck: isArgTest: ${isArgTest}, isEnvTest: ${isEnvTest}, isUserAuthorization: ${isUserAuthorization}, isContextProvider: "${isContextProvider}"`);
+    if(isArgTest || (!isEnvTest && isContextProvider !== 'No' && isUserAuthorization)){
+      if (true && AuthServer) debug('hook.authCheck: Start...');
       const isAccess = await authServer.isAccess();
       if (!isAccess) {
         throw new errors.Forbidden(`Access to the service method "${authServer.contextPath}.${authServer.contextMethod}" is denied. Not enough rights`);

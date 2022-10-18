@@ -51,7 +51,6 @@ if (process.env.DEPLOY_ENV) {
 }
 
 module.exports = {
-  // mode: 'spa',// universal|spa
   ssr: false, // false -> for spa mode, true -> for universal mode
   srcDir: 'public',
   buildDir: 'nuxt-dist',
