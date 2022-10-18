@@ -89,16 +89,16 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
     assert.ok(Object.keys(flightData).length, 'OK - Read flight json data from "dataManagement" service');
   });
 
-  it('#2.2 feathersClient ("socketio") read json data from "dataManagement" service', async () => {
-    const service = feathersSocketioClient.service('data-management');
-    const data = {
-      action: 'readJsonFile',
-      path: '/public/api/demo/ui-elements/treeview-items4.json'
-    };
-    const flightData = await service.create(data);
-    if (isDebug && flightData) inspector('data-management.flightData from "dataManagement" service:', flightData);
-    assert.ok(Object.keys(flightData).length, 'OK - Read flight json data from "dataManagement" service');
-  });
+  // it('#2.2 feathersClient ("socketio") read json data from "dataManagement" service', async () => {
+  //   const service = feathersSocketioClient.service('data-management');
+  //   const data = {
+  //     action: 'readJsonFile',
+  //     path: '/public/api/demo/ui-elements/treeview-items4.json'
+  //   };
+  //   const flightData = await service.create(data);
+  //   if (isDebug && flightData) inspector('data-management.flightData from "dataManagement" service:', flightData);
+  //   assert.ok(Object.keys(flightData).length, 'OK - Read flight json data from "dataManagement" service');
+  // });
 
   it('#3. OPC-UA clients: registered the service', async () => {
 
