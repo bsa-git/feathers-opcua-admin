@@ -429,7 +429,7 @@ class AuthServer {
    * Is user authorization
    * @return {boolean}
    */
-   static isUserAuthorization() {
+  static isUserAuthorization() {
     return (process.env.IS_USER_AUTHORIZATION === undefined) ? true : isTrue(process.env.IS_USER_AUTHORIZATION);
   }
 
