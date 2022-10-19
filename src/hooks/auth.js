@@ -48,6 +48,7 @@ const loginCheck = function (isTest = false) {
       
       if(authServer.isMask('authentication.create.after')){
         if (isDebug && authServer) console.log('authentication.create.after.loginCheck: Start');
+        if (isDebug && authServer) inspector('authentication.create.after.getHookContext', authServer.getHookContext()) ;
         const isDebugin = await authServer.isDebugin();
         if(!isDebugin){
           throw new errors.Forbidden('Access to the login is denied because your account is not activated. Contact your administrator.');

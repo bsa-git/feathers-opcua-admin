@@ -100,6 +100,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   // Run the tests.
   function tests(seedData, { genSpecs, transports, usersName, usersPath }) {
     if(isDebug && transports.length) console.log(`isMyLocalhostToIP: ${isMyLocalhostToIP}, transports: [${transports}]`);
+    
     transports.forEach(transport => {
 
       describe(`<<<--- Test "${transport}" transport --->>>`, () => {
@@ -139,6 +140,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         if (isDebug && serverUrl) debug('serverUrl:', serverUrl);
 
         server = app.listen(port);
+        
         server.once('listening', () => {
           setTimeout(async () => {
             appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
@@ -198,7 +200,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
 
             if (isDebug && method) debug(`<-- method: ${method}; displayCode: ${displayCode(ifFail, authThisMethod)} -->`);
 
-            it(`#${index + 1}.${index2 + 1} ${method} ${displayCode(ifFail, authThisMethod)}.`, async () => {
+            it(`#${index + 1}.${index2 + 1} ${method} ("${transport}") ${displayCode(ifFail, authThisMethod)}.`, async () => {
               const service = appClient.service(genService.path);
               let prop;
               let rec, rec1;
