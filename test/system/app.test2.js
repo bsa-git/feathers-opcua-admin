@@ -54,6 +54,20 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
           // Create appClient for transports: 'socketio', 'rest'
           appRestClient = await makeClient({ transport: 'rest', serverUrl: process.env.BASE_URL });
           appSocketioClient = await makeClient({ transport: 'socketio', serverUrl: process.env.BASE_URL });
+          // Login local for userEmail, userPass
+          let result = await loginLocal(appRestClient, userEmail, userPass);
+          if (result.accessToken) {
+            accessToken = result.accessToken;
+            // Login Jwt for accessToken
+            result = await loginJwt(appSocketioClient, accessToken);
+            if (isDebug && result.accessToken) {
+              accessToken = result.accessToken;
+              const pass = appSocketioClient.passport;
+              inspector('appSocketioClient.passwort.getJWT:', await pass.getJWT());
+              inspector('appSocketioClient.passwort.verifyJWT:', await pass.verifyJWT(accessToken));
+              inspector('appSocketioClient.passwort.payloadIsValid:', pass.payloadIsValid(accessToken));
+            }
+          }
           done();
         } catch (error) {
           logger.error(error.message);
@@ -68,43 +82,21 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
     setTimeout(() => { done(); }, 500);
   });
 
-  it('#1: loginLocal for user and logout', async () => {
-    let result = await loginLocal(appRestClient, userEmail, userPass);
-    if (result.accessToken) {
-      accessToken = result.accessToken;
-      logger.info(chalk.yellow(`loginLocal for email: "${userEmail}", password: "${userPass}" - OK`));
-      logger.info(chalk.yellow(`loginLocal for accessToken: "${accessToken}" - OK`));
-    }
-    assert.ok(accessToken, 'loginLocal for user and logout');
-    let service = appRestClient.service('users');
-    let user = await service.get(userId);
-    if(isDebug && user) inspector(`appRestClient.get("${userId}"):`, user);
-    assert.ok(user[idField].toString() === userId, 'loginLocal for user and logout');
-    // appRestClient logout()
-    await appRestClient.logout();
-    try {
-      service = appRestClient.service('users');
-      user = await service.get(userId);
-      assert.ok(false, 'loginLocal for user and logout');
-    } catch (error) {
-      assert.ok(true, 'loginLocal for user and logout');
-    }
+  it('#1: Authentication accessToken', async () => {
+    assert.ok(accessToken, 'Authentication accessToken');
   });
 
-  it('#2: loginJwt for accessToken and logout', async () => {
-    let result = await loginLocal(appRestClient, userEmail, userPass);
-    if (result.accessToken) {
-      accessToken = result.accessToken;
-    }
-    result = await loginJwt(appSocketioClient, accessToken);
-    if (result.accessToken) {
-      accessToken = result.accessToken;
-      logger.info(chalk.yellow(`loginJwt for accessToken: "${accessToken}" - OK`));
-    }
-    assert.ok(accessToken, 'loginJwt for accessToken and logout');
+  it('#2: loginLocal for user and logout', async () => {
+    let service = appRestClient.service('users');
+    let user = await service.get(userId);
+    if (isDebug && user) inspector(`appRestClient.get("${userId}"):`, user);
+    assert.ok(user[idField].toString() === userId, 'loginLocal for user and logout');
+  });
+
+  it('#3: loginJwt for accessToken and logout', async () => {
     let service = appSocketioClient.service('users');
     let user = await service.get(userId);
-    if(isDebug && user) inspector(`appSocketioClient.get("${userId}"):`, user);
+    if (isDebug && user) inspector(`appSocketioClient.get("${userId}"):`, user);
     assert.ok(user[idField].toString() === userId, 'loginJwt for accessToken and logout');
     await appSocketioClient.logout();
     try {

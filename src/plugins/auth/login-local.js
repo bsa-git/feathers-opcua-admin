@@ -1,4 +1,4 @@
-
+const logger = require('../../logger');
 module.exports = async function (appClient, email, password) {
   try {
     if(!appClient) return;
@@ -8,6 +8,7 @@ module.exports = async function (appClient, email, password) {
       password,
     });
   } catch(err) {
-    throw err;
+    logger.error(`Error login local: ${err.message}`);
+    return null;
   }
 };

@@ -1,4 +1,4 @@
-
+const logger = require('../../logger');
 module.exports = async function (appClient, accessToken) {
   try {
     if(!appClient) return;
@@ -7,6 +7,7 @@ module.exports = async function (appClient, accessToken) {
       accessToken,
     });
   } catch(err) {
-    throw err;
+    logger.error(`Error login jwt: ${err.message}`);
+    return null;
   }
 };
