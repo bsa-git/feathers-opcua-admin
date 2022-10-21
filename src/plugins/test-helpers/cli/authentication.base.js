@@ -9,8 +9,11 @@ const localStorage = require('../../auth/local-storage');
 const loginLocal = require('../../auth/login-local');
 const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
-const { getIdField } = require('../../db-helpers');
+const AuthServer = require('../../auth/auth-server.class');
+
+const { getIdField, getCountItems } = require('../../db-helpers');
 const { logger, isTrue } = require('../../lib');
+const { inspect } = require('util');
 
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
@@ -109,6 +112,10 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           server.once('listening', () => {
             setTimeout(async () => {
               try {
+
+                const countUsers = await getCountItems(app, usersPath);
+                if(isDebug && usersPath) console.log(`getCountItems("${usersPath}"):`, countUsers);
+
                 const usersService = app.service(usersPath);
                 await usersService.remove(null);
                 user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
@@ -126,6 +133,11 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
                   result = await loginJwt(appClient, jwt);
                   if (!result) new Error(`Error login Jwt ("${transport}") for accessToken:"${jwt}"`);
                   jwt1 = result.accessToken;
+                  if(jwt1) {
+                    const passportJWT = await AuthServer.verifyPassportJWT(appClient.passport, jwt1);                    
+                    if(true && passportJWT) inspect('AuthServer.verifyPassportJWT:', passportJWT);
+                    logger.info(`Login Local/Jwt ("${transport}") - OK`);
+                  } 
                 } else {
                   appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
                   let result = await loginLocal(appClient, loginEmail, loginPassword);
@@ -134,6 +146,11 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
                   result = await loginJwt(appClient, jwt);
                   if (!result) new Error(`Error login Jwt ("${transport}") for accessToken:"${jwt}"`);
                   jwt1 = result.accessToken;
+                  if(jwt1) {
+                    const passportJWT = await AuthServer.verifyPassportJWT(appClient.passport, jwt1);                    
+                    if(true && passportJWT) inspect('AuthServer.verifyPassportJWT:', passportJWT);
+                    logger.info(`Login Local/Jwt ("${transport}") - OK`);
+                  } 
                 }
                 done();
               } catch (error) {
@@ -151,50 +168,40 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         });
 
         // Run several tests together to reduce their runtime.
-        it(`#2.${index + 1}: Can make local authenticated call on ${usersPath} service`, async function () {
+        it(`#2.${index + 1}: Can make local authenticated ("${transport}") call on ${usersPath} service`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
-
-          // await loginLocal(appClient, loginEmail, loginPassword);
-          // jwt = localStorage.getItem('feathers-jwt');
 
           assert(typeof jwt === 'string', 'jwt not a string');
           assert(jwt.length > 100, 'jwt too short');
 
           const usersClient = appClient.service(usersPath);
-          // const result = await usersClient.find({ query: { email: loginEmail } });
           const result = await usersClient.get(userId);
-          // const rec = result.data[0] || result;
-
           assert.strictEqual(result.email, loginEmail, 'wrong email');
         });
 
-        it(`#3.${index + 1}: Can make jwt authenticated call on ${usersPath} service`, async function () {
+        it(`#3.${index + 1}: Can make jwt authenticated ("${transport}") call on ${usersPath} service`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
-
-          // await loginJwt(appClient, jwt);
-          // const jwt1 = localStorage.getItem('feathers-jwt');
 
           assert(typeof jwt1 === 'string', 'jwt not a string');
           assert(jwt1.length > 100, 'jwt too short');
           assert.notStrictEqual(jwt1, jwt, 'new token unexpectedly same as authentication token.');
 
           const usersClient = appClient.service(usersPath);
-          // const result = await usersClient.find({ query: { email: loginEmail } });
           const result = await usersClient.get(userId);
-          // const rec = result.data[0] || result;
-
           assert.strictEqual(result.email, loginEmail, 'wrong email');
         });
 
-        it(`#4.${index + 1}: throws on no authentication, incorrect email or password`, async function () {
+        it(`#4.${index + 1}: throws on no authentication ("${transport}"), incorrect email or password`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
           const usersClient = appClient.service(usersPath);
 
           try {
             // eslint-disable-next-line no-console
             await appClient.logout();
-            await usersClient.find({ query: { email: loginEmail } });
+            const accessToken = await AuthServer.getPassportJWT(appClient.passport);
+            assert(!accessToken, 'call unexpectedly succeeded');
 
+            await usersClient.get(userId);
             assert(false, 'call unexpectedly succeeded');
           } catch (err) {
             assert(true);

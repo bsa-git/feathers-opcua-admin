@@ -2,12 +2,12 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const { checkContext, getItems } = require('feathers-hooks-common');
 const errors = require('@feathersjs/errors');
 const crypto = require('crypto');
-const { 
-  inspector, 
-  readJsonFileSync, 
-  stripSpecific, 
-  isTrue, 
-  appRoot 
+const {
+  inspector,
+  readJsonFileSync,
+  stripSpecific,
+  isTrue,
+  appRoot
 } = require('../lib');
 const typeOf = require('../lib/type-of');
 const debug = require('debug')('app:plugins.auth-server.class');
@@ -327,6 +327,46 @@ class AuthServer {
     // if (error) target.error = error;
     if (grapql) target.grapql = grapql;
     return Object.assign({}, target);
+  }
+
+  /**
+   * getJWT
+   * Get a jwt token with appClient.passwort.
+   * @async
+   * @param {Object} passport
+   * @return {String}
+   */
+  static async getPassportJWT(passport) {
+    if (!passport) new Error('No passport!');
+    return await passport.getJWT();
+  }
+
+  /**
+  * verifyPassportJWT
+  * Verify a jwt token with appClient.passwort.
+  * @async
+  * @param {Object} passport
+  * @param {String} jwt
+  * @return {Object}
+  */
+  static async verifyPassportJWT(passport, jwt) {
+    if (!passport) new Error('No passport!');
+    if(!jwt) new Error('No jwt!');
+    return await passport.verifyJWT(jwt);
+  }
+
+  /**
+   * isPassportPayloadValid
+   * Verify a payload token with appClient.passwort.
+   * @async
+   * @param {Object} passport
+   * @param {String} jwt
+   * @return {Boolean}
+   */
+  static async isPassportPayloadValid(passport, jwt) {
+    if(!passport) new Error('No passport!');
+    if(!jwt) new Error('No jwt!');
+    return await passport.payloadIsValid(jwt);
   }
 
   /**

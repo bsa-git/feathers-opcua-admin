@@ -20,9 +20,6 @@ const loReduce = require('lodash/reduce');
 const debug = require('debug')('app:db-helper');
 const isDebug = false;
 
-// Get max rows for opcua-values service
-let maxOpcuaValuesRows = process.env.OPCUA_VALUES_MAXROWS;
-maxOpcuaValuesRows = Number.isInteger(maxOpcuaValuesRows) ? maxOpcuaValuesRows : Number.parseInt(maxOpcuaValuesRows);
 
 /**
    * Determine if environment allows test
@@ -91,6 +88,10 @@ const getMaxValuesStorage = async function (app, tagId = '') {
   if (!tag) return result;
   const tagBrowseName = tag.browseName;
 
+  // Get max rows for opcua-values service
+  let maxOpcuaValuesRows = process.env.OPCUA_VALUES_MAXROWS;
+  maxOpcuaValuesRows = Number.isInteger(maxOpcuaValuesRows) ? maxOpcuaValuesRows : Number.parseInt(maxOpcuaValuesRows);
+
   // This is group tag
   //==============================
   if (tag.group) {
@@ -99,7 +100,7 @@ const getMaxValuesStorage = async function (app, tagId = '') {
     if (isTest()) {
       maxOpcuaValuesRows = 10;
     }
-    
+
     return maxOpcuaValuesRows;
   }
   //==============================
@@ -168,7 +169,7 @@ const getStorePeriod = async function (app, tagId = '', dateTime) {
     throw new Error(`A "opcua-tags" service must have a record with 'browseName' = '${storeTag.ownerGroup}'`);
   }
 
-  if(!groupTag.store || !groupTag.store.numberOfValuesInDoc){
+  if (!groupTag.store || !groupTag.store.numberOfValuesInDoc) {
     throw new Error('A "opcua-tag" must have a property -> "groupTag.store.numberOfValuesInDoc"');
   }
   period = getStartEndOfPeriod(dateTime, groupTag.store.numberOfValuesInDoc);
