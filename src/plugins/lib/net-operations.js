@@ -81,11 +81,24 @@ const getHostname = function () {
  * The base URL to resolve against if the input is not absolute. 
  * @param {String} base 
  * @returns {Object}
+ * e.g. url.hash
+        url.host
+        url.hostname
+        url.href
+        url.origin
+        url.password
+        url.pathname
+        url.port
+        url.protocol
+        Special schemes
+        url.search
+        url.searchParams
+        url.username
+        url.toString()
+        url.toJSON()
  */
 const getParseUrl = function (url, base) {
-  // const url = require('url');
   const URL = require('url').URL;
-  // return url.parse(aUrl);
   return new URL(url, base);
 };
 

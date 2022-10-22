@@ -167,6 +167,50 @@ class AuthClient {
   }
 
   /**
+   * getJWT
+   * Get a jwt token with appClient.passwort.
+   * @async
+   * @param {Object} passport
+   * @return {String}
+   */
+   static async getPassportJWT(passport) {
+    if (!passport) new Error('No passport!');
+    if(passport.passport) passport = passport.passport;
+    return await passport.getJWT();
+  }
+
+  /**
+  * verifyPassportJWT
+  * Verify a jwt token with appClient.passwort.
+  * @async
+  * @param {Object} passport
+  * @param {String} jwt
+  * @return {Object}
+  */
+  static async verifyPassportJWT(passport, jwt) {
+    if (!passport) new Error('No passport!');
+    if(!jwt) new Error('No jwt!');
+    if(passport.passport) passport = passport.passport;
+    return await passport.verifyJWT(jwt);
+  }
+
+  /**
+   * isPassportPayloadValid
+   * Verify a payload token with appClient.passwort.
+   * @async
+   * @param {Object} passport
+   * @param {String} jwt
+   * @return {Boolean}
+   */
+  static async isPassportPayloadValid(passport, jwt) {
+    if(!passport) new Error('No passport!');
+    if(!jwt) new Error('No jwt!');
+    if(passport.passport) passport = passport.passport;
+    return await passport.payloadIsValid(jwt);
+  }
+
+
+  /**
    * Check unique
    * check props are unique in the users items
    * @param identifyUser

@@ -10,6 +10,7 @@ const chalk = require('chalk');
 
 const {
   doesUrlExist,
+  stripSlashes
 } = require('../lib');
 
 const defaultIoOptions = {
@@ -24,6 +25,7 @@ module.exports = async function makeClient(options) {
   transport = transport || 'socketio';
   timeout = timeout || 5000;
   serverUrl = serverUrl || 'http://localhost:3030';
+  serverUrl = stripSlashes(serverUrl);
   ioOptions = ioOptions || defaultIoOptions;
   storage = storage ? storage : localStorage;
   let socket, restClient, appClient = null;

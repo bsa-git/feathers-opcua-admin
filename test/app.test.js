@@ -1,15 +1,22 @@
 const assert = require('assert');
 const rp = require('request-promise');
-const url = require('url');
+const URL = require('url').URL;
 const app = require('../src/app');
+const port = app.get('port') || 3131;
 
-const port = app.get('port') || 3030;
-const getUrl = pathname => url.format({
-  hostname: app.get('host') || 'localhost',
-  protocol: 'http',
-  port,
-  pathname
-});
+/**
+ * Get URL
+ * @method getURL
+ * @param {String} pathname 
+ * @returns {String}
+ */
+const getURL = (pathname = '') => {
+  const port = app.get('port') || 3131;
+  const host = app.get('host') || 'localhost';
+  let url = new URL(pathname, `http://${host}:${port}`);
+  url = url.toString();
+  return url;
+}; 
 
 describe('Feathers application tests', () => {
   let server;
@@ -27,7 +34,7 @@ describe('Feathers application tests', () => {
   });
 
   it('starts and shows the index page', () => {
-    return rp(getUrl()).then(body =>
+    return rp(getURL()).then(body =>
       assert.ok(body.indexOf('<html>') !== -1, 'response does not contain <html>')
     );
   });
@@ -35,7 +42,7 @@ describe('Feathers application tests', () => {
   describe('404', function () {
     it('shows a 404 HTML page', () => {
       return rp({
-        url: getUrl('path/to/nowhere'),
+        url: getURL('path/to/nowhere'),
         headers: {
           Accept: 'text/html'
         }
@@ -47,7 +54,7 @@ describe('Feathers application tests', () => {
 
     it('shows a 404 JSON error without stack trace', () => {
       return rp({
-        url: getUrl('path/to/nowhere'),
+        url: getURL('path/to/nowhere'),
         json: true
       }).catch(res => {
         assert.strictEqual(res.statusCode, 404, 'unexpected statusCode');

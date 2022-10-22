@@ -338,6 +338,7 @@ class AuthServer {
    */
   static async getPassportJWT(passport) {
     if (!passport) new Error('No passport!');
+    if(passport.passport) passport = passport.passport;
     return await passport.getJWT();
   }
 
@@ -352,6 +353,7 @@ class AuthServer {
   static async verifyPassportJWT(passport, jwt) {
     if (!passport) new Error('No passport!');
     if(!jwt) new Error('No jwt!');
+    if(passport.passport) passport = passport.passport;
     return await passport.verifyJWT(jwt);
   }
 
@@ -366,6 +368,7 @@ class AuthServer {
   static async isPassportPayloadValid(passport, jwt) {
     if(!passport) new Error('No passport!');
     if(!jwt) new Error('No jwt!');
+    if(passport.passport) passport = passport.passport;
     return await passport.payloadIsValid(jwt);
   }
 
