@@ -2,6 +2,7 @@
 const assert = require('assert');
 const { cwd } = require('process');
 const { join } = require('path');
+const chalk = require('chalk');
 
 const ensureCanSeedData = require('./ensure-can-seed-data');
 const expandSpecsForTest = require('./expand-specs-for-test');
@@ -11,8 +12,9 @@ const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
 const AuthServer = require('../../auth/auth-server.class');
 
+const { getFakeData } = require('../service-helper');
 const { getIdField, getCountItems } = require('../../db-helpers');
-const { logger, isTrue } = require('../../lib');
+const { logger, isTrue, inspector } = require('../../lib');
 const { inspect } = require('util');
 
 const loginPassword = 'orprotroiyotrtouuikj';
@@ -21,6 +23,13 @@ const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
 const debug = require('debug')('app:authentication.base.test');
 const isDebug = false;
 const isTest = true;
+
+// Get user data
+const usersFakeData = getFakeData()['users'];
+let firstUser = usersFakeData[0];
+firstUser = Object.assign({}, firstUser, { email: loginEmail, password: loginPassword });
+const idField = getIdField(firstUser);
+const userId = firstUser[idField].toString();
 
 module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   const delayAfterServerOnce = options.delayAfterServerOnce || 500;
@@ -54,7 +63,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
 
     if (!isTest) {
-      debug(`<<<--- Test "${__filename.substring(__dirname.length + 1)}" - NOT --->>>`);
+      debug(`<--- Test "${__filename.substring(__dirname.length + 1)}" - NOT --->`);
       return;
     }
 
@@ -78,12 +87,11 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   function tests(seedData, { transports, usersName, usersPath }) {
     transports.forEach((transport, index) => {
 
-      describe(`<<<--- Test "${transport}" transport --->>>`, function () {
+      describe(`<--- Test "${transport}" transport --->`, function () {
         let app;
         let server;
         let appClient;
         let jwt, jwt1;
-        let user, userId;
         //-------------------
 
         before(function (done) {
@@ -105,7 +113,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;
           if (isDebug) debug('port:', port);
           // Get serverUrl 
-          const serverUrl = !configClient.restOptions ? 'http://localhost:3030' : (configClient.restOptions.url === 'BASE_URL') ? process.env.BASE_URL : configClient.restOptions.url;
+          const serverUrl = !configClient.restOptions ? 'http://localhost:3131' : (configClient.restOptions.url === 'BASE_URL') ? process.env.BASE_URL : configClient.restOptions.url;
           if (isDebug) debug('serverUrl:', serverUrl);
 
           server = app.listen(port);
@@ -113,45 +121,26 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
             setTimeout(async () => {
               try {
 
-                const countUsers = await getCountItems(app, usersPath);
-                if(isDebug && usersPath) console.log(`getCountItems("${usersPath}"):`, countUsers);
+                // Create appClient for transports: 'socketio', 'rest'
+                appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
+                // Create user
+                let service = app.service('users');
+                await service.remove(null);
+                service = appClient.service('users');
+                const user = await service.create(firstUser);
+                if (true && user) logger.info(chalk.yellow(`${transport} appClient.create user - OK`));
 
-                const usersService = app.service(usersPath);
-                await usersService.remove(null);
-                user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
-                user = await usersService.create(user);
-                const idField = getIdField(user);
-                userId = user[idField].toString();
-
-                // Run authentication
-                if (transport === 'socketio') {
-                  appClient = await makeClient({ transport: 'rest', serverUrl, ioOptions, primusOptions });
-                  let result = await loginLocal(appClient, loginEmail, loginPassword);
-                  if (!result) new Error(`Error login local ("${transport}") for email:"${loginEmail}", pass: "${loginPassword}"`);
+                // Login local for loginEmail, loginPassword
+                let result = await loginLocal(appClient, loginEmail, loginPassword);
+                if (true && result && result.accessToken) {
                   jwt = result.accessToken;
-                  appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
-                  result = await loginJwt(appClient, jwt);
-                  if (!result) new Error(`Error login Jwt ("${transport}") for accessToken:"${jwt}"`);
-                  jwt1 = result.accessToken;
-                  if(jwt1) {
-                    const passportJWT = await AuthServer.verifyPassportJWT(appClient.passport, jwt1);                    
-                    if(true && passportJWT) inspect('AuthServer.verifyPassportJWT:', passportJWT);
-                    logger.info(`Login Local/Jwt ("${transport}") - OK`);
-                  } 
-                } else {
-                  appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
-                  let result = await loginLocal(appClient, loginEmail, loginPassword);
-                  if (!result) new Error(`Error login local ("${transport}") for email:"${loginEmail}", pass: "${loginPassword}"`);
-                  jwt = result.accessToken;
-                  result = await loginJwt(appClient, jwt);
-                  if (!result) new Error(`Error login Jwt ("${transport}") for accessToken:"${jwt}"`);
-                  jwt1 = result.accessToken;
-                  if(jwt1) {
-                    const passportJWT = await AuthServer.verifyPassportJWT(appClient.passport, jwt1);                    
-                    if(true && passportJWT) inspect('AuthServer.verifyPassportJWT:', passportJWT);
-                    logger.info(`Login Local/Jwt ("${transport}") - OK`);
-                  } 
+                  logger.info(chalk.yellow(`${transport} appClient loginLocal - OK`));
                 }
+                if (isDebug && result && result.accessToken) {
+                  inspector(`${transport} appClient.passwort.getJWT:`, await AuthServer.getPassportJWT(appClient));
+                  inspector(`${transport} appClient.passwort.verifyJWT:`, await AuthServer.verifyPassportJWT(appClient, accessToken));
+                }
+
                 done();
               } catch (error) {
                 logger.error(error.message);
@@ -164,7 +153,11 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         after(function (done) {
           this.timeout(timeoutForClosingingServerAndClient);
           server.close();
-          setTimeout(() => done(), delayAfterServerClose);
+          setTimeout(async () => {
+            const isLogin = await AuthServer.isLoginJWT(appClient);
+            if (isLogin) await appClient.logout();
+            done();
+          }, delayAfterServerClose);
         });
 
         // Run several tests together to reduce their runtime.
@@ -179,7 +172,30 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           assert.strictEqual(result.email, loginEmail, 'wrong email');
         });
 
-        it(`#3.${index + 1}: Can make jwt authenticated ("${transport}") call on ${usersPath} service`, async function () {
+        it(`#3.${index + 1}: Test error for ${transport} appClient logout`, async () => {
+          await appClient.logout();
+          const isLogin = await AuthServer.isLoginJWT(appClient);
+          if (true && !isLogin) logger.info(chalk.yellow(`${transport} appClient logout - OK`));
+          assert.ok(!isLogin, `${transport} appClient don't logout`);
+          try {
+            const service = appClient.service('users');
+            await service.get(userId);
+            assert.ok(false, `There must  be an error when ${transport} appClient logout`);
+          } catch (error) {
+            assert.ok(true, `Not error when ${transport} appClient logout`);
+          }
+        });
+  
+        it(`#4.${index + 1}: Test - ${transport} appClient loginJwt`, async () => {
+          let result = await loginJwt(appClient, jwt);
+          if (true && result && result.accessToken) {
+            jwt1 = result.accessToken;
+            logger.info(chalk.yellow(`${transport} appClient loginJwt - OK`));
+          }
+          assert.ok(jwt1, `${transport} appClient don't loginJwt`);
+        });
+
+        it(`#5.${index + 1}: Can make jwt authenticated ("${transport}") call on ${usersPath} service`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
 
           assert(typeof jwt1 === 'string', 'jwt not a string');
@@ -191,7 +207,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           assert.strictEqual(result.email, loginEmail, 'wrong email');
         });
 
-        it(`#4.${index + 1}: throws on no authentication ("${transport}"), incorrect email or password`, async function () {
+        it(`#6.${index + 1}: throws on no authentication ("${transport}"), incorrect email or password`, async function () {
           this.timeout(timeoutForStartingServerAndClient);
           const usersClient = appClient.service(usersPath);
 

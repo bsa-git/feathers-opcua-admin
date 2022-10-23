@@ -3,10 +3,11 @@ const assert = require('assert');
 const { cwd } = require('process');
 const { join } = require('path');
 const loPick = require('lodash/pick');
+const chalk = require('chalk');
 
 const ensureCanSeedData = require('./ensure-can-seed-data');
 const expandSpecsForTest = require('./expand-specs-for-test');
-const { getFakeData } = require('../service-helper');
+const { getIdField, getFakeData } = require('../service-helper');
 const localStorage = require('../../auth/local-storage');
 const loginLocal = require('../../auth/login-local');
 const loginJwt = require('../../auth/login-jwt');
@@ -25,7 +26,14 @@ const testConfig = {
 
 const loginPassword = 'orprotroiyotrtouuikj';
 const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
+// Get user data
 const usersFakeData = getFakeData()['users'];
+let firstUser = usersFakeData[0];
+firstUser = Object.assign({}, firstUser, { email: loginEmail, password: loginPassword });
+const idField = getIdField(firstUser);
+const userId = firstUser[idField];
+const _usersFakeData = usersFakeData.filter(usr => usr[idField] !== userId);
+
 let isMyLocalhostToIP = false;
 
 module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
@@ -97,7 +105,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       tests(seedData, {
         genSpecs,
         // !!!!!!!!!!!!!!!!!!!!!!!
-        transports: genSpecs.app.providers.filter(provider => isMyLocalhostToIP ? provider === 'socketio' : true),
+        transports: genSpecs.app.providers, //.filter(provider => isMyLocalhostToIP ? provider === 'socketio' : true),
         usersName: genSpecs.authentication.entity,
         usersPath: genSpecs.authentication._entityPath
       });
@@ -113,7 +121,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       describe(`<<<--- Test "${transport}" transport --->>>`, () => {
         testServices(true, transport, seedData, genSpecs, transports, usersName, usersPath);
         // !!!!!!!!!!!!!!!!!!!!!!!
-        // testServices(false, transport, seedData, genSpecs, transports, usersName, usersPath);
+        testServices(false, transport, seedData, genSpecs, transports, usersName, usersPath);
       });
 
     });
@@ -125,7 +133,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       let server;
       let appClient, appRestClient;
       let jwt;
-      let userId, _usersFakeData;
+      // let userId, _usersFakeData;
       //------------------
 
       before(function (done) {
@@ -155,54 +163,26 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           setTimeout(async () => {
 
             try {
-              // Make client
+
+              // Create appClient for transports: 'socketio', 'rest'
               appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
+              // Create user
+              let service = app.service('users');
+              await service.remove(null);
+              service = appClient.service('users');
+              const user = await service.create(firstUser);
+              if (true && user) logger.info(chalk.yellow(`${transport} appClient.create user - OK`));
 
-              // Create user and login to server
-              if (ifAuth) {
-                let usersService = app.service(usersPath);
-                await usersService.remove(null);
-                let user = Object.assign({}, usersRecs[0], { email: loginEmail, password: loginPassword });
-                user = await usersService.create(user);
-                if (true && user) {
-                  const idField = AuthServer.getIdField(user);
-                  userId = user[idField].toString();
-                  _usersFakeData = usersFakeData.filter(usr => usr[idField] !== userId);
-                  logger.info(`User created with userId: "${userId}" - OK`);
-                }
-
-                // Run login local/jwt
-                if (transport === 'socketio') {
-                  appRestClient = await makeClient({ transport: 'rest', serverUrl, ioOptions, primusOptions });
-                  let result = await loginLocal(appRestClient, loginEmail, loginPassword);
-                  if (!result) new Error(`Error login local ("${transport}") for email:"${loginEmail}", pass: "${loginPassword}"`);
-                  jwt = result.accessToken;
-                  result = await loginJwt(appClient, jwt);
-                  if (!result) new Error(`Error login Jwt ("${transport}") for accessToken:"${jwt}"`);
-                  jwt = result.accessToken;
-                  if (jwt) {
-                    const passportJWT = await AuthServer.verifyPassportJWT(appClient.passport, jwt);
-                    if (isDebug && passportJWT) inspector('AuthServer.verifyPassportJWT:', passportJWT);
-                    logger.info(`Login Local/Jwt ("${transport}") - OK`);
-                  }
-                } else {
-                  let result = await loginLocal(appClient, loginEmail, loginPassword);
-                  if (!result) new Error(`Error login local ("${transport}") for email:"${loginEmail}", pass: "${loginPassword}"`);
-                  jwt = result.accessToken;
-                  if (jwt) {
-                    const passportJWT = await AuthServer.verifyPassportJWT(appClient.passport, jwt);
-                    if (isDebug && passportJWT) inspector('AuthServer.verifyPassportJWT:', passportJWT);
-                    logger.info(`Login Local/Jwt ("${transport}") - OK`);
-                  }
-                }
-
-                usersService = app.service(usersPath);// _usersFakeData
-                const users = await usersService.create(_usersFakeData);
-                if (true && users) {
-                  logger.info(`Create users with count: "${users.length}" - OK`);
-                }
+              // Login local for loginEmail, loginPassword
+              let result = await loginLocal(appClient, loginEmail, loginPassword);
+              if (true && result && result.accessToken) {
+                jwt = result.accessToken;
+                logger.info(chalk.yellow(`${transport} appClient loginLocal - OK`));
               }
-
+              if (isDebug && result && result.accessToken) {
+                inspector(`${transport} appClient.passwort.getJWT:`, await AuthServer.getPassportJWT(appClient));
+                inspector(`${transport} appClient.passwort.verifyJWT:`, await AuthServer.verifyPassportJWT(appClient, accessToken));
+              }
               done();
             } catch (error) {
               logger.error(error.message);
@@ -217,7 +197,11 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       after(function (done) {
         this.timeout(timeoutForClosingingServerAndClient);
         server.close();
-        setTimeout(() => done(), delayAfterServerClose);
+        setTimeout(async () => {
+          const isLogin = await AuthServer.isLoginJWT(appClient);
+          if (isLogin) await appClient.logout();
+          done();
+        }, delayAfterServerClose);
       });
 
       const genServices = Object.assign({}, loPick(genSpecs.services, testConfig.service === '*' ? Object.keys(genSpecs.services) : testConfig.service));
@@ -227,14 +211,14 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
       Object.keys(genServices).forEach((name, index) => {
 
         // !!!!!!!!!!!!!!!!!!!!!!!
-        if (name !== 'users') return;
+        // if (name !== 'users') return;
 
         describe(`<<<--- Service "${name}" --->>>`, () => {
           const genService = genServices[name];
           const isAuthEntity = genService.isAuthEntity;
           const _authByMethod = genSpecs._authByMethod[name];
           const authByMethod = Object.assign({}, loPick(_authByMethod, testConfig.metod === '*' ? Object.keys(_authByMethod) : testConfig.metod));
-          const ourSeedData = seedData[name];
+          let ourSeedData = seedData[name];
 
           if (isDebug && authByMethod) inspector('authentication.services.authByMethod:', authByMethod);
           if (isDebug && ourSeedData) inspector('authentication.services.ourSeedData:', ourSeedData);
@@ -251,7 +235,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           Object.keys(authByMethod).forEach((method, index2) => {
 
             // !!!!!!!!!!!!!!!!!!!!!!!
-            if (method !== 'create') return;
+            // if (method !== 'create') return;
 
             const authThisMethod = authByMethod[method];
 
@@ -268,20 +252,25 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
               let prop;
               let rec, rec1;
               let callMethod, result;
+              let _ourSeedData;
               //------------------------
 
               switch (method) {
               case 'create':
-                await app.service(genService.path).remove(null);
-                result = await getCountItems(app, genService.path);
-                if (true && app) console.log(`getCountItems("${genService.path}").countItems:`, result);
-                callMethod = async () => await service.create(ourSeedData);
+
+                if(name === 'users' && isAuthEntity){
+                  _ourSeedData = ourSeedData.filter(usr => usr[idField] !== userId);
+                } else {
+                  _ourSeedData = ourSeedData;
+                  await app.service(genService.path).remove(null);
+                }
+
+                callMethod = async () => await service.create(_ourSeedData);
                 result = await runMethod(ifFail, callMethod);
-                // if(isDebug && app) console.log(`getCountItems("${genService.path}").countItems:`, countItems);
-                if (true && result) inspector('authentication.services.result:', result);
-                if (true && result) inspector('authentication.services.ourSeedData:', ourSeedData);
+                if (isDebug && result) inspector('authentication.services.result:', result);
+                if (isDebug && result) inspector('authentication.services.ourSeedData:', ourSeedData);
                 if (!ifFail) {
-                  assert.strictEqual(resultLen(result), ourSeedData.length, 'Unexpected result length.');
+                  assert.strictEqual(resultLen(result), _ourSeedData.length, 'Unexpected result length.');
                 } else {
                   assert(true);
                 }

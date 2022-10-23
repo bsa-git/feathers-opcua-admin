@@ -259,7 +259,7 @@ class AuthServer {
   }
 
   /**
-   * Is login
+   * Is to log user
    * Checks the ability to log user
    * @return {Promise.<void>}
    */
@@ -370,6 +370,20 @@ class AuthServer {
     if(!jwt) new Error('No jwt!');
     if(passport.passport) passport = passport.passport;
     return await passport.payloadIsValid(jwt);
+  }
+
+  /**
+   * isLoginJWT
+   * Is a jwt login with appClient.passwort.
+   * @async
+   * @param {Object} passport
+   * @return {Boollean}
+   */
+  static async isLoginJWT(passport) {
+    if (!passport) new Error('No passport!');
+    if(passport.passport) passport = passport.passport;
+    const jwt = await passport.getJWT();
+    return !!jwt;
   }
 
   /**
