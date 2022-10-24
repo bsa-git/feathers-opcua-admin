@@ -7,7 +7,7 @@ const chalk = require('chalk');
 
 const ensureCanSeedData = require('./ensure-can-seed-data');
 const expandSpecsForTest = require('./expand-specs-for-test');
-const { getIdField, getFakeData } = require('../service-helper');
+const { getIdField, getFakeData, clearCacheApp } = require('../service-helper');
 const localStorage = require('../../auth/local-storage');
 const loginLocal = require('../../auth/login-local');
 const loginJwt = require('../../auth/login-jwt');
@@ -18,7 +18,9 @@ const { isTrue, inspector, logger } = require('../../lib');
 
 const debug = require('debug')('app:authentication.services.test');
 const isDebug = false;
-const isTest = true;
+const isTest = false;
+
+
 const testConfig = {
   service: '*', // '*' | 'users' | 'roles' | 'teams' | 'userTeams' | 'userProfiles' | 'logMessages'
   metod: '*' // '*' | 'create' | 'find' | 'get' |'update' | 'patch' | 'remove'
@@ -82,10 +84,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   // Check we can run this test.
   describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
 
-    if (!isTest) {
-      debug(`<<< Test "${__filename.substring(__dirname.length + 1)}" - NOT >>>`);
-      return;
-    }
+    if (!isTest) { it('Not Test', () => { assert.ok(!isTest, '<--- Not Test --->'); }); return; } 
 
     it('#1: Check this test may not seed data', () => {
       try {
@@ -147,8 +146,9 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
         }
 
         // Restarting app.*s is required if the last mocha test did REST calls on its server.
-        delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
-        app = require(`${appRoot}/${genSpecs.app.src}/app`);
+        // delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
+        // app = require(`${appRoot}/${genSpecs.app.src}/app`);
+        app = clearCacheApp();
 
         // Get PORT
         const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;

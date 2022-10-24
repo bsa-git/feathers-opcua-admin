@@ -12,7 +12,7 @@ const loginJwt = require('../../auth/login-jwt');
 const makeClient = require('../../auth/make-client');
 const AuthServer = require('../../auth/auth-server.class');
 
-const { getFakeData } = require('../service-helper');
+const { getFakeData, clearCacheApp } = require('../service-helper');
 const { getIdField, getCountItems } = require('../../db-helpers');
 const { logger, isTrue, inspector } = require('../../lib');
 const { inspect } = require('util');
@@ -22,7 +22,7 @@ const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
 
 const debug = require('debug')('app:authentication.base.test');
 const isDebug = false;
-const isTest = true;
+const isTest = false;
 
 // Get user data
 const usersFakeData = getFakeData()['users'];
@@ -62,10 +62,7 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
   // Check we can run this test.
   describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
 
-    if (!isTest) {
-      debug(`<--- Test "${__filename.substring(__dirname.length + 1)}" - NOT --->`);
-      return;
-    }
+    if (!isTest) { it('Not Test', () => { assert.ok(!isTest, '<--- Not Test --->'); }); return; } 
 
     it('#1: Check this test may not seed data', () => {
       assert.strictEqual(cannotRunTest, '', cannotRunTest);
@@ -107,8 +104,10 @@ module.exports = function checkHealthAuthTest(appRoot = cwd(), options = {}) {
           }
 
           // Restarting app.*s is required if the last mocha test did REST calls on its server.
-          delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
-          app = require(`${appRoot}/${genSpecs.app.src}/app`);
+          // delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
+          // app = require(`${appRoot}/${genSpecs.app.src}/app`);
+          app = clearCacheApp();
+          
           // Get PORT
           const port = !configClient.port ? 3030 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;
           if (isDebug) debug('port:', port);

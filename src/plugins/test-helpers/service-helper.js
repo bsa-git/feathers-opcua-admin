@@ -1,14 +1,17 @@
+const { join } = require('path');
 const errors = require('@feathersjs/errors');
 const seedService = require('./seed-service');
 const {readJsonFileSync, appRoot} = require('../lib');
 const typeOf = require('../lib/type-of');
-const debug = require('debug')('app:plugins.service-helper');
 
+const debug = require('debug')('app:plugins.service-helper');
 const isDebug = false;
 
 // Get fake data
 const fakeData = readJsonFileSync(`${appRoot}/seeds/fake-data.json`);
-
+// Get feathers-gen-specs.json
+const specsPath = join(appRoot, 'feathers-gen-specs.json');
+const genSpecs = require(specsPath);
 
 /**
  * Get fake data
@@ -139,6 +142,19 @@ const saveFakesToServices = async function (app, path = '') {
   return errPath;
 };
 
+/**
+ * Clear cache app
+ * @method clearCacheApp
+ * @return {Object}
+ */
+ const clearCacheApp = function() {
+  // Restarting app.*s is required if the last mocha test did REST calls on its server.
+  delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
+  app = require(`${appRoot}/${genSpecs.app.src}/app`);
+  return app
+};
+
+
 module.exports = {
   getFakeData,
   serviceFields,
@@ -146,5 +162,6 @@ module.exports = {
   getFakePaths,
   getIdField,
   checkServicesRegistered,
-  saveFakesToServices
+  saveFakesToServices,
+  clearCacheApp
 };

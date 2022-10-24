@@ -18,7 +18,6 @@ const doesUrlExist = async function (target) {
   }
 
   try {
-    // await axios.get(uri);
     await axios({
       method: 'get',
       url: uri,

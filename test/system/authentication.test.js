@@ -1,26 +1,26 @@
 /* eslint-disable no-unused-vars */
 const assert = require('assert');
 const { join } = require('path');
-// const app = require('../../src/app');
-// const port = app.get('port') || 3131;
+
 const chalk = require('chalk');
 const loReverse = require('lodash/reverse');
 
 const debug = require('debug')('app:authentication.test');
 const isDebug = false;
+const isTest = false;
 
 const {
   appRoot,
   logger,
   inspector,
-  getURL,
   localStorage,
   loginLocal,
   loginJwt,
   makeClient,
   getIdField,
   getFakeData,
-  AuthServer
+  AuthServer,
+  clearCacheApp
 } = require('../../src/plugins');
 
 const specsPath = join(appRoot, 'feathers-gen-specs.json');
@@ -47,7 +47,9 @@ const userId = firstUser[idField].toString();
 describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
   let app, server, appClient, accessToken;
   //------------------------------------------------------------
-  
+
+  if (!isTest) { it('Not Test', () => { assert.ok(!isTest, '<--- Not Test --->'); }); return; }
+
   transports.forEach((transport, index) => {
 
     describe(`<--- Test of feathers client for transport ("${transport}") --->`, () => {
@@ -55,8 +57,10 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
         localStorage.clear();
 
         // Restarting app.*s is required if the last mocha test did REST calls on its server.
-        delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
-        app = require(`${appRoot}/${genSpecs.app.src}/app`);
+        // delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
+        // app = require(`${appRoot}/${genSpecs.app.src}/app`);
+        app = clearCacheApp();
+        
         // Get PORT
         const port = !configClient.port ? 3131 : (configClient.port === 'PORT') ? process.env.PORT : configClient.port;
         if (isDebug) debug('port:', port);
@@ -69,7 +73,6 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
           setTimeout(async () => {
             try {
 
-
               // Create appClient for transports: 'socketio', 'rest'
               appClient = await makeClient({ transport, serverUrl, ioOptions, primusOptions });
               // Create user
@@ -78,7 +81,6 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
               service = appClient.service('users');
               const user = await service.create(firstUser);
               if (true && user) logger.info(chalk.yellow(`${transport} appClient.create user - OK`));
-
               // Login local for userEmail, userPass
               let result = await loginLocal(appClient, userEmail, userPass);
               if (true && result && result.accessToken) {

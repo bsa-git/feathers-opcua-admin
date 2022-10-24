@@ -1,7 +1,5 @@
 /* eslint-disable no-unused-vars */
 const assert = require('assert');
-const app = require('../../src/app');
-const port = app.get('port') || 3131;
 const {
   appRoot,
   inspector,
@@ -20,7 +18,7 @@ const {
 } = require('../../src/plugins/auth');
 
 const {
-  saveFakesToServices
+  clearCacheApp
 } = require('../../src/plugins/test-helpers');
 
 const moment = require('moment');
@@ -36,9 +34,8 @@ const fakeUsers = fakes['users'];
 const fakeUser = fakeUsers[0];
 
 const debug = require('debug')('app:data-management.test');
-const isLog = false;
 const isDebug = false;
-const isTest = true;
+const isTest = false;
 
 const baseUrl = process.env.BASE_URL;
 const serverUrl = 'http://localhost:3030';
@@ -46,18 +43,24 @@ const serverUrl = 'http://localhost:3030';
 const id = 'ua-cherkassy-azot-asutp_dev1';
 
 describe('<<< Test /services/data-management.test.js >>>', () => {
+  let app, port;
+  //------------------
 
-  if (!isTest) {
-    debug('<<< Test /services/data-management.test.js >>> - NOT >>>');
-    return;
-  }
+  if (!isTest) { it('Not Test', () => { assert.ok(!isTest, '<--- Not Test --->'); }); return; }
 
   before(function (done) {
+    
+    // Clear cache app
+    app = clearCacheApp();
+    port = app.get('port') || 3131;
+
     server = app.listen(port);
     server.once('listening', () => {
       setTimeout(async () => {
         // await saveFakesToServices(app, 'users');
-        if (isDebug) debug('Done before StartTest!');
+        
+
+
         done();
       }, 500);
     });
@@ -156,7 +159,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
     };
 
     const actionResult = await service.create(data);
-    if (isLog) inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
+    if (isDebug) inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
     // inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
     assert.ok(actionResult, 'Get getItemNodeId from "dataManagement" service');
 
@@ -186,7 +189,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
     };
     const service = feathersClient.service('data-management');
     const actionResult = await service.create(data);
-    if (isLog) inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
+    if (isDebug) inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
     // inspector('opcuaClient.getItemNodeId.readResult:', actionResult);
     if (actionResult.length && actionResult[0].statusCode.value === 0) {
       if (actionResult[0].historyData.dataValues.length) {
@@ -212,7 +215,7 @@ describe('<<< Test /services/data-management.test.js >>>', () => {
     } else {
       assert.ok(false, 'OPC-UA clients: session history value from file');
     }
-    if (isLog) inspector('SessionHistoryValue_ForCH_M51.histOpcuaValues:', histOpcuaValues);
+    if (isDebug) inspector('SessionHistoryValue_ForCH_M51.histOpcuaValues:', histOpcuaValues);
     // inspector('SessionHistoryValue_ForCH_M51.histOpcuaValues:', histOpcuaValues);
     accumulator = histOpcuaValues.length;
     start = histOpcuaValues[0].updatedAt;
