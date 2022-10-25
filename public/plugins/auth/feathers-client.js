@@ -34,7 +34,7 @@ const storage = new CookieStorage();
 const transport = process.env.FEATHERS_CLIENT_TRANSPORT || 'socketio';
 const baseURL = process.env.BASE_URL || 'http://localhost:3131';
 const ioOptions = { transports: ['websocket'] };
-const timeout = 5000;
+const timeout = 20000;
 
 const isDebug = false;
 

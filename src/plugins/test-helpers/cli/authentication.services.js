@@ -18,7 +18,7 @@ const { isTrue, inspector, logger } = require('../../lib');
 
 const debug = require('debug')('app:authentication.services.test');
 const isDebug = false;
-const isTest = false;
+const isTest = true;
 
 
 const testConfig = {

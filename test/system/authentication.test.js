@@ -7,7 +7,7 @@ const loReverse = require('lodash/reverse');
 
 const debug = require('debug')('app:authentication.test');
 const isDebug = false;
-const isTest = false;
+const isTest = true;
 
 const {
   appRoot,
@@ -42,7 +42,7 @@ const firstUser = usersFakeData[0];
 const userEmail = firstUser.email;
 const userPass = firstUser.password;
 const idField = getIdField(firstUser);
-const userId = firstUser[idField].toString();
+const userId = firstUser[idField];
 
 describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, () => {
   let app, server, appClient, accessToken;

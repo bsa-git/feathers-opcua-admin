@@ -147,11 +147,11 @@ const saveFakesToServices = async function (app, path = '') {
  * @method clearCacheApp
  * @return {Object}
  */
- const clearCacheApp = function() {
+const clearCacheApp = function() {
   // Restarting app.*s is required if the last mocha test did REST calls on its server.
   delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
   app = require(`${appRoot}/${genSpecs.app.src}/app`);
-  return app
+  return app;
 };
 
 

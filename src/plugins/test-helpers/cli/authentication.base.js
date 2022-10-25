@@ -13,7 +13,7 @@ const makeClient = require('../../auth/make-client');
 const AuthServer = require('../../auth/auth-server.class');
 
 const { getFakeData, clearCacheApp } = require('../service-helper');
-const { getIdField, getCountItems } = require('../../db-helpers');
+const { getIdField } = require('../../db-helpers');
 const { logger, isTrue, inspector } = require('../../lib');
 const { inspect } = require('util');
 
@@ -22,7 +22,7 @@ const loginEmail = 'hdsjkhsdkhfhfd@hgfjffghfgh.com';
 
 const debug = require('debug')('app:authentication.base.test');
 const isDebug = false;
-const isTest = false;
+const isTest = true;
 
 // Get user data
 const usersFakeData = getFakeData()['users'];

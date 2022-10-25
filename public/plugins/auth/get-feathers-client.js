@@ -52,7 +52,7 @@ export default function (transport) {
   const _transport = transport ? transport : process.env.FEATHERS_CLIENT_TRANSPORT || 'socketio';
   const baseURL = process.env.BASE_URL || 'http://localhost:3131';
   const ioOptions = { transports: ['websocket'] };
-  const timeout = 5000;
+  const timeout = 20000;
 
   const appClient = feathersClient();
 
