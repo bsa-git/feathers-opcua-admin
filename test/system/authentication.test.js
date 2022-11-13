@@ -56,9 +56,7 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
       before(function (done) {
         localStorage.clear();
 
-        // Restarting app.*s is required if the last mocha test did REST calls on its server.
-        // delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
-        // app = require(`${appRoot}/${genSpecs.app.src}/app`);
+        // Clear cache app
         app = clearCacheApp();
         
         // Get PORT

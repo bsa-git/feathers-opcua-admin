@@ -12,6 +12,7 @@ const fakeData = readJsonFileSync(`${appRoot}/seeds/fake-data.json`);
 // Get feathers-gen-specs.json
 const specsPath = join(appRoot, 'feathers-gen-specs.json');
 const genSpecs = require(specsPath);
+const appPath = join(appRoot, genSpecs.app.src, 'app');
 
 /**
  * Get fake data
@@ -149,8 +150,11 @@ const saveFakesToServices = async function (app, path = '') {
  */
 const clearCacheApp = function() {
   // Restarting app.*s is required if the last mocha test did REST calls on its server.
-  delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
-  app = require(`${appRoot}/${genSpecs.app.src}/app`);
+  // delete require.cache[require.resolve(`${appRoot}/${genSpecs.app.src}/app`)];
+  // const app = require(`${appRoot}/${genSpecs.app.src}/app`);
+  // appPath
+  delete require.cache[require.resolve(appPath)];
+  const app = require(appPath);
   return app;
 };
 
