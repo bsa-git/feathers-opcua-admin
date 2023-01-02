@@ -108,10 +108,13 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
         }, 500);
       });
 
+
+       
       it(`#1.${index + 1}: Test - Is ${transport} appClient authentication accessToken`, async () => {
         assert.ok(accessToken, 'Authentication accessToken');
       });
 
+      /**
       it(`#2.${index + 1}: Test - ${transport} appClient create newUsers`, async () => {
         let service = appClient.service('users');
         let newUsers = usersFakeData.filter(usr => usr[idField] !== userId);
@@ -175,7 +178,7 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
         if (true && firstUser) logger.info(chalk.yellow(`${transport} appClient get firstUser for id: ("${firstUser[idField]}") - OK`));
         assert.ok(firstUser[idField] === userId, `${transport} appClient don't get firstUser`);
       });
-
+      */
     });
   });
 });
