@@ -27,7 +27,7 @@
     "dev": "cross-env NODE_ENV=development DEBUG=app:* node src/",
     "start": "cross-env NODE_ENV=production node src/",
     "test:all": "yarn run eslint && cross-env NODE_ENV=test DEBUG=app:* yarn run mocha",
-    "test:debug": "yarn run eslint && cross-env NODE_ENV=test DEBUG=@feathersjs/authentication* yarn run mocha:debug",
+    "test:debug": "yarn run eslint && cross-env NODE_ENV=test DEBUG=app:* yarn run mocha:debug",
     "start:seed": "cross-env NODE_ENV=test node src/ --seed",
     "start-mongod": "mongod -f mongod.config.yml",
     "start-mongod32": "mongod --storageEngine=mmapv1 -f mongod.config.yml",

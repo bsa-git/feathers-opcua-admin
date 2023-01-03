@@ -25,7 +25,8 @@ const {
 
 const specsPath = join(appRoot, 'feathers-gen-specs.json');
 const genSpecs = require(specsPath);
-const transports = loReverse(genSpecs['app']['providers']);
+let transports = loReverse(genSpecs['app']['providers']);
+// transports = transports.filter(tr => tr === 'socketio');// socketio, rest
 const defaultJson = require(`${appRoot}/config/default.json`);
 const configClient = (defaultJson.tests || {}).client;
 const ioOptions = configClient.ioOptions || {
@@ -114,7 +115,6 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
         assert.ok(accessToken, 'Authentication accessToken');
       });
 
-      /**
       it(`#2.${index + 1}: Test - ${transport} appClient create newUsers`, async () => {
         let service = appClient.service('users');
         let newUsers = usersFakeData.filter(usr => usr[idField] !== userId);
@@ -178,7 +178,6 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
         if (true && firstUser) logger.info(chalk.yellow(`${transport} appClient get firstUser for id: ("${firstUser[idField]}") - OK`));
         assert.ok(firstUser[idField] === userId, `${transport} appClient don't get firstUser`);
       });
-      */
     });
   });
 });

@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
 const axios = require('axios');
-const feathersClient = require('@feathersjs/client');
 const io = require('socket.io-client');
-const primus = require('@feathersjs/primus');
+const feathers = require('@feathersjs/feathers');
+const socketio = require('@feathersjs/socketio-client');
+const rest = require('@feathersjs/rest-client');
+const auth = require('@feathersjs/authentication-client');
 const localStorage = require('./local-storage');
 const chalk = require('chalk');
 
@@ -18,48 +20,41 @@ const defaultIoOptions = {
   extraHeaders: {}
 };
 
-const defaultPrimusOptions = {
-  transformer: 'ws'
-};
-
 module.exports = async function makeClient(options) {
-  let { transport, timeout, serverUrl, ioOptions, primusOptions, storage, ifNoAuth } = options;
+  let { transport, timeout, serverUrl, ioOptions, storage, ifNoAuth } = options;
   transport = transport || 'socketio';
-  timeout = timeout || 20000;
-  serverUrl = serverUrl || 'http://localhost:3131';
+  timeout = timeout || 50000;
+  serverUrl = serverUrl || 'http://localhost:3030';
   serverUrl = stripSlashes(serverUrl);
-  storage = storage ? storage : localStorage;
   ioOptions = ioOptions || defaultIoOptions;
-  primusOptions = primusOptions || defaultPrimusOptions;
-  let socket;
-
+  storage = storage ? storage : localStorage;
+  let socket, restClient, appClient = null;
+  //-----------------------------------------------
   try {
-
     await doesUrlExist(serverUrl);
-
-    const appClient = feathersClient();
+    appClient = feathers();
     switch (transport) {
     case 'socketio':
       socket = io(serverUrl, ioOptions);
-      appClient.configure(feathersClient.socketio(socket, { timeout }));
-      break;
-    case 'primus':
-      appClient.configure(primus(primusOptions));
+      appClient.configure(socketio(socket, { timeout }));
       break;
     case 'rest':
-      appClient.configure(feathersClient.rest(serverUrl).axios(axios));
+      restClient = rest(serverUrl);
+      appClient.configure(restClient.axios(axios));
       break;
     default:
       throw new Error(`Invalid transport ${transport}. (makeClient)`);
     }
 
     if (!ifNoAuth) {
-      appClient.configure(feathersClient.authentication({ storage }));
+      appClient.configure(auth({
+        timeout,
+        storage
+      }));
     }
     return appClient;
   } catch (error) {
+    console.log(chalk.red('error:'), 'feathers-client.serverUrl:', chalk.cyan(`${error.message}!`));
     throw new Error(`Error while creating client (makeClient): ${error.message}.`);
   }
-
-
 };
