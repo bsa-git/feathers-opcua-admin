@@ -1,13 +1,12 @@
 // const loConcat = require('lodash/concat');
 import fakeData from '~~/seeds/fake-data.json';
-// import typeOf from '~/plugins/lib/type-of';
+import util from '~/plugins/lib/util';
 import moment from 'moment';
 const loKebabCase = require('lodash/kebabCase');
 const loMerge = require('lodash/merge');
 // const errors = require('@feathersjs/errors');
 const debug = require('debug')('app:plugins.service-client.class');
 
-const isLog = false;
 const isDebug = false;
 
 class Service {
@@ -43,7 +42,7 @@ class Service {
     }
     const idField = 'id' in serviceFakeData ? 'id' : '_id';
     const fields = Object.keys(serviceFakeData).filter(key => isId ? true : key !== idField);
-    if (isLog) debug('serviceFields.fields:', fields);
+    if (isDebug) debug('serviceFields.fields:', fields);
     return fields;
   }
 
@@ -96,7 +95,7 @@ class Service {
    */
   getAuthUser() {
     const user = this.state.auth.user;
-    if (isLog) debug('getUser:', user);
+    if (isDebug) debug('getUser:', user);
     return user;
   }
 
@@ -142,11 +141,19 @@ class Service {
     // Find chat messages for user
     const user = this.getAuthUser();
     if (user) {
+      const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
       // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
-      const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams');
-      paths.forEach(path => this.findAll(path, { query: {} }));
+      if (true && paths.length) console.log('findAllForAdmin.paths:', paths);
+      // paths.forEach(path => this.findAll(path, { query: {} }));
+      for (let index = 0; index < paths.length; index++) {
+        const path = paths[index];
+        // await this.find(path, { query: {} });    
+        const result = await this.findAll(path, { query: {} });    
+        console.log('findAllForAdmin.result:', result);
+      }
       // Find all chat messages for admin
       await this.findChatMessagesForAdmin(user);
+      await util.pause(1000);
       this.initStateChatCheckAt();
     }
   }
@@ -412,6 +419,9 @@ class Service {
    */
   getChatUsers() {
     let users = this.findInStore('users', { query: { $sort: { fullName: 1 } } });
+    // let users = this.findInStore('users', { query: { } });
+    // console.log('getChatUsers.users:', users);
+    // util.sortByStringField(users, 'fullName');
     users = users.filter(user => this.isChatFilterUser(user));
     return users;
   }
@@ -422,6 +432,8 @@ class Service {
    */
   getChatRoles() {
     let roles = this.findInStore('roles', { query: { $sort: { name: 1 } } });
+    // let roles = this.findInStore('roles', { query: { } });
+    // util.sortByStringField(roles, 'name');
     roles = roles.filter(role => this.isChatFilterRole(role));
     return roles;
   }
@@ -432,6 +444,8 @@ class Service {
    */
   getChatTeams() {
     let teams = this.findInStore('teams', { query: { $sort: { name: 1 } } });
+    // let teams = this.findInStore('teams', { query: { } });
+    // util.sortByStringField(teams, 'name');
     teams = teams.filter(team => this.isChatFilterTeam(team));
     return teams;
   }
@@ -442,6 +456,8 @@ class Service {
    */
   getChatMessages() {
     let messages = this.findInStore('chat-messages', { query: { $sort: { createdAt: 1 } } });
+    // let messages = this.findInStore('chat-messages', { query: { } });
+    // util.sortByStringField(messages, 'createdAt');
     messages = messages.filter(msg => this.isChatFilterMsg(msg));
     return messages;
   }
@@ -641,7 +657,7 @@ class Service {
       results = await this.dispatch(`${path}/find`, { query: params });
     }
     results = results.data || results;
-    if (isLog) debug(`find.path: ${path}`, `find.params: ${JSON.stringify(params)}`, 'find.results:', results);
+    if (isDebug) debug(`find.path: ${path}`, `find.params: ${JSON.stringify(params)}`, 'find.results:', results);
     return results;
   }
 
@@ -664,7 +680,7 @@ class Service {
     }
     results = await this.dispatch(`${path}/find`, newParams);
     results = results.total;
-    if (isLog) debug(`findCount.path: ${path}`, `findCount.params: ${JSON.stringify(newParams)}`, 'findCount.results:', results);
+    if (isDebug) debug(`findCount.path: ${path}`, `findCount.params: ${JSON.stringify(newParams)}`, 'findCount.results:', results);
     return results;
   }
 
@@ -686,7 +702,7 @@ class Service {
       newParams = { query: newParams };
     }
     results = await this.dispatch(`${path}/find`, newParams);
-    if (isLog) debug(`findAll.path: ${path}`, `findAll.params: ${JSON.stringify(newParams)}`, 'findAll.results:', results);
+    if (true && results) debug(`findAll.path: ${path}`, `findAll.params: ${JSON.stringify(newParams)}`, 'findAll.results:', results);
     results = results.data || results;
     return results;
   }
@@ -706,7 +722,7 @@ class Service {
       results = this.getters[`${path}/find`]({ query: params });
     }
     results = results.data || results;
-    if (isLog) debug(`findInStore.path: ${path}`, `findInStore.params: ${JSON.stringify(params)}`, 'findInStore.results:', results);
+    if (isDebug) debug(`findInStore.path: ${path}`, `findInStore.params: ${JSON.stringify(params)}`, 'findInStore.results:', results);
     return results;
   }
 
@@ -727,7 +743,7 @@ class Service {
     }
     results = this.getters[`${path}/find`](newParams);
     results = results.total;
-    if (isLog) debug(`findCountInStore.path: ${path}`, `findCountInStore.params: ${JSON.stringify(newParams)}`, 'findCountInStore.results:', results);
+    if (isDebug) debug(`findCountInStore.path: ${path}`, `findCountInStore.params: ${JSON.stringify(newParams)}`, 'findCountInStore.results:', results);
     return results;
   }
 
@@ -748,7 +764,7 @@ class Service {
     }
     results = this.getters[`${path}/find`](newParams);
     results = results.data || results;
-    if (isLog) debug(`findAllInStore.path: ${path}`, `findAllInStore.params: ${JSON.stringify(newParams)}`, 'findAllInStore.results:', results);
+    if (isDebug) debug(`findAllInStore.path: ${path}`, `findAllInStore.params: ${JSON.stringify(newParams)}`, 'findAllInStore.results:', results);
     return results;
   }
 
@@ -763,7 +779,7 @@ class Service {
    */
   async get(path, id, params = {}) {
     let results = await this.dispatch(`${path}/get`, id, params);
-    if (isLog) debug(`get.path: ${path}`, `get.id: ${id}`, 'get.results:', results);
+    if (isDebug) debug(`get.path: ${path}`, `get.id: ${id}`, 'get.results:', results);
     return results;
   }
 
@@ -776,7 +792,7 @@ class Service {
    */
   getFromStore(path, id, params = {}) {
     let results = this.getters[`${path}/get`](id, params);
-    if (isLog) debug(`getFromStore.path: ${path}`, `getFromStore.id: ${id}`, 'getFromStore.results:', results);
+    if (isDebug) debug(`getFromStore.path: ${path}`, `getFromStore.id: ${id}`, 'getFromStore.results:', results);
     return results;
   }
 
@@ -791,7 +807,7 @@ class Service {
    */
   async create(path, data, params = {}) {
     let results = await this.dispatch(`${path}/create`, [data, params]);
-    if (isLog) debug(`create.path: ${path}`, `create.data: ${data}`, 'create.results:', results);
+    if (isDebug) debug(`create.path: ${path}`, `create.data: ${data}`, 'create.results:', results);
     return results;
   }
 
@@ -807,7 +823,7 @@ class Service {
    */
   async patch(path, id, data, params = {}) {
     let results = await this.dispatch(`${path}/patch`, [id, data, params]);
-    if (isLog) debug(`patch.path: ${path}`, `patch.id: ${id}`, `patch.data: ${data}`, 'patch.results:', results);
+    if (isDebug) debug(`patch.path: ${path}`, `patch.id: ${id}`, `patch.data: ${data}`, 'patch.results:', results);
     return results;
   }
 
@@ -821,7 +837,7 @@ class Service {
    */
   async remove(path, id) {
     let results = await this.dispatch(`${path}/remove`, id);
-    if (isLog) debug(`remove.path: ${path}`, `remove.id: ${id}`, 'remove.results:', results);
+    if (isDebug) debug(`remove.path: ${path}`, `remove.id: ${id}`, 'remove.results:', results);
     return results;
   }
 }

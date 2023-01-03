@@ -6,8 +6,7 @@ import log from '~/services/hooks/log';
 
 const debug = require('debug')('app:service.opcua-values');
 
-// const isDebug = true;
-const isLog = false;
+const isDebug = true;
 
 const { service } = feathersVuex(feathersClient, { idField: '_id' });
 
@@ -15,7 +14,7 @@ const servicePath = 'opcua-values';
 const servicePlugin = service(servicePath, {
   instanceDefaults(data, { store, Model, Models }) {
     const idField = store.state['opcua-values'].idField;
-    if (isLog) debug('ServiceInfo:', {
+    if (isDebug) debug('ServiceInfo:', {
       servicePath: Model.servicePath,
       namespace: Model.namespace,
       idField: idField,
