@@ -142,6 +142,7 @@ class Service {
     const user = this.getAuthUser();
     if (user) {
       const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams');
+      // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages');
       // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
       if (true && paths.length) console.log('findAllForAdmin.paths:', paths);
       // paths.forEach(path => this.findAll(path, { query: {} }));
@@ -154,6 +155,7 @@ class Service {
       // Find all chat messages for admin
       await this.findChatMessagesForAdmin(user);
       // await util.pause(1000);
+      const userCount = this.findCountInStore('users');
       this.initStateChatCheckAt();
       // let users = this.findInStore('users', { query: { $sort: { fullName: 1 } } });
     }
@@ -703,7 +705,7 @@ class Service {
       newParams = { query: newParams };
     }
     results = await this.dispatch(`${path}/find`, newParams);
-    if (true && results) debug(`findAll.path: ${path}`, `findAll.params: ${JSON.stringify(newParams)}`, 'findAll.results:', results);
+    if (isDebug && results) debug(`findAll.path: ${path}`, `findAll.params: ${JSON.stringify(newParams)}`, 'findAll.results:', results);
     results = results.data || results;
     return results;
   }
@@ -723,7 +725,7 @@ class Service {
       results = this.getters[`${path}/find`]({ query: params });
     }
     results = results.data || results;
-    if (isDebug) debug(`findInStore.path: ${path}`, `findInStore.params: ${JSON.stringify(params)}`, 'findInStore.results:', results);
+    if (true &&  results) debug(`findInStore.path: ${path}`, `findInStore.params: ${JSON.stringify(params)}`, 'findInStore.results:', results);
     return results;
   }
 
