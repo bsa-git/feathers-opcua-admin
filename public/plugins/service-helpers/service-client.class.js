@@ -141,7 +141,7 @@ class Service {
     // Find chat messages for user
     const user = this.getAuthUser();
     if (user) {
-      const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
+      const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams');
       // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
       if (true && paths.length) console.log('findAllForAdmin.paths:', paths);
       // paths.forEach(path => this.findAll(path, { query: {} }));
