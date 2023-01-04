@@ -153,8 +153,9 @@ class Service {
       }
       // Find all chat messages for admin
       await this.findChatMessagesForAdmin(user);
-      await util.pause(1000);
+      // await util.pause(1000);
       this.initStateChatCheckAt();
+      // let users = this.findInStore('users', { query: { $sort: { fullName: 1 } } });
     }
   }
 
