@@ -14,7 +14,7 @@ const baseURL = process.env.BASE_URL;
 const storage = new CookieStorage();
 const feathersClient = feathers();
 
-const timeout = 120000;
+const timeout = 60000;
 
 if (transport === 'socketio') {
   const socket = io(baseURL, { transports: ['websocket'] });
