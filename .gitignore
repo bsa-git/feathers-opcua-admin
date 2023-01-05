@@ -115,6 +115,7 @@ compiled/
 node_modules
 
 # Others
+daemon
 data/db/*
 !data/db/README.md
 data/db-log/*
