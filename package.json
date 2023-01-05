@@ -45,6 +45,8 @@
     "generate:graphql": "feathers-plus generate graphql",
     "generate:hook": "feathers-plus generate hook",
     "generate:test": "feathers-plus generate test",
+    "install-win-service": "node scripts/cli/install-windows.service.js",
+    "uninstall-win-service": "node scripts/cli/uninstall-windows.service.js",
     "heroku-postbuild": "yarn run build"
   },
   "dependencies": {
