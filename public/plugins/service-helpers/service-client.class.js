@@ -142,22 +142,16 @@ class Service {
     const user = this.getAuthUser();
     if (user) {
       const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams');
-      // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages');
-      // const paths = Service.getServicePaths().filter(path => path !== 'chat-messages' && path !== 'user-teams' && path !== 'opcua-values');
       if (true && paths.length) console.log('findAllForAdmin.paths:', paths);
       // paths.forEach(path => this.findAll(path, { query: {} }));
       for (let index = 0; index < paths.length; index++) {
         const path = paths[index];
-        // await this.find(path, { query: {} });    
         const result = await this.findAll(path, { query: {} });    
         console.log('findAllForAdmin.result:', result);
       }
       // Find all chat messages for admin
       await this.findChatMessagesForAdmin(user);
-      // await util.pause(1000);
-      const userCount = this.findCountInStore('users');
       this.initStateChatCheckAt();
-      // let users = this.findInStore('users', { query: { $sort: { fullName: 1 } } });
     }
   }
 
