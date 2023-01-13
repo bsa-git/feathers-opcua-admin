@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 const { inspector, isString, isObject, isNumber, isNull } = require('../lib');
 const HookHelper = require('./hook-helper.class');
+const AuthServer = require('../auth/auth-server.class');
 const loToNumber = require('lodash/toNumber');
 
 const isLog = false;
@@ -15,6 +16,26 @@ const baseNormalize = async (record) => {
   let _cloneObject = JSON.parse(JSON.stringify(record));
   Object.assign(record, _cloneObject);
   if (isLog) inspector('plugins.contextNormalize::record:', record);
+};
+
+
+/**
+ * Before normalize create user
+ * @async
+ * @method beforeNormalizeCreateUser
+ * @param {Object} record
+ */
+const beforeNormalizeCreateUser = async (record) => {
+  if (!record) return;
+  if (AuthServer.isSetUserActive()) {
+    if (record.active === undefined || !record.active) {
+      record.active = true;
+    }
+  }
+
+  // if (!AuthServer.isAuthManager()) {
+  //   record.isVerified = true;
+  // }
 };
 
 
@@ -131,6 +152,7 @@ module.exports = async function contextNormalize(context) {
   // Run normalize
   switch (`${hh.contextPath}.${hh.contextType}`) {
   case 'users.before':
+    if (hh.contextMethod) await hh.forEachRecords(beforeNormalizeCreateUser);
     await hh.forEachRecords(beforeNormalizeUserAuth);
     break;
   case 'users.after':

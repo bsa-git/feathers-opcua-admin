@@ -15,12 +15,11 @@ const isDebug = false;
 const authCheck = function (isTest = false) {
   return async context => {
     const authServer = new AuthServer(context);
-    const isUserAuthorization = AuthServer.isUserAuthorization();
     const contextProvider = authServer.contextProvider? authServer.contextProvider : 'No';
     const isArgTest = isTest;
     const isEnvTest = AuthServer.isTest();
-    if (isDebug && AuthServer) console.log(`hook.authCheck: isArgTest: ${isArgTest}, isEnvTest: ${isEnvTest}, isUserAuthorization: ${isUserAuthorization}, isContextProvider: "${isContextProvider}"`);
-    if(isArgTest || (!isEnvTest && contextProvider !== 'No' && isUserAuthorization)){
+    if (isDebug && AuthServer) console.log(`hook.authCheck: isArgTest: ${isArgTest}, isEnvTest: ${isEnvTest}, contextProvider: "${contextProvider}"`);
+    if(isArgTest || (!isEnvTest && contextProvider !== 'No')){
       if (isDebug && AuthServer) debug('hook.authCheck: Start...');
       const isAccess = await authServer.isAccess();
       if (!isAccess) {
@@ -49,8 +48,8 @@ const loginCheck = function (isTest = false) {
       if(authServer.isMask('authentication.create.after')){
         if (isDebug && authServer) console.log('authentication.create.after.loginCheck: Start');
         if (isDebug && authServer) inspector('authentication.create.after.getHookContext', authServer.getHookContext()) ;
-        const isDebugin = await authServer.isDebugin();
-        if(!isDebugin){
+        const isUserActive = await authServer.isUserActive();
+        if(!isUserActive){
           throw new errors.Forbidden('Access to the login is denied because your account is not activated. Contact your administrator.');
         }
       }

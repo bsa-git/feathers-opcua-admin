@@ -259,11 +259,12 @@ class AuthServer {
   }
 
   /**
-   * Is to log user
-   * Checks the ability to log user
-   * @return {Promise.<void>}
+   * @async
+   * Checks the ability active of user
+   * @method isUserActive
+   * @return {Boolean}
    */
-  async isDebugin() {
+  async isUserActive() {
     let payload = this.contextPayload;
     if (!payload) {
       payload = await AuthServer.verifyJWT(this.contextAccessToken);
@@ -274,7 +275,7 @@ class AuthServer {
     const service = this.app.service('users');
     if (service) {
       const user = await service.get(payload.userId);
-      if (isDebug) inspector('plugins::auth-server.class::isDebugin.user:', user);
+      if (isDebug) inspector('isUserActive.user:', user);
       // return Promise.resolve(user.active);
       return user.active;
     } else {
@@ -483,11 +484,12 @@ class AuthServer {
   }
 
   /**
-   * Is user authorization
+   * Is set user active
+   * @method isSetUserActive
    * @return {boolean}
    */
-  static isUserAuthorization() {
-    return (process.env.IS_USER_AUTHORIZATION === undefined) ? true : isTrue(process.env.IS_USER_AUTHORIZATION);
+  static isSetUserActive() {
+    return (process.env.SET_USER_ACTIVE === undefined) ? false : isTrue(process.env.SET_USER_ACTIVE);
   }
 
   /**

@@ -12,7 +12,7 @@ const usersPopulate = require('./users.populate');
 //---------------
 const loConcat = require('lodash/concat');
 const verifyHooks = require('feathers-authentication-management').hooks;
-const {AuthServer} = require('../../plugins');
+const { AuthServer } = require('../../plugins');
 const accountNotifier = require('../auth-management/notifier');
 //---------------
 // !end
@@ -26,14 +26,14 @@ const { create, update, patch, validateCreate, validateUpdate, validatePatch } =
 
 // !code: init
 //------------
-const {preventChanges, discard, disallow, isProvider} = commonHooks;
+const { preventChanges, discard, disallow, isProvider } = commonHooks;
 
 const isTest = AuthServer.isTest();
 
 const hookAddVerification = async (context) => {
-  if(!isTest && !AuthServer.isContextExternalAccount(context)){
+  if (!isTest && !AuthServer.isContextExternalAccount(context)) {
     let _context = await verifyHooks.addVerification()(context);
-    if(!AuthServer.isAuthManager() && _context.data){
+    if (!AuthServer.isAuthManager() && _context.data) {
       _context.data.isVerified = true;
       _context.data.verifyToken = null;
       _context.data.verifyShortToken = null;
@@ -41,22 +41,22 @@ const hookAddVerification = async (context) => {
       _context.data.verifyChanges = {};
     }
     return _context;
-  }else {
+  } else {
     return context;
   }
 };
 
 const hookToEmailYourVerification = (context) => {
-  if(!isTest && !AuthServer.isContextExternalAccount(context) && AuthServer.isAuthManager()){
+  if (!isTest && !AuthServer.isContextExternalAccount(context) && AuthServer.isAuthManager()) {
     accountNotifier(context.app).notifier('resendVerifySignup', context.result);
   }
   return context;
 };
 
 const hookRemoveVerification = (context) => {
-  if(!isTest && !AuthServer.isContextExternalAccount(context)){
+  if (!isTest && !AuthServer.isContextExternalAccount(context)) {
     return verifyHooks.removeVerification()(context);
-  }else {
+  } else {
     return context;
   }
 };
@@ -93,7 +93,7 @@ let moduleExports = {
     //--------------
     all: [],
     find: [authenticate('jwt')],
-    get: [authenticate('jwt')], 
+    get: [authenticate('jwt')],
     create: [hashPassword()],
     // update: [ hashPassword(), authenticate('jwt') ],
     update: [authenticate('jwt')],
@@ -108,7 +108,7 @@ let moduleExports = {
     // Your hooks should include:
     //   all   : protect('password') /* Must always be the last hook */
     // !<DEFAULT> code: after
-    all: [ protect('password') /* Must always be the last hook */ ],
+    all: [protect('password') /* Must always be the last hook */],
     find: [],
     get: [],
     create: [],
