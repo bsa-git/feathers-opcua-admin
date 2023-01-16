@@ -126,10 +126,6 @@ describe(`<<<=== Test "${__filename.substring(__dirname.length + 1)}" ===>>>`, (
           if (isDebug && payload) inspector('AuthServer.verifyJWT.payload:', payload);
           userId = payload.userId ? payload.userId : payload.sub;
           if (isDebug && userId) inspector('newUser.userId:', userId);
-          if (isDebug && accessToken) {
-            inspector(`"${transport}" appClient.passwort.getJWT:`, await AuthServer.getPassportJWT(appClient));
-            inspector(`"${transport}" appClient.passwort.verifyJWT:`, await AuthServer.verifyPassportJWT(appClient, accessToken));
-          }
           logger.info(chalk.yellow(`"${transport}" appClient loginLocal - OK`));
         } catch (error) {
           if (true && error) logger.error(`Error for "${transport}" appClient login to newUser. Error.message: "${error.message}"`);
