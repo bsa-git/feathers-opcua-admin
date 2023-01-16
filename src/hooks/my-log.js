@@ -19,7 +19,7 @@ module.exports = function (isTest = false) {
     hookHelper.showDebugError();
 
     // hookHelper.showDebugInfo('authentication.remove.after', true);
-    // hookHelper.showDebugInfo('users.get.before', true, true); // isConn = true (show connect and headers)
+    hookHelper.showDebugInfo('users.get.before', true, true); // isConn = true (show connect and headers)
 
     // Is log msg enable
     const isDebugMsgEnable = isTest ||
