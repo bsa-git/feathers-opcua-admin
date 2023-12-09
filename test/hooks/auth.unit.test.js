@@ -229,6 +229,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       contextAfter.method = 'create';
       contextAfter.params.payload = payload;
 
+      
       if (isLog) inspector('Error check auth for not active user.contextAfter:', contextAfter);
       if (isDebug) debug(`Check access to service method - "${contextAfter.path}.${contextAfter.method}"`);
 
