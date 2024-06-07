@@ -9845,6 +9845,11 @@ short-hash@1.0.0:
   dependencies:
     hash-string "^1.0.0"
 
+should-proxy@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/should-proxy/-/should-proxy-1.0.4.tgz#c805a501abf69539600634809e62fbf238ba35e4"
+  integrity sha512-RPQhIndEIVUCjkfkQ6rs6sOR6pkxJWCNdxtfG5pP0RVgUYbK5911kLTF0TNcCC0G3YCGd492rMollFT2aTd9iQ==
+
 side-channel@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/side-channel/-/side-channel-1.0.4.tgz#efce5c8fdc104ee751b25c58d4290011fa5ea2cf"

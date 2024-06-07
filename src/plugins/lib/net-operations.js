@@ -100,7 +100,7 @@ const getHostname = function () {
         url.toString()
         url.toJSON()
  */
-const getParseURL = function (url, base) {
+const getParseUrl = function (url, base) {
   const URL = require('url').URL;
   return new URL(url, base);
 };
@@ -229,7 +229,7 @@ module.exports = {
   getLocalIpAddress,
   getIpAddresses,
   getHostname,
-  getParseURL,
+  getParseUrl,
   getURL,
   validateURL,
   isValidURL,

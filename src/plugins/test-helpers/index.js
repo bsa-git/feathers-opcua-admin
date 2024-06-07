@@ -6,6 +6,7 @@ const graphqlQuery = require('./graphql-query');
 const graphqlExpected = require('./graphql-expected');
 const isTestEnv = require('./is-test-env');
 const serviceHelper = require('./service-helper');
+const testHelper = require('./test-helper');
 
 module.exports = Object.assign({},
   {
@@ -16,5 +17,6 @@ module.exports = Object.assign({},
     graphqlExpected,
   },
   serviceHelper,
+  testHelper,
   cli
 );
