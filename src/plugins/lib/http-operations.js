@@ -333,7 +333,7 @@ const urlExists = async function (target) {
       const result = await connectToProxy(url);
       await getHttps(url, result.socket);
     } else {
-      await getHttp(url);
+      await axios({ url: url.href, timeout: 2000 });
     }
     return true;
   } catch (error) {
