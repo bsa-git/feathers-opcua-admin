@@ -74,8 +74,8 @@ describe('<<=== HttpOperations: (http-operations.test) ===>>', () => {
     assert.ok(response.status === 200, 'HttpOperations: axios.get');
   });
 
-  it('#3: HttpOperations: https.get("http://nodejs.org/dist/index.json")', async () => {
-    let response, url = 'http://nodejs.org/dist/index.json';
+  it('#3: HttpOperations: https.get("https://nodejs.org/dist/index.json")', async () => {
+    let response, url = 'https://nodejs.org/dist/index.json';
     //------------------------------------------------------
     
     // External address
