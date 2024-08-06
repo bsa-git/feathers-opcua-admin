@@ -12,7 +12,6 @@ const chalk = require('chalk');
 const app = require(`${appRoot}/src/app`);
 const debug = require('debug')('app:auth.unit.test');
 
-const isLog = false;
 const isDebug = false;
 const isTest = true;
 
@@ -63,28 +62,28 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
     contextAfterPaginated.result.total = contextAfterPaginated.result.data.length;
   });
 
-  it('authHook.authCheck hook exists', () => {
+  it('#1: authHook.authCheck hook exists', () => {
     assert(typeof authHook.authCheck() === 'function', 'authHook.authCheck hook is not a function.');
   });
 
-  it('authHook.loginCheck hook exists', () => {
+  it('#2: authHook.loginCheck hook exists', () => {
     assert(typeof authHook.loginCheck() === 'function', 'authHook.loginCheck hook is not a function.');
   });
 
-  it('authHook.setLoginAt hook exists', () => {
+  it('#3: authHook.setLoginAt hook exists', () => {
     assert(typeof authHook.setLoginAt() === 'function', 'authHook.setLoginAt hook is not a function.');
   });
 
-  it('auth.payloadExtension hook exists', () => {
+  it('#4: auth.payloadExtension hook exists', () => {
     assert(typeof authHook.payloadExtension() === 'function', 'auth.payloadExtension hook is not a function.');
   });
 
-  it('Save fake data to \'users\' service', async () => {
+  it('#5: Save fake data to \'users\' service', async () => {
     const errPath = await saveFakesToServices(app, 'users');
     assert.ok(errPath === '', `Not save fakes to services - '${errPath}'`);
   });
 
-  it('Customizing the Payload with Hook', () => {
+  it('#6: Customizing the Payload with Hook', () => {
     // Set context params
     contextBefore.params.authenticated = true;
     contextBefore.params.payload = {};
@@ -96,13 +95,13 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
     roleNames.forEach(name => {
       contextBefore.params.payload.role = objRoles[name];
       authHook.payloadExtension(true)(contextBefore);
-      if (isLog) inspector('Customizing the Payload with Hook.contextBefore:', contextBefore);
+      if (isDebug) inspector('Customizing the Payload with Hook.contextBefore:', contextBefore);
       if (isDebug) debug('Customizing the Payload with Hook.params.payload.role:', contextBefore.params.payload.role);
       assert(contextBefore.params.payload.role === objRoles[name], 'Customizing the Payload');
     });
   });
 
-  it('Check access to public services', async () => {
+  it('#7: Check access to public services', async () => {
     try {
       const objServices = AuthServer.listServices(process.env.PUBLIC_SERVICES);
       const serviceNames = Object.keys(objServices);
@@ -111,7 +110,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       contextBefore.path = name;
       contextBefore.method = method;
       await authHook.authCheck(true)(contextBefore);
-      if (isLog) inspector('Check access to public services.contextBefore:', contextBefore);
+      if (isDebug) inspector('Check access to public services.contextBefore:', contextBefore);
       if (isDebug) debug(`Check access to service method - "${contextBefore.path}.${contextBefore.method}"`);
       assert(true);
     }
@@ -121,7 +120,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
     }
   });
 
-  it('Error accessing services to not public services', async () => {
+  it('#8: Error accessing services to not public services', async () => {
     try {
       const objServices = AuthServer.listServices(process.env.ADMIN_SERVICES);
       const serviceNames = Object.keys(objServices);
@@ -129,7 +128,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       const method = objServices[name][0];
       contextBefore.path = name;
       contextBefore.method = method;
-      if (isLog) inspector('Error accessing services to not public services.contextBefore:', contextBefore);
+      if (isDebug) inspector('Error accessing services to not public services.contextBefore:', contextBefore);
       if (isDebug) debug(`Check access to service method - "${contextBefore.path}.${contextBefore.method}"`);
       await authHook.authCheck(true)(contextBefore);
       assert(false, 'The hook "authHook.authCheck()" generated an error of the wrong type.');
@@ -142,7 +141,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
 
   });
 
-  it('Check access to services for the administrator role', async () => {
+  it('#9: Check access to services for the administrator role', async () => {
     try {
       // Set context params
       contextBefore.params.authenticated = true;
@@ -156,7 +155,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       contextBefore.path = name;
       contextBefore.method = method;
       await authHook.authCheck(true)(contextBefore);
-      if (isLog) inspector('Check access to services for the administrator role.contextBefore:', contextBefore);
+      if (isDebug) inspector('Check access to services for the administrator role.contextBefore:', contextBefore);
       if (isDebug) debug(`Check access to service method - "${contextBefore.path}.${contextBefore.method}"`);
       assert(true);
     }
@@ -166,7 +165,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
     }
   });
 
-  it('Error accessing services if the role is not an administrator', async () => {
+  it('#10: Error accessing services if the role is not an administrator', async () => {
     try {
       // Set context params
       contextBefore.params.authenticated = true;
@@ -179,7 +178,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       const method = objServices[name][0];
       contextBefore.path = name;
       contextBefore.method = method;
-      if (isLog) inspector('Error accessing services if the role is not an administrator.contextBefore:', contextBefore);
+      if (isDebug) inspector('Error accessing services if the role is not an administrator.contextBefore:', contextBefore);
       if (isDebug) debug(`Check access to service method - "${contextBefore.path}.${contextBefore.method}"`);
       await authHook.authCheck(true)(contextBefore);
       assert(false, 'The hook "authHook.authCheck()" generated an error of the wrong type.');
@@ -191,7 +190,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
     }
   });
 
-  it('Check auth for active user', async () => {
+  it('#11: Check auth for active user', async () => {
     try {
       const fakeUser = fakes['users'][0];
       const idField = HookHelper.getIdField(fakeUser);
@@ -203,7 +202,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       contextAfter.params.payload = payload;
 
       await authHook.loginCheck(true)(contextAfter);
-      if (isLog) inspector('Check auth for active user services.contextAfter:', contextAfter);
+      if (isDebug) inspector('Check auth for active user services.contextAfter:', contextAfter);
       if (isDebug) debug(`Check auth for active user method - "${contextAfter.path}.${contextAfter.method}"`);
       assert(true);
     }
@@ -213,7 +212,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
     }
   });
 
-  it('Error check auth for not active user', async () => {
+  it('#12: Error check auth for not active user', async () => {
     try {
       const fakeUser = fakes['users'][0];
       const idField = HookHelper.getIdField(fakeUser);
@@ -222,7 +221,7 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       // Set user.active = false
       const users = app.service('users');
       const pathUser = await users.patch(fakeUser[idField], {active: false});
-      if (isLog) inspector('Error check auth for not active user::pathUser:', pathUser);
+      if (isDebug && pathUser) inspector('Error check auth for not active user::pathUser:', pathUser);
 
       contextAfter.app = app;
       contextAfter.path = 'authentication';
@@ -230,20 +229,21 @@ describe('<<< Test /hooks/auth.unit.test.js >>>', () => {
       contextAfter.params.payload = payload;
 
       
-      if (isLog) inspector('Error check auth for not active user.contextAfter:', contextAfter);
+      if (isDebug && contextAfter) inspector('Error check auth for not active user.contextAfter:', contextAfter);
       if (isDebug) debug(`Check access to service method - "${contextAfter.path}.${contextAfter.method}"`);
 
       await authHook.loginCheck(true)(contextAfter);
       assert(false, 'The hook "authHook.loginCheck()" generated an error of the wrong type.');
     }
     catch (ex) {
+      console.log('Error check auth for not active user.error:', ex);
       assert.strictEqual(ex.code, 403, 'unexpected error.code');
       assert.strictEqual(ex.message, 'Access to the login is denied because your account is not activated. Contact your administrator.');
       assert.strictEqual(ex.name, 'Forbidden', 'unexpected error.name');
     }
   });
 
-  it('Check of set user loginAt field', async () => {
+  it('#13: Check of set user loginAt field', async () => {
     try {
       const fakeUser = fakes['users'][0];
       const idField = HookHelper.getIdField(fakeUser);

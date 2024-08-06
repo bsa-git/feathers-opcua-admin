@@ -144,7 +144,7 @@ const afterNormalizeUserAuth = async (record) => {
 module.exports = async function contextNormalize(context) {
   // let normalize = null;
   // Create HookHelper object
-  const hh = new HookHelper(context);
+  const hh = new HookHelper(context);// contextMethod
   // Run base normalize
   if (hh.contextType === 'before' || hh.contextType === 'after') {
     await hh.forEachRecords(baseNormalize);
@@ -152,7 +152,7 @@ module.exports = async function contextNormalize(context) {
   // Run normalize
   switch (`${hh.contextPath}.${hh.contextType}`) {
   case 'users.before':
-    if (hh.contextMethod) await hh.forEachRecords(beforeNormalizeCreateUser);
+    if (hh.contextMethod === 'create') await hh.forEachRecords(beforeNormalizeCreateUser);
     await hh.forEachRecords(beforeNormalizeUserAuth);
     break;
   case 'users.after':
