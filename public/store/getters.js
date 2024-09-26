@@ -143,7 +143,7 @@ const getters = {
     return findIndex > -1;
   },
 
-  detUserIdsForTeam: (state, getters) => (teamId) => {
+  getUserIdsForTeam: (state, getters) => (teamId) => {
     return getters['user-teams/userIdsForTeam'](teamId);
   },
 
